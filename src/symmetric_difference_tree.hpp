@@ -1,0 +1,62 @@
+#ifndef PSTRUDEL_SYMMETRIC_DISTANCE_TREE_HPP
+#define PSTRUDEL_SYMMETRIC_DISTANCE_TREE_HPP
+
+#include <unordered_set>
+#include "basic_tree.hpp"
+
+namespace pstrudel {
+
+///////////////////////////////////////////////////////////////////////////////
+// SymmtericDifferenceNodeValue
+
+class SymmtericDifferenceNodeValue : public BasicNodeValue {
+    public:
+        SymmtericDifferenceNodeValue()
+            : num_leaves_(0)
+              , num_descendent_nodes_(0) {
+        }
+        unsigned long get_num_leaves() const {
+            return this->num_leaves_;
+        }
+        void set_num_leaves(unsigned long num_leaves) {
+            this->num_leaves_ = num_leaves;
+        }
+        unsigned long get_num_descendent_nodes() const {
+            return this->num_descendent_nodes_;
+        }
+        void set_num_descendent_nodes(unsigned long num_descendent_nodes) {
+            this->num_descendent_nodes_ = num_descendent_nodes;
+        }
+    private:
+        unsigned long num_leaves_;
+        unsigned long num_descendent_nodes_;
+}; // SymmtericDifferenceNodeValue
+
+///////////////////////////////////////////////////////////////////////////////
+// SymmtericDifferenceTree
+
+class SymmtericDifferenceTree : public pstrudel::BasicTree<SymmtericDifferenceNodeValue> {
+
+    public:
+        typedef std::unordered_multiset<unsigned long> SizesSetType;
+
+    public:
+        void calc_subtree_sizes();
+        unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
+
+    public:
+        static unsigned long calc_set_symmetric_difference(
+                const SizesSetType & set1,
+                const SizesSetType & set2,
+                SizesSetType * common=nullptr,
+                SizesSetType * unmatched1=nullptr,
+                SizesSetType * unmatched2=nullptr);
+
+    private:
+        SizesSetType        subtree_leaf_set_sizes_;
+        SizesSetType        subtree_clade_sizes_;
+}; // SymmtericDifferenceTree
+
+} // namespace pstrudel
+
+#endif
