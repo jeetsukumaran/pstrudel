@@ -1,3 +1,4 @@
+#include <cassert>
 #include "colugo-utilities/src/cmdopt.hpp"
 #include "colugo-utilities/src/utility.hpp"
 #include "colugo-utilities/src/logger.hpp"
@@ -63,7 +64,7 @@ int main(int argc, const char * argv[]) {
             pstrudel::treeio::read_from_filepath(pairwise_distance_trees, arg, format);
             ++file_idx;
         }
-        logger.info(pairwise_distance_trees.size(), " pairwise_distance_trees read.");
+        logger.info(pairwise_distance_trees.size(), " trees read.");
     }
 
     // process pairwise_distance_trees
@@ -120,12 +121,12 @@ int main(int argc, const char * argv[]) {
         logger.info("Calculating other metrics ...");
         std::vector<pstrudel::SymmtericDifferenceTree> symmetric_difference_trees;
         symmetric_difference_trees.reserve(pairwise_distance_trees.size());
-        for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size() - 1; ++tree_idx1) {
-            auto & tree1 = pairwise_distance_trees[tree_idx1];
+        for (auto & tree1 : pairwise_distance_trees) {
             symmetric_difference_trees.emplace_back(tree1);
             auto & sd_tree = symmetric_difference_trees.back();
             sd_tree.calc_subtree_sizes();
         }
+        COLUGO_ASSERT(symmetric_difference_trees.size() == pairwise_distance_trees.size());
         for (unsigned long tree_idx1 = 0; tree_idx1 < symmetric_difference_trees.size() - 1; ++tree_idx1) {
             auto & tree1 = symmetric_difference_trees[tree_idx1];
             for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < symmetric_difference_trees.size(); ++tree_idx2) {
@@ -135,7 +136,6 @@ int main(int argc, const char * argv[]) {
             }
         }
     }
-
 
     std::ostream& out = std::cout;
     if (!suppress_header_row) {
@@ -151,24 +151,19 @@ int main(int argc, const char * argv[]) {
         out << std::endl;
     }
 
-    // for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size() - 1; ++tree_idx1) {
-    //     auto & tree1 = pairwise_distance_trees[tree_idx1];
-    //     for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < pairwise_distance_trees.size(); ++tree_idx2) {
-    //         auto & tree2 = pairwise_distance_trees[tree_idx2];
-    //         out << tree_idx1 + 1;
-    //         out << "\t" << tree_idx2 + 1;
-    //         out << "\t" << std::setprecision(20) << tree1.get_unweighted_subprofile_distance(tree2);
-    //         out << "\t" << std::setprecision(20) << tree1.get_weighted_subprofile_distance(tree2);
-    //         out << "\t" << std::setprecision(20) << tree1.get_distance(tree2);
-    //         if (calculate_other_distance_metrics) {
-    //             auto result = tree_comparison_calculator.compare_pairwise_distance_trees(tree1, tree2);
-    //             std::cout << "\t" << result.symmetric_difference;
-    //             std::cout << "\t" << std::setprecision(20) << result.edge_len_euclidean_distance;
-    //             std::cout << "\t" << std::setprecision(20) << result.weighted_rf_distance;
-    //         }
-    //         out << std::endl;
-    //     }
-    // }
+    unsigned long num_trees = pairwise_distance_trees.size();
+    for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
+        for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
+            out << tree_idx1 + 1;
+            out << "\t" << tree_idx2 + 1;
+            out << "\t" << std::setprecision(20) << unweighted_profile_distances[tree_idx1][tree_idx2];
+            if (calculate_other_distance_metrics) {
+                out << "\t" << unweighted_symmetric_difference_leaf_set_sizes[tree_idx1][tree_idx2];
+                out << "\t" << unweighted_symmetric_difference_clade_sizes[tree_idx1][tree_idx2];
+            }
+            out << std::endl;
+        }
+    }
 
 }
 
