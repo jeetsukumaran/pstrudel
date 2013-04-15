@@ -9,7 +9,7 @@
 #include "testutils.hpp"
 
 int main(int argc, const char * argv[]) {
-    typedef pstrudel::SymmtericDifferenceTree TreeType;
+    typedef pstrudel::SymmetricDifferenceTree TreeType;
     auto & out = std::cout;
     std::vector<TreeType> trees;
     get_trees(trees, argc, argv);

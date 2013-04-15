@@ -119,7 +119,7 @@ int main(int argc, const char * argv[]) {
     TreeDistanceMatrixType  unweighted_symmetric_difference_clade_sizes;
     if (calculate_other_distance_metrics) {
         logger.info("Calculating other metrics ...");
-        std::vector<pstrudel::SymmtericDifferenceTree> symmetric_difference_trees;
+        std::vector<pstrudel::SymmetricDifferenceTree> symmetric_difference_trees;
         symmetric_difference_trees.reserve(pairwise_distance_trees.size());
         for (auto & tree1 : pairwise_distance_trees) {
             symmetric_difference_trees.emplace_back(tree1);

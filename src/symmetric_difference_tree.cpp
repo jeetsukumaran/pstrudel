@@ -1,20 +1,20 @@
 #include "symmetric_difference_tree.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
-// SymmtericDifferenceTree
+// SymmetricDifferenceTree
 
 namespace pstrudel {
 
-SymmtericDifferenceTree::SymmtericDifferenceTree() {
+SymmetricDifferenceTree::SymmetricDifferenceTree() {
 }
 
-SymmtericDifferenceTree::SymmtericDifferenceTree(const SymmtericDifferenceTree & other)
-    : BasicTree<SymmtericDifferenceNodeValue>(other)
+SymmetricDifferenceTree::SymmetricDifferenceTree(const SymmetricDifferenceTree & other)
+    : BasicTree<SymmetricDifferenceNodeValue>(other)
       , subtree_leaf_set_sizes_(other.subtree_leaf_set_sizes_)
       , subtree_clade_sizes_(other.subtree_clade_sizes_) {
 }
 
-void SymmtericDifferenceTree::calc_subtree_sizes() {
+void SymmetricDifferenceTree::calc_subtree_sizes() {
     this->subtree_leaf_set_sizes_.clear();
     for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
         if (ndi.is_leaf()) {
@@ -37,41 +37,41 @@ void SymmtericDifferenceTree::calc_subtree_sizes() {
     }
 }
 
-unsigned long SymmtericDifferenceTree::calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other) {
+unsigned long SymmetricDifferenceTree::calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmetricDifferenceTree & other) {
     if (this->subtree_leaf_set_sizes_.empty()) {
         this->calc_subtree_sizes();
     }
     if (other.subtree_leaf_set_sizes_.empty()) {
         other.calc_subtree_sizes();
     }
-    return SymmtericDifferenceTree::calc_set_symmetric_difference(this->subtree_leaf_set_sizes_, other.subtree_leaf_set_sizes_);
+    return SymmetricDifferenceTree::calc_set_symmetric_difference(this->subtree_leaf_set_sizes_, other.subtree_leaf_set_sizes_);
 }
 
-unsigned long SymmtericDifferenceTree::calc_clade_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other) {
+unsigned long SymmetricDifferenceTree::calc_clade_sizes_unlabeled_symmetric_difference(SymmetricDifferenceTree & other) {
     if (this->subtree_clade_sizes_.empty()) {
         this->calc_subtree_sizes();
     }
     if (other.subtree_clade_sizes_.empty()) {
         other.calc_subtree_sizes();
     }
-    return SymmtericDifferenceTree::calc_set_symmetric_difference(this->subtree_clade_sizes_, other.subtree_clade_sizes_);
+    return SymmetricDifferenceTree::calc_set_symmetric_difference(this->subtree_clade_sizes_, other.subtree_clade_sizes_);
 }
 
-unsigned long SymmtericDifferenceTree::get_unlabeled_symmetric_difference(SymmtericDifferenceTree & other) {
+unsigned long SymmetricDifferenceTree::get_unlabeled_symmetric_difference(SymmetricDifferenceTree & other) {
     return this->calc_leaf_set_sizes_unlabeled_symmetric_difference(other);
 }
 
-unsigned long SymmtericDifferenceTree::get_unweighted_labeled_symmetric_difference(SymmtericDifferenceTree & other) {
-    throw std::logic_error("Not Implemented: SymmtericDifferenceTree::get_unweighted_labeled_symmetric_difference()");
+unsigned long SymmetricDifferenceTree::get_unweighted_labeled_symmetric_difference(SymmetricDifferenceTree & other) {
+    throw std::logic_error("Not Implemented: SymmetricDifferenceTree::get_unweighted_labeled_symmetric_difference()");
     return 0;
 }
 
-unsigned long SymmtericDifferenceTree::get_weighted_labeled_symmetric_difference(SymmtericDifferenceTree & other) {
-    throw std::logic_error("Not Implemented: SymmtericDifferenceTree::get_weighted_labeled_symmetric_difference()");
+unsigned long SymmetricDifferenceTree::get_weighted_labeled_symmetric_difference(SymmetricDifferenceTree & other) {
+    throw std::logic_error("Not Implemented: SymmetricDifferenceTree::get_weighted_labeled_symmetric_difference()");
     return 0;
 }
 
-unsigned long SymmtericDifferenceTree::calc_set_symmetric_difference(
+unsigned long SymmetricDifferenceTree::calc_set_symmetric_difference(
         const SizesSetType & set1,
         const SizesSetType & set2,
         SizesSetType * common,
