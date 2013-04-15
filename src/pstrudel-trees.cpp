@@ -106,17 +106,20 @@ int main(int argc, const char * argv[]) {
 
     // calculating distances
     TreeDistanceMatrixType  unweighted_profile_distances;
+    TreeDistanceMatrixType  weighted_profile_distances;
+    TreeDistanceMatrixType  full_distances;
     logger.info("Calculating profile distances ...");
     for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size() - 1; ++tree_idx1) {
         auto & tree1 = pairwise_distance_trees[tree_idx1];
         for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < pairwise_distance_trees.size(); ++tree_idx2) {
             auto & tree2 = pairwise_distance_trees[tree_idx2];
             unweighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_unweighted_subprofile_distance(tree2);
+            weighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_weighted_subprofile_distance(tree2);
+            full_distances[tree_idx1][tree_idx2] = tree1.get_distance(tree2);
         }
     }
 
-    TreeDistanceMatrixType  unweighted_symmetric_difference_leaf_set_sizes;
-    TreeDistanceMatrixType  unweighted_symmetric_difference_clade_sizes;
+    TreeDistanceMatrixType  unlabeled_symmetric_differences;
     if (calculate_other_distance_metrics) {
         logger.info("Calculating other metrics ...");
         std::vector<pstrudel::SymmetricDifferenceTree> symmetric_difference_trees;
@@ -131,8 +134,7 @@ int main(int argc, const char * argv[]) {
             auto & tree1 = symmetric_difference_trees[tree_idx1];
             for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < symmetric_difference_trees.size(); ++tree_idx2) {
                 auto & tree2 = symmetric_difference_trees[tree_idx2];
-                unweighted_symmetric_difference_leaf_set_sizes[tree_idx1][tree_idx2] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(tree2);
-                unweighted_symmetric_difference_clade_sizes[tree_idx1][tree_idx2] = tree1.calc_clade_sizes_unlabeled_symmetric_difference(tree2);
+                unlabeled_symmetric_differences[tree_idx1][tree_idx2] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(tree2);
             }
         }
     }
@@ -142,11 +144,10 @@ int main(int argc, const char * argv[]) {
         out << "Tree_i";
         out << "\t" << "Tree_j";
         out << "\t" << "Unweighted.Profile.Distance";
-        // out << "\t" << "Edge.Weighted.Profile.Distance";
-        // out << "\t" << "Aggregate.Profile.Distance";
+        out << "\t" << "Edge.Weighted.Profile.Distance";
+        out << "\t" << "Aggregate.Profile.Distance";
         if (calculate_other_distance_metrics) {
-            out << "\t" << "Unlabeled.Symmetric.Difference.Leaf.Sets";
-            out << "\t" << "Unlabeled.Symmetric.Difference.Subtree.Sets";
+            out << "\t" << "Unlabeled.Symmetric.Difference.Sets";
         }
         out << std::endl;
     }
@@ -157,9 +158,10 @@ int main(int argc, const char * argv[]) {
             out << tree_idx1 + 1;
             out << "\t" << tree_idx2 + 1;
             out << "\t" << std::setprecision(20) << unweighted_profile_distances[tree_idx1][tree_idx2];
+            out << "\t" << std::setprecision(20) << weighted_profile_distances[tree_idx1][tree_idx2];
+            out << "\t" << std::setprecision(20) << full_distances[tree_idx1][tree_idx2];
             if (calculate_other_distance_metrics) {
-                out << "\t" << unweighted_symmetric_difference_leaf_set_sizes[tree_idx1][tree_idx2];
-                out << "\t" << unweighted_symmetric_difference_clade_sizes[tree_idx1][tree_idx2];
+                out << "\t" << unlabeled_symmetric_differences[tree_idx1][tree_idx2];
             }
             out << std::endl;
         }
