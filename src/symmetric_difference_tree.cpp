@@ -57,6 +57,20 @@ unsigned long SymmtericDifferenceTree::calc_clade_sizes_unlabeled_symmetric_diff
     return SymmtericDifferenceTree::calc_set_symmetric_difference(this->subtree_clade_sizes_, other.subtree_clade_sizes_);
 }
 
+unsigned long SymmtericDifferenceTree::get_unlabeled_symmetric_difference(SymmtericDifferenceTree & other) {
+    return this->calc_leaf_set_sizes_unlabeled_symmetric_difference(other);
+}
+
+unsigned long SymmtericDifferenceTree::get_unweighted_labeled_symmetric_difference(SymmtericDifferenceTree & other) {
+    throw std::logic_error("Not Implemented: SymmtericDifferenceTree::get_unweighted_labeled_symmetric_difference()");
+    return 0;
+}
+
+unsigned long SymmtericDifferenceTree::get_weighted_labeled_symmetric_difference(SymmtericDifferenceTree & other) {
+    throw std::logic_error("Not Implemented: SymmtericDifferenceTree::get_weighted_labeled_symmetric_difference()");
+    return 0;
+}
+
 unsigned long SymmtericDifferenceTree::calc_set_symmetric_difference(
         const SizesSetType & set1,
         const SizesSetType & set2,

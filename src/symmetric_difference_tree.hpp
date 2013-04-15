@@ -56,6 +56,9 @@ class SymmtericDifferenceTree : public BasicTree<SymmtericDifferenceNodeValue> {
         void calc_subtree_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
         unsigned long calc_clade_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
+        unsigned long get_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
+        unsigned long get_unweighted_labeled_symmetric_difference(SymmtericDifferenceTree & other);
+        unsigned long get_weighted_labeled_symmetric_difference(SymmtericDifferenceTree & other);
 
     public:
         static unsigned long calc_set_symmetric_difference(
