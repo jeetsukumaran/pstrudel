@@ -25,6 +25,8 @@ COMMON_SRC = \
 	dataio.hpp \
 	pairwise_distance_tree.cpp \
 	pairwise_distance_tree.hpp \
+	symmetric_difference_tree.cpp \
+	symmetric_difference_tree.hpp \
 	profile.cpp \
 	profile.hpp \
 	split.cpp \

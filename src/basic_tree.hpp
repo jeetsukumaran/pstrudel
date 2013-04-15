@@ -69,9 +69,15 @@ class BasicTree : public platypus::Tree<T> {
               , label_(std::move(other.label_)) {
         }
         BasicTree(const BasicTree & other)
-            : platypus::Tree<T>(other)
+            : platypus::Tree<T>()
               , is_rooted_(other.is_rooted_)
               , label_(other.label_) {
+        }
+        template <class OtherT> BasicTree(const OtherT & other)
+            : platypus::Tree<T>()
+              , is_rooted_(other.is_rooted())
+              , label_(other.get_label()) {
+            this->deep_copy_from(other);
         }
         BasicTree & operator=(const BasicTree & other) {
             platypus::Tree<T>::operator=(other);

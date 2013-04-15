@@ -15,6 +15,13 @@ class SymmtericDifferenceNodeValue : public BasicNodeValue {
             : num_leaves_(0)
               , num_descendent_nodes_(0) {
         }
+        SymmtericDifferenceNodeValue(const SymmtericDifferenceNodeValue & other)
+            : num_leaves_(other.num_leaves_)
+              , num_descendent_nodes_(other.num_descendent_nodes_) {
+        }
+        template <class T> SymmtericDifferenceNodeValue & operator=(const T & other) {
+            return *this;
+        }
         unsigned long get_num_leaves() const {
             return this->num_leaves_;
         }
@@ -35,14 +42,20 @@ class SymmtericDifferenceNodeValue : public BasicNodeValue {
 ///////////////////////////////////////////////////////////////////////////////
 // SymmtericDifferenceTree
 
-class SymmtericDifferenceTree : public pstrudel::BasicTree<SymmtericDifferenceNodeValue> {
+class SymmtericDifferenceTree : public BasicTree<SymmtericDifferenceNodeValue> {
 
     public:
         typedef std::unordered_multiset<unsigned long> SizesSetType;
 
     public:
+        SymmtericDifferenceTree();
+        SymmtericDifferenceTree(const SymmtericDifferenceTree & other);
+        template <class T> SymmtericDifferenceTree(const T & other)
+            : BasicTree<SymmtericDifferenceNodeValue>(other) {
+        }
         void calc_subtree_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
+        unsigned long calc_clade_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other);
 
     public:
         static unsigned long calc_set_symmetric_difference(

@@ -5,6 +5,15 @@
 
 namespace pstrudel {
 
+SymmtericDifferenceTree::SymmtericDifferenceTree() {
+}
+
+SymmtericDifferenceTree::SymmtericDifferenceTree(const SymmtericDifferenceTree & other)
+    : BasicTree<SymmtericDifferenceNodeValue>(other)
+      , subtree_leaf_set_sizes_(other.subtree_leaf_set_sizes_)
+      , subtree_clade_sizes_(other.subtree_clade_sizes_) {
+}
+
 void SymmtericDifferenceTree::calc_subtree_sizes() {
     this->subtree_leaf_set_sizes_.clear();
     for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
@@ -36,6 +45,16 @@ unsigned long SymmtericDifferenceTree::calc_leaf_set_sizes_unlabeled_symmetric_d
         other.calc_subtree_sizes();
     }
     return SymmtericDifferenceTree::calc_set_symmetric_difference(this->subtree_leaf_set_sizes_, other.subtree_leaf_set_sizes_);
+}
+
+unsigned long SymmtericDifferenceTree::calc_clade_sizes_unlabeled_symmetric_difference(SymmtericDifferenceTree & other) {
+    if (this->subtree_clade_sizes_.empty()) {
+        this->calc_subtree_sizes();
+    }
+    if (other.subtree_clade_sizes_.empty()) {
+        other.calc_subtree_sizes();
+    }
+    return SymmtericDifferenceTree::calc_set_symmetric_difference(this->subtree_clade_sizes_, other.subtree_clade_sizes_);
 }
 
 unsigned long SymmtericDifferenceTree::calc_set_symmetric_difference(
