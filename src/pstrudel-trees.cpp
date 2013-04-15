@@ -142,8 +142,8 @@ int main(int argc, const char * argv[]) {
         out << "Tree_i";
         out << "\t" << "Tree_j";
         out << "\t" << "Unweighted.Profile.Distance";
-        out << "\t" << "Edge.Weighted.Profile.Distance";
-        out << "\t" << "Aggregate.Profile.Distance";
+        // out << "\t" << "Edge.Weighted.Profile.Distance";
+        // out << "\t" << "Aggregate.Profile.Distance";
         if (calculate_other_distance_metrics) {
             out << "\t" << "Unlabeled.Symmetric.Difference.Leaf.Sets";
             out << "\t" << "Unlabeled.Symmetric.Difference.Subtree.Sets";
