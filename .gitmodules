@@ -1,6 +1,0 @@
-[submodule "src/platypus-phyloinformary"]
-	path = src/platypus-phyloinformary
-	url = git@github.com:jeetsukumaran/platypus-phyloinformary.git
-[submodule "src/colugo-utilities"]
-	path = src/colugo-utilities
-	url = git@github.com:jeetsukumaran/colugo-utilities.git
