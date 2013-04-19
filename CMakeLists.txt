@@ -48,12 +48,15 @@ INCLUDE_DIRECTORIES(
     )
 
 # Libraries
-find_library(NCL_LIBRARY
+FIND_LIBRARY(NCL_LIBRARY
     NAMES ncl                   # name of the library as passed to '-l' flag, e.g. '-lncl'
     PATHS ${NCL_LIBRARY_DIR}    # explicit paths to search on, other than the usual
     REQUIRED                    # error if library not found
     )
-set(NCL_LIBRARIES ${NCL_LIBRARY} )
+IF (NOT NCL_LIBRARY )
+    MESSAGE(FATAL_ERROR "Unable to locate the NCL libraries")
+ENDIF()
+SET(NCL_LIBRARIES ${NCL_LIBRARY} )
 # set(NCL_LIBRARIES ${NCL_LIBRARIES} debug ${NCL_LIBRARY_DIR}/libncl.a)
 # set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
 
