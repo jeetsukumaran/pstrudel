@@ -18,6 +18,6 @@ ADD_EXECUTABLE(pstrudel-trees
     )
 TARGET_LINK_LIBRARIES(pstrudel-trees ${NCL_LIBRARIES})
 INSTALL(TARGETS pstrudel-trees
-        DESTINATION ${INSTALL_BIN_DIR}
+        DESTINATION bin
         )
 

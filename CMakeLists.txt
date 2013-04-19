@@ -22,22 +22,22 @@ IF( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 ENDIF()
 
 # Offer the user the choice of overriding the installation directories
-set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
-set(INSTALL_BIN_DIR bin CACHE PATH "Installation sub-directory for executables")
-set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
-IF (WIN32 AND NOT CYGWIN)
-  SET(DEF_INSTALL_CMAKE_DIR CMake)
-ELSE()
-  SET(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
-ENDIF()
-SET(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
+# set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
+# set(INSTALL_BIN_DIR bin CACHE PATH "Installation sub-directory for executables")
+# set(INSTALL_INCLUDE_DIR include CACHE PATH "Installation directory for header files")
+# IF (WIN32 AND NOT CYGWIN)
+#   SET(DEF_INSTALL_CMAKE_DIR CMake)
+# ELSE()
+#   SET(DEF_INSTALL_CMAKE_DIR lib/CMake/${PROJECT_NAME})
+# ENDIF()
+# SET(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH "Installation directory for CMake files")
 
 # NCL (hard-coded for now)
 set(NCL_INSTALL_DIR ext/v2.1/build/installed)
 set(NCL_INCLUDE_DIR ext/v2.1/build/installed/include)
 set(NCL_LIBRARY_DIR ext/v2.1/build/installed/lib/ncl)
 
-# Set library source directory variable
+# Set source directory variable
 SET(MAIN_PSTRUDEL_SOURCE_DIR
     ${PROJECT_SOURCE_DIR}/pstrudel CACHE PATH "Directory of main source code")
 
@@ -48,7 +48,11 @@ INCLUDE_DIRECTORIES(
     )
 
 # Libraries
-find_library(NCL_LIBRARY ncl PATHS ${NCL_LIBRARY_DIR})
+find_library(NCL_LIBRARY
+    NAMES ncl                   # name of the library as passed to '-l' flag, e.g. '-lncl'
+    PATHS ${NCL_LIBRARY_DIR}    # explicit paths to search on, other than the usual
+    REQUIRED                    # error if library not found
+    )
 set(NCL_LIBRARIES ${NCL_LIBRARY} )
 # set(NCL_LIBRARIES ${NCL_LIBRARIES} debug ${NCL_LIBRARY_DIR}/libncl.a)
 # set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
