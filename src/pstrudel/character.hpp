@@ -9,7 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include "colugo-utilities/src/utility.hpp"
+#include <colugo/utility.hpp>
 
 namespace pstrudel {
 

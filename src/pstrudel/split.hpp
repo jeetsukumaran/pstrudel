@@ -12,7 +12,7 @@
 #include <map>
 #include <set>
 #include <bitset>
-#include "colugo-utilities/src/utility.hpp"
+#include <colugo/utility.hpp>
 
 namespace pstrudel {
 

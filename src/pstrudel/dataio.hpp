@@ -10,8 +10,8 @@
 #include <functional>
 #include <map>
 #include <ncl/nxsmultiformat.h>
-#include "colugo-utilities/src/utility.hpp"
-#include "platypus-phyloinformary/src/ncl_reader.hpp"
+#include <colugo/utility.hpp>
+#include <platypus/ncl_reader.hpp>
 
 namespace pstrudel {
 

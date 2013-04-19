@@ -9,8 +9,8 @@
 #include <stack>
 #include <map>
 #include <set>
-#include "colugo-utilities/src/utility.hpp"
-#include "platypus-phyloinformary/src/tree.hpp"
+#include <colugo/utility.hpp>
+#include <platypus/tree.hpp>
 #include "basic_tree.hpp"
 #include "profile.hpp"
 

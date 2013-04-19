@@ -1,8 +1,8 @@
 #include <cassert>
-#include "colugo-utilities/src/cmdopt.hpp"
-#include "colugo-utilities/src/utility.hpp"
-#include "colugo-utilities/src/logger.hpp"
-#include "colugo-utilities/src/textutil.hpp"
+#include <colugo/cmdopt.hpp>
+#include <colugo/utility.hpp>
+#include <colugo/logger.hpp>
+#include <colugo/textutil.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pairwise_distance_tree.hpp"

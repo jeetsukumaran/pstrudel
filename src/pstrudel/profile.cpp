@@ -1,4 +1,4 @@
-#include "colugo-utilities/src/utility.hpp"
+#include <colugo/utility.hpp>
 #include "profile.hpp"
 
 namespace pstrudel {

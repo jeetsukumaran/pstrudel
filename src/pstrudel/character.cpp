@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <iterator>
-#include "colugo-utilities/src/utility.hpp"
+#include <colugo/utility.hpp>
 #include "character.hpp"
 
 namespace pstrudel {
