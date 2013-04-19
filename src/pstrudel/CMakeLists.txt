@@ -16,7 +16,8 @@ ADD_EXECUTABLE(pstrudel-trees
     ${COLUGO_SOURCES}
     ${PSTRUDEL_MAIN_SOURCES}
     )
-install(TARGETS pstrudel-trees
+TARGET_LINK_LIBRARIES(pstrudel-trees ${NCL_LIBRARIES})
+INSTALL(TARGETS pstrudel-trees
         DESTINATION ${INSTALL_BIN_DIR}
         )
 
