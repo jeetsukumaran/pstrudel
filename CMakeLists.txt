@@ -20,8 +20,17 @@ SET(PROJECT_MINOR_VERSION 1)
 SET(PROJECT_PATCH_VERSION 0)
 SET(PROJECT_VERSION
   ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
-include(GetGitRevisionDescription)
+
+# Get VCS info and make available to program(s)
+# (program must include "version.h", which will be created in the build directory,
+# and the following strings will be defined: PROJECT_GIT_REFSPEC,
+# PROJECT_GIT_SHA1, PROJECT_GIT_SHA1_SHORT, PROJECT_GIT_BRANCH,
+# PROJECT_GIT_COMMIT_DATE, PROJECT_SOURCE_IDENTIFIER. In addition
+# 'PROJECT_SOURCE_IDENTIFIED' will evaluate to TRUE if VCS information
+# was available, and FALSE if not (all previous strings will be blank in the
+# latter case).
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(
     GIT_REFSPEC
     GIT_SHA1
@@ -44,7 +53,7 @@ FILE(WRITE ${PROJECT_BINARY_DIR}/version.h.in
 #define PROJECT_SOURCE_IDENTIFIER   \"@PROJECT_SOURCE_IDENTIFIER@\"
 #define PROJECT_SOURCE_IDENTIFIED      @PROJECT_SOURCE_IDENTIFIED@
 ")
-configure_file("${PROJECT_BINARY_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
+CONFIGURE_FILE("${PROJECT_BINARY_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
 
 
 # Offer the user the choice of overriding the installation directories
