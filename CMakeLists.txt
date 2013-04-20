@@ -1,18 +1,19 @@
-# Required CMake
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+##############################################################################
+## Required CMake
 
-# Project name: sets ${PROJECT_NAME}
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
+
+##############################################################################
+## Project name: sets ${PROJECT_NAME}
 project("pstrudel" CXX)
 
-# disallow in-source build
-IF( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
-  MESSAGE(FATAL_ERROR
-"In-source builds are not allowed."
-"Please create a directory and run cmake from there, passing the path to this"
-"source directory as the last argument."
-"This process created the file `CMakeCache.txt' and the directory `CMakeFiles'."
-"Please delete them.")
-ENDIF()
+##############################################################################
+## Find local CMake modules
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+
+##############################################################################
+## Block builds from project directory
+INCLUDE(DisableInSourceBuild)
 
 # Versioning
 SET(PROJECT_MAJOR_VERSION 0)
@@ -39,7 +40,6 @@ SET(PROJECT_VERSION
 #               std::cout << " (" << __DATE__ << " " << __TIME__ ")";
 #           #endif
 #       }
-LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(
     GIT_REFSPEC
