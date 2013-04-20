@@ -28,7 +28,13 @@ get_git_head_revision(
     GIT_SHA1_SHORT
     GIT_BRANCH
     GIT_COMMIT_DATE)
+IF (GIT_SHA1)
+    SET(PROJECT_SOURCE_IDENTIFIER "${GIT_SHA1_SHORT} [on ${GIT_BRANCH}]: ${GIT_COMMIT_DATE}")
+ELSE()
+    SET(PROJECT_SOURCE_IDENTIFIER "")
+ENDIF()
 configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
+
 
 # Offer the user the choice of overriding the installation directories
 # set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
