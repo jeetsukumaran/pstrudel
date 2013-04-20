@@ -26,6 +26,7 @@ SET(PROJECT_VERSION
 ## Versioning
 
 INCLUDE(CreateProjectSourceIdentificationCXX)
+create_CXX_version_file()
 
 # Offer the user the choice of overriding the installation directories
 # set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
