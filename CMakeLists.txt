@@ -1,21 +1,22 @@
 ##############################################################################
 ## Required CMake
-
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8.8)
-
-##############################################################################
-## Project name: sets ${PROJECT_NAME}
-project("pstrudel" CXX)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 
 ##############################################################################
 ## Find local CMake modules
-LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/Modules")
 
 ##############################################################################
 ## Block builds from project directory
 INCLUDE(DisableInSourceBuild)
 
-# Versioning
+##############################################################################
+## Project name: sets ${PROJECT_NAME}
+PROJECT("pstrudel" CXX)
+
+
+##############################################################################
+## Versioning
 SET(PROJECT_MAJOR_VERSION 0)
 SET(PROJECT_MINOR_VERSION 1)
 SET(PROJECT_PATCH_VERSION 0)
