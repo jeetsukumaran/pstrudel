@@ -22,7 +22,12 @@ SET(PROJECT_VERSION
   ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+get_git_head_revision(
+    GIT_REFSPEC
+    GIT_SHA1
+    GIT_SHA1_SHORT
+    GIT_BRANCH
+    GIT_COMMIT_DATE)
 configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
 
 # Offer the user the choice of overriding the installation directories

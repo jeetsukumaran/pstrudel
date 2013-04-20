@@ -39,7 +39,55 @@ set(__get_git_revision_description YES)
 # to find the path to this module rather than the path to a calling list file
 get_filename_component(_gitdescmoddir ${CMAKE_CURRENT_LIST_FILE} PATH)
 
-function(get_git_head_revision _refspecvar _hashvar)
+function(get_git_desc_info _shorthashvar _branchvar _commitdatevar)
+    FIND_PACKAGE(Git)
+    IF(GIT_FOUND)
+    EXECUTE_PROCESS(
+        COMMAND ${GIT_EXECUTABLE} status 2>/dev/null
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        RESULT_VARIABLE GIT_STATUS_RV
+        OUTPUT_QUIET
+        ERROR_QUIET
+        )
+    IF (${GIT_STATUS_RV})
+        MESSAGE(STATUS "Not a Git Repository")
+    ELSE()
+        EXECUTE_PROCESS(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+            # chain COMMAND's in a pipe by listing them one after the other; stdout
+            # of one will be passed to stdin of subsequent
+            # COMMAND sed etc. etc.
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_BRANCH_NAME
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        EXECUTE_PROCESS(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_SHA1_SHORT
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        EXECUTE_PROCESS(
+            COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%cd
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT_DATE
+            ERROR_QUIET
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        SET(GIT_SOURCE_DESC "${GIT_BRANCH_NAME}:${GIT_SHA1_SHORT}, ${GIT_COMMIT_DATE}")
+        MESSAGE(STATUS "${GIT_SOURCE_DESC}")
+    ENDIF()
+    ELSE()
+        MESSAGE(STATUS "Git not found")
+    ENDIF()
+    set(${_shorthashvar} "${GIT_SHA1_SHORT}" PARENT_SCOPE)
+    set(${_branchvar} "${GIT_BRANCH_NAME}" PARENT_SCOPE)
+    set(${_commitdatevar} "${GIT_COMMIT_DATE}" PARENT_SCOPE)
+endfunction()
+
+function(get_git_head_revision _refspecvar _hashvar _shorthashvar _branchvar _commitdatevar)
 	set(GIT_PARENT_DIR "${CMAKE_SOURCE_DIR}")
 	set(GIT_DIR "${GIT_PARENT_DIR}/.git")
 	while(NOT EXISTS "${GIT_DIR}")	# .git dir not found, search parent directories
@@ -69,6 +117,10 @@ function(get_git_head_revision _refspecvar _hashvar)
 		@ONLY)
 	include("${GIT_DATA}/grabRef.cmake")
 
+    get_git_desc_info(GIT_SHA1_SHORT GIT_BRANCH_NAME GIT_COMMIT_DATE)
+    set(${_shorthashvar} "${GIT_SHA1_SHORT}" PARENT_SCOPE)
+    set(${_branchvar} "${GIT_BRANCH_NAME}" PARENT_SCOPE)
+    set(${_commitdatevar} "${GIT_COMMIT_DATE}" PARENT_SCOPE)
 	set(${_refspecvar} "${HEAD_REF}" PARENT_SCOPE)
 	set(${_hashvar} "${HEAD_HASH}" PARENT_SCOPE)
 endfunction()
