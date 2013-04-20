@@ -9,8 +9,8 @@ namespace pstrudel {
 std::string get_program_identification(const std::string& program_name) {
     std::ostringstream s;
     s << program_name;
-#if defined(PROJECT_GIT_SHA1_SHORT)
-    s << " (" << PROJECT_GIT_REFSPEC << ": " << PROJECT_GIT_SHA1_SHORT << ") ";
+#if defined(PROJECT_SOURCE_DESC)
+    s << " (" PROJECT_SOURCE_DESC << ") ";
 #else
     s << " (" << __DATE__ << ")";
 #endif
