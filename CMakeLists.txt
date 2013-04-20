@@ -34,10 +34,7 @@ IF(GIT_FOUND)
       MESSAGE(STATUS "Not a Git Repository")
   ELSE()
     EXECUTE_PROCESS(
-        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
-        # chain COMMAND's in a pipe by listing them one after the other; stdout
-        # of one will be passed to stdin of subsequent
-        # COMMAND sed etc. etc.
+        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
         OUTPUT_VARIABLE GIT_BRANCH_NAME
         ERROR_QUIET
@@ -57,7 +54,7 @@ IF(GIT_FOUND)
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-    SET(GIT_SOURCE_DESC "${GIT_BRANCH_NAME}:${GIT_SHA1_SHORT}, ${GIT_DATE}")
+    SET(GIT_SOURCE_DESC "<${GIT_BRANCH_NAME}> ${GIT_SHA1_SHORT}, ${GIT_DATE}")
     MESSAGE(STATUS "${GIT_SOURCE_DESC}")
   ENDIF()
 ELSE()
