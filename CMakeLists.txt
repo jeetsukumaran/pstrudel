@@ -29,6 +29,16 @@ SET(PROJECT_VERSION
 # 'PROJECT_SOURCE_IDENTIFIED' will evaluate to TRUE if VCS information
 # was available, and FALSE if not (all previous strings will be blank in the
 # latter case).
+# Example of use :
+#       # include <iostream>
+#       # include "version.h"
+#       int main() {
+#           #if defined(PROJECT_SOURCE_IDENTIFIED) && PROJECT_SOURCE_IDENTIFIED
+#               std::cout << " (" PROJECT_SOURCE_IDENTIFIER << ")";
+#           #else
+#               std::cout << " (" << __DATE__ << " " << __TIME__ ")";
+#           #endif
+#       }
 LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
 INCLUDE(GetGitRevisionDescription)
 get_git_head_revision(
@@ -78,7 +88,7 @@ SET(MAIN_PSTRUDEL_SOURCE_DIR
 
 # Set include directories
 INCLUDE_DIRECTORIES(
-  "${PROJECT_BINARY_DIR}"   # to find foo/config.h
+  "${PROJECT_BINARY_DIR}"   # to find "version.h"
   "${NCL_INCLUDE_DIR}"      # for NCL
     )
 
