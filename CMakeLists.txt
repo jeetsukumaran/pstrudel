@@ -4,17 +4,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Project name: sets ${PROJECT_NAME}
 project("pstrudel" CXX)
 
-# Versioning
-SET(PROJECT_MAJOR_VERSION 0)
-SET(PROJECT_MINOR_VERSION 1)
-SET(PROJECT_PATCH_VERSION 0)
-SET(PROJECT_VERSION
-  ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
-include(GetGitRevisionDescription)
-get_git_head_revision(GIT_REFSPEC GIT_SHA1)
-configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
-
 # disallow in-source build
 IF( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
   MESSAGE(FATAL_ERROR
@@ -24,6 +13,59 @@ IF( CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR AND NOT MSVC_IDE )
 "This process created the file `CMakeCache.txt' and the directory `CMakeFiles'."
 "Please delete them.")
 ENDIF()
+
+# Versioning
+SET(PROJECT_MAJOR_VERSION 0)
+SET(PROJECT_MINOR_VERSION 1)
+SET(PROJECT_PATCH_VERSION 0)
+SET(PROJECT_VERSION
+  ${PROJECT_MAJOR_VERSION}.${PROJECT_MINOR_VERSION}.${PROJECT_PATCH_VERSION})
+
+FIND_PACKAGE(Git)
+IF(GIT_FOUND)
+  EXECUTE_PROCESS(
+      COMMAND ${GIT_EXECUTABLE} status 2>/dev/null
+      WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+      RESULT_VARIABLE GIT_STATUS_RV
+      OUTPUT_QUIET
+      ERROR_QUIET
+      )
+  IF (${GIT_STATUS_RV})
+      MESSAGE(STATUS "Not a Git Repository")
+  ELSE()
+    EXECUTE_PROCESS(
+        COMMAND ${GIT_EXECUTABLE} name-rev --name-only HEAD
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH_NAME
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    EXECUTE_PROCESS(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_SHA1_SHORT
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    EXECUTE_PROCESS(
+        COMMAND ${GIT_EXECUTABLE} log -1 --pretty=format:%cd
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_DATE
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        )
+    SET(GIT_SOURCE_DESC "<${GIT_BRANCH_NAME}> ${GIT_SHA1_SHORT}, ${GIT_DATE}")
+    MESSAGE(STATUS "${GIT_SOURCE_DESC}")
+  ENDIF()
+ELSE()
+    MESSAGE(STATUS "Git not found")
+ENDIF()
+configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
+
+# list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/Modules")
+# include(GetGitRevisionDescription)
+# get_git_head_revision(GIT_REFSPEC GIT_SHA1)
+# configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
 
 # Offer the user the choice of overriding the installation directories
 # set(INSTALL_LIB_DIR lib CACHE PATH "Installation sub-directory for libraries")
