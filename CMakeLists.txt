@@ -33,7 +33,16 @@ IF (GIT_SHA1)
 ELSE()
     SET(PROJECT_SOURCE_IDENTIFIER "")
 ENDIF()
-configure_file("${PROJECT_SOURCE_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
+FILE(WRITE ${PROJECT_BINARY_DIR}/version.h.in
+"
+#define PROJECT_GIT_REFSPEC         \"@GIT_REFSPEC@\"
+#define PROJECT_GIT_SHA1            \"@GIT_SHA1@\"
+#define PROJECT_GIT_SHA1_SHORT      \"@GIT_SHA1_SHORT@\"
+#define PROJECT_GIT_BRANCH          \"@GIT_BRANCH@\"
+#define PROJECT_GIT_COMMIT_DATE     \"@GIT_COMMIT_DATE@\"
+#define PROJECT_SOURCE_IDENTIFIER   \"@PROJECT_SOURCE_IDENTIFIER@\"
+")
+configure_file("${PROJECT_BINARY_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
 
 
 # Offer the user the choice of overriding the installation directories
