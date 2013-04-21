@@ -8,11 +8,10 @@ SET(PSTRUDEL_MAIN_SOURCES
     character.cpp
     pairwise_distance_tree.cpp
     profile.cpp
-    pstrudel-trees.cpp
     split.cpp
     symmetric_difference_tree.cpp)
 ADD_EXECUTABLE(pstrudel-trees
-    pstrudel-trees.cpp
+    pstrudel_trees_main.cpp
     ${COLUGO_SOURCES}
     ${PSTRUDEL_MAIN_SOURCES}
     )
