@@ -85,15 +85,16 @@ SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
 ##############################################################################
 ## Install test driver script and data, and run test driver as target of
 ## ``make check``
-INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
-INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 ADD_CUSTOM_TARGET(check
     COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
     COMMAND python "${TEST_DIR}/run-tests.py"
     )
+INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
 ##############################################################################
-## Build the test executables
+## Build the main and test code base in a library, installing it as part of
+## the test suite. This is to save build time for tests.
 
 ## Auto-discover the project sources. Discouraged in official documentation as
 ## this list will only get populated when `cmake` is run, and new files added
@@ -119,6 +120,33 @@ INCLUDE_DIRECTORIES(
   "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary"
   "${PROJECT_SOURCE_DIR}/src"   # to find "<pstrudel/foo.hpp>"
     )
+
+## Create a library directory at configuration time.
+## Since the libraries will get only installed during the second
+## phase (as part of the ``testsuite`` COMPONENT), the linker
+## will complain of a missing directory during the first pass
+## because the "lib" directory has not been created yet. We
+## avoid this annoyance by creating the directory ahead of time.
+SET(LIBDIR "${PROJECT_BINARY_DIR}/lib")
+FILE(MAKE_DIRECTORY ${LIBDIR})
+
+## Build the library for the main code base, setting it up to be installed
+## during the ``testsuite`` COMPONENT install.
+ADD_LIBRARY(pstrudelmain ${PROJECT_SOURCES})
+ADD_DEPENDENCIES(check pstrudelmain)
+INSTALL(TARGETS pstrudelmain DESTINATION ${LIBDIR} COMPONENT testsuite)
+
+## Build the library for the test code base, setting it up to be installed
+## during the ``testsuite`` COMPONENT install.
+ADD_LIBRARY(pstrudeltest src/testutils.cpp)
+ADD_DEPENDENCIES(check pstrudeltest)
+INSTALL(TARGETS pstrudeltest DESTINATION ${LIBDIR} COMPONENT testsuite)
+
+## Point the linker to the library directory.
+LINK_DIRECTORIES(${LIBDIR})
+
+##############################################################################
+## Build the test executables
 
 ## The list of implementation files for the test executables that need to be
 ## built.
@@ -146,10 +174,11 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)
     ADD_EXECUTABLE(${basename}
         ${test_src_file}
-        src/testutils.cpp
-        ${PROJECT_SOURCES}
         )
-    TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
+    TARGET_LINK_LIBRARIES(${basename}
+        ${NCL_LIBRARIES}
+        pstrudelmain
+        pstrudeltest)
     ADD_DEPENDENCIES(check ${basename})
     INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()

@@ -84,11 +84,11 @@ SET(NCL_LIBRARIES ${NCL_LIBRARY} )
 # set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
 
 ##############################################################################
+## Sources
+ADD_SUBDIRECTORY(src)
+
+##############################################################################
 ## Testing
 ENABLE_TESTING ()
 # ``EXCLUDE_FROM_ALL``: skip from `make all` build
 ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)
-
-##############################################################################
-## Sources
-ADD_SUBDIRECTORY(src)
