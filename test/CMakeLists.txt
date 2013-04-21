@@ -5,12 +5,11 @@ SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
 ##############################################################################
 ## Install test driver script and data, and run test driver as target of
 ## ``make check``
-INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT check)
-INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT check)
+INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 add_custom_target(check
-    COMMAND echo "********** HELLO *************"
-    COMMAND ${CMAKE_COMMAND} -D COMPONENT=check -P cmake_install.cmake
-    COMMAND ${CMAKE_COMMAND} -D COMPONENT=check -P cmake_install.cmake
+    COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
+    COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
     COMMAND python "${TEST_DIR}/run-tests.py"
     )
 
