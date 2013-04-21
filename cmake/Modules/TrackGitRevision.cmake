@@ -132,7 +132,7 @@ endfunction()
 #       # include <iostream>
 #       # include "version.h"
 #       int main() {
-#           #if defined(PROJECT_SOURCE_IDENTIFIED) && PROJECT_SOURCE_IDENTIFIED
+#           #if defined(PROJECT_SOURCE_IDENTIFIED)
 #               std::cout << " (" PROJECT_SOURCE_IDENTIFIER << ")";
 #           #else
 #               std::cout << " (" << __DATE__ << " " << __TIME__ ")";
@@ -141,25 +141,27 @@ endfunction()
 #
 function(create_CXX_git_version_info_file)
     get_git_revision_info(
-        GIT_SHA1
-        GIT_SHA1_SHORT
-        GIT_BRANCH
-        GIT_COMMIT_DATE)
-    IF (GIT_SHA1)
-        SET(PROJECT_SOURCE_IDENTIFIER "${GIT_BRANCH} ${GIT_SHA1_SHORT}: ${GIT_COMMIT_DATE}")
+        PROJECT_GIT_SHA1
+        PROJECT_GIT_SHA1_SHORT
+        PROJECT_GIT_BRANCH
+        PROJECT_GIT_COMMIT_DATE)
+    IF (PROJECT_GIT_SHA1)
+        SET(PROJECT_SOURCE_IDENTIFIER "${PROJECT_GIT_BRANCH} ${PROJECT_GIT_SHA1_SHORT}: ${PROJECT_GIT_COMMIT_DATE}")
         SET(PROJECT_SOURCE_IDENTIFIED 1)
     ELSE()
         SET(PROJECT_SOURCE_IDENTIFIED 0)
     ENDIF()
 
+    # #cmakedefine creates a valid macro with the contents of the variable if
+    # it is not empty, and undefines and comments out the line if not
     FILE(WRITE ${PROJECT_BINARY_DIR}/version.h.in
     "
-    #define PROJECT_GIT_SHA1            \"@GIT_SHA1@\"
-    #define PROJECT_GIT_SHA1_SHORT      \"@GIT_SHA1_SHORT@\"
-    #define PROJECT_GIT_BRANCH          \"@GIT_BRANCH@\"
-    #define PROJECT_GIT_COMMIT_DATE     \"@GIT_COMMIT_DATE@\"
-    #define PROJECT_SOURCE_IDENTIFIER   \"@PROJECT_SOURCE_IDENTIFIER@\"
-    #define PROJECT_SOURCE_IDENTIFIED      @PROJECT_SOURCE_IDENTIFIED@
+    #cmakedefine01 PROJECT_SOURCE_IDENTIFIED
+    #cmakedefine PROJECT_GIT_SHA1            \"@PROJECT_GIT_SHA1@\"
+    #cmakedefine PROJECT_GIT_SHA1_SHORT      \"@PROJECT_GIT_SHA1_SHORT@\"
+    #cmakedefine PROJECT_GIT_BRANCH          \"@PROJECT_GIT_BRANCH@\"
+    #cmakedefine PROJECT_GIT_COMMIT_DATE     \"@PROJECT_GIT_COMMIT_DATE@\"
+    #cmakedefine PROJECT_SOURCE_IDENTIFIER   \"@PROJECT_SOURCE_IDENTIFIER@\"
     ")
     CONFIGURE_FILE("${PROJECT_BINARY_DIR}/version.h.in" "${PROJECT_BINARY_DIR}/version.h" @ONLY)
 endfunction()

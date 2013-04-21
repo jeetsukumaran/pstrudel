@@ -9,7 +9,7 @@ namespace pstrudel {
 std::string get_program_identification(const std::string& program_name) {
     std::ostringstream s;
     s << program_name;
-#if defined(PROJECT_SOURCE_IDENTIFIED) && PROJECT_SOURCE_IDENTIFIED
+#if defined(PROJECT_SOURCE_IDENTIFIED)
     s << " (" PROJECT_SOURCE_IDENTIFIER << ")";
 #else
     s << " (" << __DATE__ << " " << __TIME__ ")";
