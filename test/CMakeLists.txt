@@ -14,10 +14,17 @@ add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
 ##############################################################################
 ## Test executables
 
+# file(GLOB_RECURSE DATABASE_SRCS
+#          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+#          ${CMAKE_CURRENT_SOURCE_DIR}/database/*.cpp
+#          ${CMAKE_CURRENT_SOURCE_DIR}/database/*.h)
+
 FILE(GLOB_RECURSE
     PSTRUDEL_SOURCE_FILES
     "../src/pstrudel/*.cpp"
     )
+MESSAGE(${PSTRUDEL_SOURCE_FILES})
+list(REMOVE_ITEM PSTRUDEL_SOURCE_FILES "/Users/jeet/Documents/Projects/Phyloinformatics/pstrudel/pstrudel/test/../src/pstrudel/pstrudel-trees.cpp")
 
 FILE(GLOB_RECURSE
     PLATYPUS_SOURCE_FILES
