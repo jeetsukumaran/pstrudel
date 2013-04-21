@@ -7,7 +7,7 @@ SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
 ## ``make check``
 INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
-add_custom_target(check
+ADD_CUSTOM_TARGET(check
     COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
     COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
     COMMAND python "${TEST_DIR}/run-tests.py"
@@ -23,12 +23,13 @@ add_custom_target(check
 # file(GLOB_RECURSE SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
 # string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${SRCS}")
 
+INCLUDE(ListFilter)
 FILE(GLOB_RECURSE
-    PSTRUDEL_SOURCE_FILES
+    PSTRUDEL_SOURCE_FILES_FULL
     "../src/pstrudel/*.cpp"
     )
-MESSAGE(${PSTRUDEL_SOURCE_FILES})
-list(REMOVE_ITEM PSTRUDEL_SOURCE_FILES "/Users/jeet/Documents/Projects/Phyloinformatics/pstrudel/pstrudel/test/../src/pstrudel/pstrudel-trees.cpp")
+list_filter_out(PSTRUDEL_SOURCE_FILES "pstrudel.trees.cpp" ${PSTRUDEL_SOURCE_FILES_FULL})
+# list(REMOVE_ITEM PSTRUDEL_SOURCE_FILES "/Users/jeet/Documents/Projects/Phyloinformatics/pstrudel/pstrudel/test/../src/pstrudel/pstrudel-trees.cpp")
 
 FILE(GLOB_RECURSE
     PLATYPUS_SOURCE_FILES
