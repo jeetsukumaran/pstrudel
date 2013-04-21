@@ -87,8 +87,8 @@ SET(NCL_LIBRARIES ${NCL_LIBRARY} )
 ## Testing
 ENABLE_TESTING ()
 # ``EXCLUDE_FROM_ALL``: skip from `make all` build
-# ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)
-ADD_SUBDIRECTORY(test)
+ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)
+# ADD_SUBDIRECTORY(test)
 
 ##############################################################################
 ## Sources

@@ -3,18 +3,16 @@
 SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
 
 ##############################################################################
-## Install test data
-INSTALL(DIRECTORY data/
-    DESTINATION ${TEST_DIR}/data)
-
-##############################################################################
-## Run test driver script as target of ``make check``
-add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
-
-##############################################################################
-## Install test driver script
-INSTALL(PROGRAMS scripts/run-tests.py
-    DESTINATION ${TEST_DIR})
+## Install test driver script and data, and run test driver as target of
+## ``make check``
+INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT check)
+INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT check)
+add_custom_target(check
+    COMMAND echo "********** HELLO *************"
+    COMMAND ${CMAKE_COMMAND} -D COMPONENT=check -P cmake_install.cmake
+    COMMAND ${CMAKE_COMMAND} -D COMPONENT=check -P cmake_install.cmake
+    COMMAND python "${TEST_DIR}/run-tests.py"
+    )
 
 ##############################################################################
 ## Test executables
@@ -66,7 +64,7 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)
     MESSAGE(STATUS "Adding test: ${test_src_file} => ${basename}")
     ADD_EXECUTABLE(${basename}
-        EXCLUDE_FROM_ALL
+        # EXCLUDE_FROM_ALL
         ${test_src_file}
         src/testutils.cpp
         ${PSTRUDEL_SOURCE_FILES}
@@ -75,8 +73,8 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         )
     TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
     ADD_DEPENDENCIES(check ${basename})
-    ADD_TEST(${basename} ${basename})
-    # INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
+    # ADD_TEST(${basename} ${basename})
+    INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()
 
 
