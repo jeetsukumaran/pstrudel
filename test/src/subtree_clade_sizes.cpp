@@ -3,8 +3,8 @@
 #include <string>
 #include <iomanip>
 #include <unordered_set>
-#include "../../src/dataio.hpp"
-#include "../../src/symmetric_difference_tree.hpp"
+#include <pstrudel/dataio.hpp>
+#include <pstrudel/symmetric_difference_tree.hpp>
 #include "testutils.hpp"
 
 int main(int argc, const char * argv[]) {

@@ -57,7 +57,10 @@ ENDIF()
 SET(MAIN_PSTRUDEL_SOURCE_DIR
     ${PROJECT_SOURCE_DIR}/pstrudel CACHE PATH "Directory of main source code")
 INCLUDE_DIRECTORIES(
-  "${PROJECT_BINARY_DIR}"   # to find "version.h"
+  "${PROJECT_BINARY_DIR}"       # to find "version.h"
+  "${PROJECT_SOURCE_DIR}/src/colugo-utilities"
+  "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary"
+  "${PROJECT_SOURCE_DIR}/src"
     )
 
 ##############################################################################
@@ -83,7 +86,9 @@ SET(NCL_LIBRARIES ${NCL_LIBRARY} )
 ##############################################################################
 ## Testing
 ENABLE_TESTING ()
-ADD_SUBDIRECTORY(test)
+# ``EXCLUDE_FROM_ALL``: skip from `make all` build
+# ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)
+ADD_SUBDIRECTORY(test EXCLUDE_FROM_ALL)
 
 ##############################################################################
 ## Sources

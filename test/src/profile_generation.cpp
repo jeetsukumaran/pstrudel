@@ -3,7 +3,7 @@
 #include <vector>
 #include <algorithm>
 #include <string>
-#include "../../src/profile.hpp"
+#include <pstrudel/profile.hpp>
 
 int main(int argc, const char * argv[]) {
     std::vector<double> data;

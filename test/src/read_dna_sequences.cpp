@@ -3,8 +3,8 @@
 #include <string>
 #include <algorithm> // for copy
 #include <iterator> // for ostream_iterator
-#include "../../src/character.hpp"
-#include "../../src/dataio.hpp"
+#include <pstrudel/character.hpp>
+#include <pstrudel/dataio.hpp>
 
 int main(int argc, const char * argv[]) {
     if (argc == 1) {

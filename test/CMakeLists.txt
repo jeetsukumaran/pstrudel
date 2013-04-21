@@ -8,10 +8,48 @@ INSTALL(DIRECTORY data/
     DESTINATION ${TEST_DIR}/data)
 
 ##############################################################################
-## Install test script
+## Run test driver script as target of ``make check``
+add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
+
+##############################################################################
+## Test executables
+
+FILE(GLOB_RECURSE MAIN_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src *.cpp)
+
+SET(TEST_TARGET_SOURCES
+    src/profile_distances.cpp
+    src/profile_generation.cpp
+    src/read_dna_sequences.cpp
+    src/read_tree.cpp
+    src/set_value_symmetric_difference.cpp
+    src/subtree_clade_sizes.cpp
+    src/subtree_leaf_set_sizes.cpp
+    src/tree_child_iter.cpp
+    src/tree_copy.cpp
+    src/tree_internal_iter.cpp
+    src/tree_leaf_iter.cpp
+    src/tree_pairwise_tip_distances.cpp
+    src/tree_postorder_iter.cpp
+    src/tree_preorder_iter.cpp
+    src/tree_reader.cpp
+    src/tree_splits_distances.cpp)
+
+MESSAGE(STATUS "Adding tests...")
+FOREACH(test_src_file ${TEST_TARGET_SOURCES})
+    get_filename_component(basename ${test_src_file} NAME_WE)
+    MESSAGE(STATUS "Adding test: ${test_src_file} => ${basename}")
+    ADD_EXECUTABLE(${basename}
+        ${test_src_file}
+        src/testutils.cpp
+        ${MAIN_SOURCE_FILES})
+    ADD_DEPENDENCIES(check ${basename})
+    TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
+    INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
+ENDFOREACH()
+
+##############################################################################
+## Install test driver script
 INSTALL(PROGRAMS scripts/run-tests.py
     DESTINATION ${TEST_DIR})
 
-##############################################################################
-## Add test
-add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
+

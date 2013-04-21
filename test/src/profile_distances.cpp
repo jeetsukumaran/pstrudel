@@ -3,10 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <colugo/utility.hpp>
+#include <colugo/textutil.hpp>
+#include <pstrudel/profile.hpp>
 #include "testutils.hpp"
-#include "../../src/colugo-utilities/src/utility.hpp"
-#include "../../src/colugo-utilities/src/textutil.hpp"
-#include "../../src/profile.hpp"
 
 int main(int argc, const char * argv[]) {
     unsigned long num_subprofiles = 1;

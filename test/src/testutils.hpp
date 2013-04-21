@@ -5,9 +5,9 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "../../src/dataio.hpp"
-#include "../../src/pairwise_distance_tree.hpp"
-#include "../../src/split.hpp"
+#include <pstrudel/dataio.hpp>
+#include <pstrudel/pairwise_distance_tree.hpp>
+#include <pstrudel/split.hpp>
 
 template <class TreeT>
 void get_trees(std::vector<TreeT>& trees, int argc, const char * argv[]) {

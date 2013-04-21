@@ -3,10 +3,10 @@
 #include <vector>
 #include <algorithm>
 #include <string>
+#include <colugo/utility.hpp>
+#include <colugo/textutil.hpp>
+#include <pstrudel/symmetric_difference_tree.hpp>
 #include "testutils.hpp"
-#include "../../src/colugo-utilities/src/utility.hpp"
-#include "../../src/colugo-utilities/src/textutil.hpp"
-#include "../../src/symmetric_difference_tree.hpp"
 
 void dump_results(pstrudel::SymmetricDifferenceTree::SizesSetType & s) {
     std::vector<unsigned long> v(s.cbegin(), s.cend());

@@ -1,9 +1,9 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include "../../src/platypus-phyloinformary/src/ncl_reader.hpp"
-#include "../../src/dataio.hpp"
-#include "../../src/pairwise_distance_tree.hpp"
+#include <platypus-phyloinformary/ncl_reader.hpp>
+#include <pstrudel/dataio.hpp>
+#include <pstrudel/pairwise_distance_tree.hpp>
 #include "testutils.hpp"
 
 const char * DATA_FORMAT = "nexus";
