@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <platypus-phyloinformary/ncl_reader.hpp>
+#include <platypus/ncl_reader.hpp>
 #include <pstrudel/dataio.hpp>
 #include <pstrudel/pairwise_distance_tree.hpp>
 #include "testutils.hpp"

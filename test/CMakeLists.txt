@@ -14,7 +14,20 @@ add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
 ##############################################################################
 ## Test executables
 
-FILE(GLOB_RECURSE MAIN_SOURCE_FILES ${PROJECT_SOURCE_DIR}/src *.cpp)
+FILE(GLOB_RECURSE
+    PSTRUDEL_SOURCE_FILES
+    "../src/pstrudel/*.cpp"
+    )
+
+FILE(GLOB_RECURSE
+    PLATYPUS_SOURCE_FILES
+    "../src/platypus-phyloinformary/platypus/*.cpp"
+    )
+
+FILE(GLOB_RECURSE
+    COLUGO_SOURCE_FILES
+    "../src/colugo-utilities/colugo/*.cpp"
+    )
 
 SET(TEST_TARGET_SOURCES
     src/profile_distances.cpp
@@ -41,9 +54,12 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     ADD_EXECUTABLE(${basename}
         ${test_src_file}
         src/testutils.cpp
-        ${MAIN_SOURCE_FILES})
-    ADD_DEPENDENCIES(check ${basename})
+        ${PSTRUDEL_SOURCE_FILES}
+        ${COLUGO_SOURCE_FILES}
+        ${PLATYPUS_SOURCE_FILES}
+        )
     TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
+    ADD_DEPENDENCIES(check ${basename})
     INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()
 
