@@ -12,12 +12,19 @@ INSTALL(DIRECTORY data/
 add_custom_target(check COMMAND python "${TEST_DIR}/run-tests.py")
 
 ##############################################################################
+## Install test driver script
+INSTALL(PROGRAMS scripts/run-tests.py
+    DESTINATION ${TEST_DIR})
+
+##############################################################################
 ## Test executables
 
 # file(GLOB_RECURSE DATABASE_SRCS
 #          RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
 #          ${CMAKE_CURRENT_SOURCE_DIR}/database/*.cpp
 #          ${CMAKE_CURRENT_SOURCE_DIR}/database/*.h)
+# file(GLOB_RECURSE SRCS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp *.h)
+# string(REGEX REPLACE "CMakeFiles/[^;]+;?" "" SRCS "${SRCS}")
 
 FILE(GLOB_RECURSE
     PSTRUDEL_SOURCE_FILES
@@ -59,6 +66,7 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)
     MESSAGE(STATUS "Adding test: ${test_src_file} => ${basename}")
     ADD_EXECUTABLE(${basename}
+        EXCLUDE_FROM_ALL
         ${test_src_file}
         src/testutils.cpp
         ${PSTRUDEL_SOURCE_FILES}
@@ -67,12 +75,8 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         )
     TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
     ADD_DEPENDENCIES(check ${basename})
-    INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
+    ADD_TEST(${basename} ${basename})
+    # INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()
-
-##############################################################################
-## Install test driver script
-INSTALL(PROGRAMS scripts/run-tests.py
-    DESTINATION ${TEST_DIR})
 
 
