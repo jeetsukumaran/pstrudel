@@ -78,7 +78,6 @@
 # live with the caveat (which is to remember to run ``cmake ..`` if any new
 # file gets added).
 
-
 ##############################################################################
 ## Specify the test directory
 SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
@@ -96,30 +95,33 @@ ADD_CUSTOM_TARGET(check
 ##############################################################################
 ## Build the test executables
 
-INCLUDE(ListFilter)
-FILE(GLOB_RECURSE
-    PSTRUDEL_SOURCE_FILES_FULL
+## Auto-discover the project sources. Discouraged in official documentation as
+## this list will only get populated when `cmake` is run, and new files added
+## to the directories will not get picked up until `cmake` is run again. I can
+## live with that.
+FILE(GLOB
+    PROJECT_SOURCES_ALL
     "../src/pstrudel/*.cpp"
-    )
-list_filter_out(PSTRUDEL_SOURCE_FILES "_main.cpp$" ${PSTRUDEL_SOURCE_FILES_FULL})
-
-FILE(GLOB_RECURSE
-    PLATYPUS_SOURCE_FILES
     "../src/platypus-phyloinformary/platypus/*.cpp"
-    )
-
-FILE(GLOB_RECURSE
-    COLUGO_SOURCE_FILES
     "../src/colugo-utilities/colugo/*.cpp"
     )
 
+## We need to filter out the actual application source (i.e., implementation
+## files with a ``main()`` function. I use the convention of naming such
+## files with a "_main.cpp" suffix so they can easily be identified.
+INCLUDE(ListFilter)
+list_filter_out(PROJECT_SOURCES "_main.cpp$" ${PROJECT_SOURCES_ALL})
+
+## Set up the following directories on the include path.
 INCLUDE_DIRECTORIES(
   "${PROJECT_BINARY_DIR}"       # to find "version.h"
   "${PROJECT_SOURCE_DIR}/src/colugo-utilities"
   "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary"
-  "${PROJECT_SOURCE_DIR}/src"
+  "${PROJECT_SOURCE_DIR}/src"   # to find "<pstrudel/foo.hpp>"
     )
 
+## The list of implementation files for the test executables that need to be
+## built.
 SET(TEST_TARGET_SOURCES
     src/profile_distances.cpp
     src/profile_generation.cpp
@@ -138,21 +140,17 @@ SET(TEST_TARGET_SOURCES
     src/tree_reader.cpp
     src/tree_splits_distances.cpp)
 
-MESSAGE(STATUS "Adding tests...")
+## For each test source, create the corresponding executable, add it as ##
+## dependency of the ``check`` target, and install it to the test directory.
 FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     get_filename_component(basename ${test_src_file} NAME_WE)
-    MESSAGE(STATUS "Adding test: ${test_src_file} => ${basename}")
     ADD_EXECUTABLE(${basename}
-        # EXCLUDE_FROM_ALL
         ${test_src_file}
         src/testutils.cpp
-        ${PSTRUDEL_SOURCE_FILES}
-        ${COLUGO_SOURCE_FILES}
-        ${PLATYPUS_SOURCE_FILES}
+        ${PROJECT_SOURCES}
         )
     TARGET_LINK_LIBRARIES(${basename} ${NCL_LIBRARIES})
     ADD_DEPENDENCIES(check ${basename})
-    # ADD_TEST(${basename} ${basename})
     INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()
 
