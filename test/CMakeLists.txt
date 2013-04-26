@@ -103,7 +103,6 @@ INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 FILE(GLOB
     PROJECT_SOURCES_ALL
     "../src/pstrudel/*.cpp"
-    "../src/platypus-phyloinformary/platypus/*.cpp"
     "../src/colugo-utilities/colugo/*.cpp"
     )
 
@@ -112,14 +111,6 @@ FILE(GLOB
 ## files with a "_main.cpp" suffix so they can easily be identified.
 INCLUDE(ListFilter)
 list_filter_out(PROJECT_SOURCES "_main.cpp$" ${PROJECT_SOURCES_ALL})
-
-## Set up the following directories on the include path.
-INCLUDE_DIRECTORIES(
-  "${PROJECT_BINARY_DIR}"       # to find "version.h"
-  "${PROJECT_SOURCE_DIR}/src/colugo-utilities"
-  "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary"
-  "${PROJECT_SOURCE_DIR}/src"   # to find "<pstrudel/foo.hpp>"
-    )
 
 ## Create a library directory at configuration time.
 ## Since the libraries will get only installed during the second

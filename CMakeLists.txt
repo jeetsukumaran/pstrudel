@@ -59,7 +59,7 @@ SET(MAIN_PSTRUDEL_SOURCE_DIR
 INCLUDE_DIRECTORIES(
   "${PROJECT_BINARY_DIR}"       # to find "version.h"
   "${PROJECT_SOURCE_DIR}/src/colugo-utilities"
-  "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary"
+  "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary/include"
   "${PROJECT_SOURCE_DIR}/src"
     )
 

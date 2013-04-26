@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <string>
-#include <platypus/ncl_reader.hpp>
+#include <platypus/parse/nclreader.hpp>
 #include <pstrudel/dataio.hpp>
 #include <pstrudel/pairwise_distance_tree.hpp>
 #include "testutils.hpp"
@@ -13,8 +13,8 @@ void test_raw_tree_reader(std::istream& src) {
     std::vector<T> trees;
     std::function<T& ()> tree_factory ( [&trees] () -> T& { trees.emplace_back(); return trees.back(); } );
     platypus::NclTreeReader<T> tree_reader(tree_factory);
-    tree_reader.set_node_value_label_func(&T::value_type::set_label);
-    tree_reader.set_node_value_edge_length_func(&T::value_type::set_edge_length);
+    tree_reader.set_node_label_setter(&T::value_type::set_label);
+    tree_reader.set_edge_length_setter(&T::value_type::set_edge_length);
     tree_reader.read_from_stream(src, DATA_FORMAT);
     for (auto & tree : trees) {
         pstrudel::treeio::write_newick(tree, std::cout);

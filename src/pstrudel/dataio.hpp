@@ -11,7 +11,8 @@
 #include <map>
 #include <ncl/nxsmultiformat.h>
 #include <colugo/utility.hpp>
-#include <platypus/ncl_reader.hpp>
+// #include <platypus/platypus.hpp>
+#include <platypus/parse/nclreader.hpp>
 
 namespace pstrudel {
 
@@ -124,8 +125,8 @@ int read_from_stream(std::vector<TreeT>& trees,
         const std::string& format) {
     std::function<TreeT& ()> tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
     platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_value_label_func(&TreeT::value_type::set_label);
-    tree_reader.set_node_value_edge_length_func(&TreeT::value_type::set_edge_length);
+    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
+    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
     return tree_reader.read_from_stream(src, format);
 
 }
@@ -136,8 +137,8 @@ int read_from_filepath(std::vector<TreeT>& trees,
         const std::string& format) {
     std::function<TreeT& ()>  tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
     platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_value_label_func(&TreeT::value_type::set_label);
-    tree_reader.set_node_value_edge_length_func(&TreeT::value_type::set_edge_length);
+    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
+    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
     return tree_reader.read_from_filepath(filepath, format);
 }
 
@@ -147,8 +148,8 @@ int read_from_string(std::vector<TreeT>& trees,
         const std::string& format) {
     std::function<TreeT& ()> tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
     platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_value_label_func(&TreeT::value_type::set_label);
-    tree_reader.set_node_value_edge_length_func(&TreeT::value_type::set_edge_length);
+    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
+    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
     return tree_reader.read_from_string(str, format);
 }
 

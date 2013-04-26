@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include <colugo/utility.hpp>
-#include <platypus/tree.hpp>
+#include <platypus/platypus.hpp>
 
 namespace pstrudel {
 
