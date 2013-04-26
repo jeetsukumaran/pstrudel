@@ -18,7 +18,6 @@ int main(int argc, const char * argv[]) {
     // bool force_unrooted = false;
     unsigned long num_interpolated_points = 0;
     bool calculate_other_distance_metrics = false;
-    // bool calculate_tree_metrics = false;
     std::string output_prefix = "";
     bool suppress_header_row = false;
     bool quiet = false;
@@ -44,7 +43,7 @@ int main(int argc, const char * argv[]) {
     parser.parse(argc, argv);
 
     // set up logger
-    colugo::Logger logger("pstrudel-pairwise_distance_trees");
+    colugo::Logger logger("pstrudel-trees");
     if (quiet) {
         logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
     } else {
@@ -55,7 +54,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::string> args = parser.get_args();
     std::vector<pstrudel::PairwiseDistanceTree> pairwise_distance_trees;
     if (args.size() == 0) {
-        logger.info("(reading pairwise_distance_trees from standard input)");
+        logger.info("(reading trees from standard input)");
         pstrudel::treeio::read_from_stream(pairwise_distance_trees, std::cin, format);
     } else {
         unsigned file_idx = 1;
@@ -104,11 +103,11 @@ int main(int argc, const char * argv[]) {
         tree.build_profile();
     }
 
-    // calculating distances
+    // calculate pairwise profile distances
     TreeDistanceMatrixType  unweighted_profile_distances;
     TreeDistanceMatrixType  weighted_profile_distances;
     TreeDistanceMatrixType  full_distances;
-    logger.info("Calculating profile distances ...");
+    logger.info("Calculating all pairwise profile distances ...");
     for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size() - 1; ++tree_idx1) {
         auto & tree1 = pairwise_distance_trees[tree_idx1];
         for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < pairwise_distance_trees.size(); ++tree_idx2) {
@@ -119,6 +118,7 @@ int main(int argc, const char * argv[]) {
         }
     }
 
+    // calculate pairwise symmetric distances
     TreeDistanceMatrixType  unlabeled_symmetric_differences;
     if (calculate_other_distance_metrics) {
         logger.info("Calculating other metrics ...");
@@ -143,11 +143,11 @@ int main(int argc, const char * argv[]) {
     if (!suppress_header_row) {
         out << "Tree_i";
         out << "\t" << "Tree_j";
-        out << "\t" << "Unweighted.Profile.Distance";
-        out << "\t" << "Edge.Weighted.Profile.Distance";
-        out << "\t" << "Aggregate.Profile.Distance";
+        out << "\t" << "uw.profile.dist";
+        out << "\t" << "w.profile.dist";
+        out << "\t" << "a.profile.dist";
         if (calculate_other_distance_metrics) {
-            out << "\t" << "Unlabeled.Symmetric.Difference.Sets";
+            out << "\t" << "sym.diff.dist";
         }
         out << std::endl;
     }
