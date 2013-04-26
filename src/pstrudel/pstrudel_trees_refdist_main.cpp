@@ -131,7 +131,7 @@ int main(int argc, const char * argv[]) {
     }
     pstrudel::PairwiseDistanceTree balanced_tree;
     build_maximally_balanced_tree(balanced_tree, leaves.begin(), leaves.end());
-    auto newick_writer1 =  get_newick_writer<pstrudel::PairwiseDistanceTree>();
+    auto newick_writer1 =  get_newick_writer<pstrudel::PairwiseDistanceTree>(false);
     std::ostringstream balanced_tree_newick;
     newick_writer1.write_tree(balanced_tree, balanced_tree_newick);
     logger.info("Balanced tree: ", balanced_tree_newick.str());
@@ -139,6 +139,7 @@ int main(int argc, const char * argv[]) {
     if (num_interpolated_points == 0) {
         balanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
     }
+    balanced_tree.build_profile();
 
     leaves.clear();
     logger.info("Generating unbalanced tree ..");
@@ -154,11 +155,14 @@ int main(int argc, const char * argv[]) {
     if (num_interpolated_points == 0) {
         unbalanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
     }
+    unbalanced_tree.build_profile();
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     // calculate pairwise profile distances
     TreeReferenceDistanceType  balanced_tree_profile_distances;
     TreeReferenceDistanceType  unbalanced_tree_profile_distances;
-    logger.info("Calculating all pairwise profile distances ...");
+    logger.info("Calculating profile distances to reference trees ...");
     for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size(); ++tree_idx1) {
         auto & tree1 = pairwise_distance_trees[tree_idx1];
         balanced_tree_profile_distances[tree_idx1] = tree1.get_unweighted_subprofile_distance(balanced_tree);
@@ -195,33 +199,29 @@ int main(int argc, const char * argv[]) {
     //     }
     // }
 
-    // std::ostream& out = std::cout;
-    // if (!suppress_header_row) {
-    //     out << "Tree_i";
-    //     out << "\t" << "Tree_j";
-    //     out << "\t" << "Unweighted.Profile.Distance";
-    //     out << "\t" << "Edge.Weighted.Profile.Distance";
-    //     out << "\t" << "Aggregate.Profile.Distance";
-    //     if (calculate_other_distance_metrics) {
-    //         out << "\t" << "Unlabeled.Symmetric.Difference.Sets";
-    //     }
-    //     out << std::endl;
-    // }
+    std::ostream& out = std::cout;
+    if (!suppress_header_row) {
+        out << "Tree";
+        out << "\t" << "profile.dist.to.balanced.tree";
+        out << "\t" << "profile.dist.to.unbalanced.tree";
+        if (calculate_other_distance_metrics) {
+            out << "\t" << "sym.diff.dist.to.balanced.tree";
+            out << "\t" << "sym.diff.dist.to.unbalanced.tree";
+        }
+        out << std::endl;
+    }
 
-    // unsigned long num_trees = pairwise_distance_trees.size();
-    // for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
-    //     for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
-    //         out << tree_idx1 + 1;
-    //         out << "\t" << tree_idx2 + 1;
-    //         out << "\t" << std::setprecision(20) << unweighted_profile_distances[tree_idx1][tree_idx2];
-    //         out << "\t" << std::setprecision(20) << weighted_profile_distances[tree_idx1][tree_idx2];
-    //         out << "\t" << std::setprecision(20) << full_distances[tree_idx1][tree_idx2];
-    //         if (calculate_other_distance_metrics) {
-    //             out << "\t" << unlabeled_symmetric_differences[tree_idx1][tree_idx2];
-    //         }
-    //         out << std::endl;
-    //     }
-    // }
+    unsigned long num_trees = pairwise_distance_trees.size();
+    for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees; ++tree_idx1) {
+        out << tree_idx1 + 1;
+        out << "\t" << std::setprecision(20) << balanced_tree_profile_distances[tree_idx1];
+        out << "\t" << std::setprecision(20) << unbalanced_tree_profile_distances[tree_idx1];
+        if (calculate_other_distance_metrics) {
+            // out << "\t" << balanced_tree_profile_distances[tree_idx1];
+            // out << "\t" << unbalanced_tree_profile_distances[tree_idx1];
+        }
+        out << std::endl;
+    }
 
 }
 

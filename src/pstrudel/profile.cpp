@@ -137,9 +137,11 @@ double Profile::sum_of_squares(const Profile& other, const std::string& subprofi
     auto sp_pair2 = other.subprofiles_.find(subprofile_id);
     if (sp_pair1 == this->subprofiles_.end()) {
         colugo::colugo_abort("Subprofile '", subprofile_id, "' not found");
+        exit(1);
     }
     if (sp_pair2 == other.subprofiles_.end()) {
         colugo::colugo_abort("Subprofile '", subprofile_id, "' not found");
+        exit(1);
     }
     auto & subprofile1 = sp_pair1->second;
     auto & subprofile2 = sp_pair2->second;
