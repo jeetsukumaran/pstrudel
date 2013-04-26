@@ -4,6 +4,7 @@
 #include <colugo/logger.hpp>
 #include <colugo/textutil.hpp>
 #include <platypus/model/archetypaltree.hpp>
+#include <platypus/serialize/newick.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pairwise_distance_tree.hpp"
@@ -11,6 +12,17 @@
 #include "pstrudel.hpp"
 
 typedef std::map<unsigned long, double> TreeReferenceDistanceType;
+
+template <class TreeT>
+platypus::NewickWriter<TreeT> get_newick_writer(bool include_edge_lengths=true) {
+    platypus::NewickWriter<TreeT>  newick_writer;
+    newick_writer.set_tree_is_rooted_getter([](const TreeT & tree)->bool {return tree.is_rooted();} );
+    newick_writer.set_node_label_getter([](const typename TreeT::value_type & nv)->std::string {return nv.get_label();} );
+    if (include_edge_lengths) {
+        newick_writer.set_edge_length_getter([](const typename TreeT::value_type & nv)->double {return nv.get_edge_length();} );
+    }
+    return newick_writer;
+}
 
 int main(int argc, const char * argv[]) {
     std::string prog_id = pstrudel::get_program_identification("PSTRUDEL-TREES-REFDIST").c_str();
@@ -119,9 +131,10 @@ int main(int argc, const char * argv[]) {
     }
     pstrudel::PairwiseDistanceTree balanced_tree;
     build_maximally_balanced_tree(balanced_tree, leaves.begin(), leaves.end());
-    // std::ostringstream balanced_tree_newick;
-    // pstrudel::treeio::write_nexus(balanced_tree, balanced_tree_newick, false);
-    // logger.info("Balanced tree: ", balanced_tree_newick.str());
+    auto newick_writer1 =  get_newick_writer<pstrudel::PairwiseDistanceTree>();
+    std::ostringstream balanced_tree_newick;
+    newick_writer1.write_tree(balanced_tree, balanced_tree_newick);
+    logger.info("Balanced tree: ", balanced_tree_newick.str());
     balanced_tree.calc_profile_metrics();
     if (num_interpolated_points == 0) {
         balanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
@@ -134,9 +147,9 @@ int main(int argc, const char * argv[]) {
     }
     pstrudel::PairwiseDistanceTree unbalanced_tree;
     build_maximally_unbalanced_tree(unbalanced_tree, leaves.begin(), leaves.end());
-    // std::ostringstream unbalanced_tree_newick;
-    // pstrudel::treeio::write_nexus(unbalanced_tree, unbalanced_tree_newick, false);
-    // logger.info("Balanced tree: ", unbalanced_tree_newick.str());
+    std::ostringstream unbalanced_tree_newick;
+    newick_writer1.write_tree(unbalanced_tree, unbalanced_tree_newick);
+    logger.info("Unbalanced tree: ", unbalanced_tree_newick.str());
     unbalanced_tree.calc_profile_metrics();
     if (num_interpolated_points == 0) {
         unbalanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
