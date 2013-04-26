@@ -30,6 +30,7 @@ int main(int argc, const char * argv[]) {
     // bool force_rooted = false;
     // bool force_unrooted = false;
     unsigned long num_interpolated_points = 0;
+    bool exclude_distance_between_reference_trees = false;
     bool calculate_other_distance_metrics = false;
     std::string output_prefix = "";
     bool suppress_header_row = false;
@@ -129,33 +130,33 @@ int main(int argc, const char * argv[]) {
     for (unsigned long i = 0; i < num_leaves; ++i) {
         leaves.emplace_back();
     }
-    pstrudel::PairwiseDistanceTree balanced_tree;
-    build_maximally_balanced_tree(balanced_tree, leaves.begin(), leaves.end());
+    pstrudel::PairwiseDistanceTree balanced_tree_pwd;
+    build_maximally_balanced_tree(balanced_tree_pwd, leaves.begin(), leaves.end());
     auto newick_writer1 =  get_newick_writer<pstrudel::PairwiseDistanceTree>(false);
     std::ostringstream balanced_tree_newick;
-    newick_writer1.write_tree(balanced_tree, balanced_tree_newick);
+    newick_writer1.write_tree(balanced_tree_pwd, balanced_tree_newick);
     logger.info("Balanced tree: ", balanced_tree_newick.str());
-    balanced_tree.calc_profile_metrics();
+    balanced_tree_pwd.calc_profile_metrics();
     if (num_interpolated_points == 0) {
-        balanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
+        balanced_tree_pwd.set_num_interpolated_profile_points(global_num_interpolated_points);
     }
-    balanced_tree.build_profile();
+    balanced_tree_pwd.build_profile();
 
     leaves.clear();
     logger.info("Generating unbalanced tree ..");
     for (unsigned long i = 0; i < num_leaves; ++i) {
         leaves.emplace_back();
     }
-    pstrudel::PairwiseDistanceTree unbalanced_tree;
-    build_maximally_unbalanced_tree(unbalanced_tree, leaves.begin(), leaves.end());
+    pstrudel::PairwiseDistanceTree unbalanced_tree_pwd;
+    build_maximally_unbalanced_tree(unbalanced_tree_pwd, leaves.begin(), leaves.end());
     std::ostringstream unbalanced_tree_newick;
-    newick_writer1.write_tree(unbalanced_tree, unbalanced_tree_newick);
+    newick_writer1.write_tree(unbalanced_tree_pwd, unbalanced_tree_newick);
     logger.info("Unbalanced tree: ", unbalanced_tree_newick.str());
-    unbalanced_tree.calc_profile_metrics();
+    unbalanced_tree_pwd.calc_profile_metrics();
     if (num_interpolated_points == 0) {
-        unbalanced_tree.set_num_interpolated_profile_points(global_num_interpolated_points);
+        unbalanced_tree_pwd.set_num_interpolated_profile_points(global_num_interpolated_points);
     }
-    unbalanced_tree.build_profile();
+    unbalanced_tree_pwd.build_profile();
     //
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -165,39 +166,31 @@ int main(int argc, const char * argv[]) {
     logger.info("Calculating profile distances to reference trees ...");
     for (unsigned long tree_idx1 = 0; tree_idx1 < pairwise_distance_trees.size(); ++tree_idx1) {
         auto & tree1 = pairwise_distance_trees[tree_idx1];
-        balanced_tree_profile_distances[tree_idx1] = tree1.get_unweighted_subprofile_distance(balanced_tree);
-        unbalanced_tree_profile_distances[tree_idx1] = tree1.get_unweighted_subprofile_distance(unbalanced_tree);
-        // for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < pairwise_distance_trees.size(); ++tree_idx2) {
-        //     auto & tree2 = pairwise_distance_trees[tree_idx2];
-        //     unweighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_unweighted_subprofile_distance(tree2);
-        //     weighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_weighted_subprofile_distance(tree2);
-        //     full_distances[tree_idx1][tree_idx2] = tree1.get_distance(tree2);
-        // }
+        balanced_tree_profile_distances[tree_idx1] = tree1.get_unweighted_subprofile_distance(balanced_tree_pwd);
+        unbalanced_tree_profile_distances[tree_idx1] = tree1.get_unweighted_subprofile_distance(unbalanced_tree_pwd);
     }
 
     // calculate pairwise symmetric distances
-    // TreeReferenceDistanceType  balanced_tree_symdiff_distances;
-    // TreeReferenceDistanceType  unbalanced_tree_symdiff_distances;
-    // if (calculate_other_distance_metrics) {
-    //     logger.info("Calculating other metrics ...");
-    //     std::vector<pstrudel::SymmetricDifferenceTree> symmetric_difference_trees;
-    //     symmetric_difference_trees.reserve(pairwise_distance_trees.size());
-    //     for (auto & tree1 : pairwise_distance_trees) {
-    //         symmetric_difference_trees.emplace_back(tree1);
-    //         auto & sd_tree = symmetric_difference_trees.back();
-    //         sd_tree.calc_subtree_sizes();
-    //     }
-    //     COLUGO_ASSERT(symmetric_difference_trees.size() == pairwise_distance_trees.size());
-    //     for (unsigned long tree_idx1 = 0; tree_idx1 < symmetric_difference_trees.size(); ++tree_idx1) {
-    //         auto & tree1 = symmetric_difference_trees[tree_idx1];
-    //         balanced_tree_symdiff_distances[tree_idx1] = calc_leaf_set_sizes_unlabeled_symmetric_difference(balanced_tree2);
-    //         unbalanced_tree_symdiff_distances[tree_idx1] = calc_leaf_set_sizes_unlabeled_symmetric_difference(unbalanced_tree2);
-    //         // for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < symmetric_difference_trees.size(); ++tree_idx2) {
-    //         //     auto & tree2 = symmetric_difference_trees[tree_idx2];
-    //         //     unlabeled_symmetric_differences[tree_idx1][tree_idx2] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(tree2);
-    //         // }
-    //     }
-    // }
+    TreeReferenceDistanceType  balanced_tree_symdiff_distances;
+    TreeReferenceDistanceType  unbalanced_tree_symdiff_distances;
+    pstrudel::SymmetricDifferenceTree balanced_tree_symd(balanced_tree_pwd);
+    pstrudel::SymmetricDifferenceTree unbalanced_tree_symd(unbalanced_tree_pwd);
+    if (calculate_other_distance_metrics) {
+        logger.info("Calculating other metrics ...");
+        std::vector<pstrudel::SymmetricDifferenceTree> symmetric_difference_trees;
+        symmetric_difference_trees.reserve(pairwise_distance_trees.size());
+        for (auto & tree1 : pairwise_distance_trees) {
+            symmetric_difference_trees.emplace_back(tree1);
+            auto & sd_tree = symmetric_difference_trees.back();
+            sd_tree.calc_subtree_sizes();
+        }
+        COLUGO_ASSERT(symmetric_difference_trees.size() == pairwise_distance_trees.size());
+        for (unsigned long tree_idx1 = 0; tree_idx1 < symmetric_difference_trees.size(); ++tree_idx1) {
+            auto & tree1 = symmetric_difference_trees[tree_idx1];
+            balanced_tree_symdiff_distances[tree_idx1] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(balanced_tree_symd);
+            unbalanced_tree_symdiff_distances[tree_idx1] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(unbalanced_tree_symd);
+        }
+    }
 
     std::ostream& out = std::cout;
     if (!suppress_header_row) {
@@ -211,14 +204,30 @@ int main(int argc, const char * argv[]) {
         out << std::endl;
     }
 
+    // print distance between reference trees
+    if (!exclude_distance_between_reference_trees) {
+        out << "-1";
+        out << "\t" << std::setprecision(20) << balanced_tree_pwd.get_unweighted_subprofile_distance(balanced_tree_pwd);
+        out << "\t" << std::setprecision(20) << balanced_tree_pwd.get_unweighted_subprofile_distance(unbalanced_tree_pwd);
+        if (calculate_other_distance_metrics) {
+            out << "\t" << std::setprecision(20) << balanced_tree_symd.calc_leaf_set_sizes_unlabeled_symmetric_difference(balanced_tree_symd);
+            out << "\t" << std::setprecision(20) << balanced_tree_symd.calc_leaf_set_sizes_unlabeled_symmetric_difference(unbalanced_tree_symd);
+        }
+        out << std::endl;
+        // out << "-2";
+        // out << "\t" << std::setprecision(20) << unbalanced_tree_pwd.get_unweighted_subprofile_distance(balanced_tree_pwd);
+        // out << "\t" << std::setprecision(20) << unbalanced_tree_pwd.get_unweighted_subprofile_distance(unbalanced_tree_pwd);
+        // out << std::endl;
+    }
+
     unsigned long num_trees = pairwise_distance_trees.size();
     for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees; ++tree_idx1) {
         out << tree_idx1 + 1;
         out << "\t" << std::setprecision(20) << balanced_tree_profile_distances[tree_idx1];
         out << "\t" << std::setprecision(20) << unbalanced_tree_profile_distances[tree_idx1];
         if (calculate_other_distance_metrics) {
-            // out << "\t" << balanced_tree_profile_distances[tree_idx1];
-            // out << "\t" << unbalanced_tree_profile_distances[tree_idx1];
+            out << "\t" << balanced_tree_symdiff_distances[tree_idx1];
+            out << "\t" << unbalanced_tree_symdiff_distances[tree_idx1];
         }
         out << std::endl;
     }
