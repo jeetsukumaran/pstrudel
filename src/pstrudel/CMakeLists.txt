@@ -6,10 +6,9 @@ SET(COLUGO_SOURCES
    ../colugo-utilities/colugo/utility.cpp)
 SET(PSTRUDEL_MAIN_LIB_SOURCES
     character.cpp
-    pairwise_distance_tree.cpp
+    distancetree.cpp
     profile.cpp
-    split.cpp
-    symmetric_difference_tree.cpp)
+    split.cpp)
 SET(PSTRUDEL_MAIN_PROG_SOURCES
     pstrudel_trees_main.cpp
     pstrudel_trees_refdist_main.cpp)

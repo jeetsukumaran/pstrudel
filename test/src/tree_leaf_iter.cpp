@@ -2,11 +2,11 @@
 #include <iostream>
 #include <string>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/pairwise_distance_tree.hpp>
+#include <pstrudel/distancetree.hpp>
 #include "testutils.hpp"
 
 int main(int argc, const char * argv[]) {
-    std::vector<pstrudel::PairwiseDistanceTree> trees;
+    std::vector<pstrudel::DistanceTree> trees;
     get_trees(trees, argc, argv);
     for (auto & tree : trees) {
         int leaf_count = 0;

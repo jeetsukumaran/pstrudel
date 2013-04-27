@@ -3,12 +3,12 @@
 #include <string>
 #include <iomanip>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/pairwise_distance_tree.hpp>
+#include <pstrudel/distancetree.hpp>
 #include <pstrudel/split.hpp>
 #include "testutils.hpp"
 
 int main(int argc, const char * argv[]) {
-    typedef pstrudel::PairwiseDistanceTree TreeType;
+    typedef pstrudel::DistanceTree TreeType;
     pstrudel::TreeComparisonCalculator<TreeType> tree_calc;
     std::vector<TreeType> trees;
     get_trees(trees, argc, argv);

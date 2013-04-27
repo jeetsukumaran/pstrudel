@@ -4,11 +4,11 @@
 #include <iomanip>
 #include <unordered_set>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/symmetric_difference_tree.hpp>
+#include <pstrudel/distancetree.hpp>
 #include "testutils.hpp"
 
 int main(int argc, const char * argv[]) {
-    typedef pstrudel::SymmetricDifferenceTree TreeType;
+    typedef pstrudel::DistanceTree TreeType;
     auto & out = std::cout;
     std::vector<TreeType> trees;
     get_trees(trees, argc, argv);

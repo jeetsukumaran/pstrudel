@@ -6,7 +6,7 @@
 #include <string>
 #include <sstream>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/pairwise_distance_tree.hpp>
+#include <pstrudel/distancetree.hpp>
 #include <pstrudel/split.hpp>
 
 template <class TreeT>

@@ -3,7 +3,7 @@
 #include <string>
 #include <platypus/parse/nclreader.hpp>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/pairwise_distance_tree.hpp>
+#include <pstrudel/distancetree.hpp>
 #include "testutils.hpp"
 
 const char * DATA_FORMAT = "nexus";
@@ -37,7 +37,7 @@ int main(int argc, const char * argv[]) {
     // 3    -   TreePointerVectorReader, nodes: custom
 
     if (code_branch == 0) {
-        test_raw_tree_reader<pstrudel::PairwiseDistanceTree>(src);
+        test_raw_tree_reader<pstrudel::DistanceTree>(src);
     // } else if (code_branch == 1) {
     // } else if (code_branch == 2) {
     // } else if (code_branch == 3) {

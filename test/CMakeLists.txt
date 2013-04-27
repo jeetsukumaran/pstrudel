@@ -147,7 +147,6 @@ SET(TEST_TARGET_SOURCES
     src/read_dna_sequences.cpp
     src/read_tree.cpp
     src/set_value_symmetric_difference.cpp
-    src/subtree_clade_sizes.cpp
     src/subtree_leaf_set_sizes.cpp
     src/tree_child_iter.cpp
     src/tree_copy.cpp

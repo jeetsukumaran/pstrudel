@@ -820,41 +820,41 @@ class TestRunner(object):
             return self.fail("Expecting {} leaf set sizes but found {}".format(len(exp_subtree_leaf_set_sizes), len(obs_rows)))
         return TestRunner.PASS
 
-    def test_tree_subtree_clade_sizes(self):
-        treefile = os.path.join(self.data_dir, "general", "pythonidae.postorder.newick")
-        # treefile = os.path.join(self.data_dir, "general", os.path.expanduser("~/Scratch/x.tre"))
-        self.execute_test("subtree_clade_sizes",
-                [treefile, "newick"])
-        if self.test_retcode != 0:
-            return TestRunner.ERROR
-        tree = dendropy.Tree.get_from_path(treefile, "newick")
-        internal_nodes = tree.internal_nodes()
-        exp_subtree_clade_sizes = {}
-        for nd in internal_nodes:
-            nd_count = -1 # adjust for top node being counted in iteration
-            for nd in nd.postorder_iter():
-                nd_count += 1
-            exp_subtree_clade_sizes[nd.label] = nd_count
-        obs_subtree_clade_sizes = {}
-        obs_rows = self.test_stdout.split("\n")
-        for row in obs_rows:
-            if not row:
-                obs_rows.remove(row)
-                continue
-            obs_cols = row.split("\t")
-            label = obs_cols[0]
-            sz1 = int(obs_cols[1])
-            if label not in exp_subtree_clade_sizes:
-                return self.fail("Unexpected node: '{}'".format(label))
-            exp_sz = exp_subtree_clade_sizes[label]
-            if exp_sz != sz1:
-                return self.fail("External check mismatch in clade size: '{}': expecting {} but found {}".format(label, exp_sz, sz1))
-                # print
-                # print self.test_stdout
-                # print tree.as_ascii_plot(show_internal_node_labels=True)
-        if len(obs_rows) != len(exp_subtree_clade_sizes):
-            return self.fail("Expecting {} clade sizes but found {}".format(len(exp_subtree_clade_sizes), len(obs_rows)))
-        return TestRunner.PASS
+    # def test_tree_subtree_clade_sizes(self):
+    #     treefile = os.path.join(self.data_dir, "general", "pythonidae.postorder.newick")
+    #     # treefile = os.path.join(self.data_dir, "general", os.path.expanduser("~/Scratch/x.tre"))
+    #     self.execute_test("subtree_clade_sizes",
+    #             [treefile, "newick"])
+    #     if self.test_retcode != 0:
+    #         return TestRunner.ERROR
+    #     tree = dendropy.Tree.get_from_path(treefile, "newick")
+    #     internal_nodes = tree.internal_nodes()
+    #     exp_subtree_clade_sizes = {}
+    #     for nd in internal_nodes:
+    #         nd_count = -1 # adjust for top node being counted in iteration
+    #         for nd in nd.postorder_iter():
+    #             nd_count += 1
+    #         exp_subtree_clade_sizes[nd.label] = nd_count
+    #     obs_subtree_clade_sizes = {}
+    #     obs_rows = self.test_stdout.split("\n")
+    #     for row in obs_rows:
+    #         if not row:
+    #             obs_rows.remove(row)
+    #             continue
+    #         obs_cols = row.split("\t")
+    #         label = obs_cols[0]
+    #         sz1 = int(obs_cols[1])
+    #         if label not in exp_subtree_clade_sizes:
+    #             return self.fail("Unexpected node: '{}'".format(label))
+    #         exp_sz = exp_subtree_clade_sizes[label]
+    #         if exp_sz != sz1:
+    #             return self.fail("External check mismatch in clade size: '{}': expecting {} but found {}".format(label, exp_sz, sz1))
+    #             # print
+    #             # print self.test_stdout
+    #             # print tree.as_ascii_plot(show_internal_node_labels=True)
+    #     if len(obs_rows) != len(exp_subtree_clade_sizes):
+    #         return self.fail("Expecting {} clade sizes but found {}".format(len(exp_subtree_clade_sizes), len(obs_rows)))
+    #     return TestRunner.PASS
 
     def run(self):
         tests_to_run = []
