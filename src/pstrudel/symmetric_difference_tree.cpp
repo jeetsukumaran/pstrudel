@@ -9,7 +9,7 @@ SymmetricDifferenceTree::SymmetricDifferenceTree() {
 }
 
 SymmetricDifferenceTree::SymmetricDifferenceTree(const SymmetricDifferenceTree & other)
-    : BasicTree<SymmetricDifferenceNodeValue>(other)
+    : platypus::StandardTree<SymmetricDifferenceNodeValue>(other)
       , subtree_leaf_set_sizes_(other.subtree_leaf_set_sizes_)
       , subtree_clade_sizes_(other.subtree_clade_sizes_) {
 }

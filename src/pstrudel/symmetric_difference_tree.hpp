@@ -2,14 +2,14 @@
 #define PSTRUDEL_SYMMETRIC_DISTANCE_TREE_HPP
 
 #include <unordered_set>
-#include "basic_tree.hpp"
+#include <platypus/model/standardtree.hpp>
 
 namespace pstrudel {
 
 ///////////////////////////////////////////////////////////////////////////////
 // SymmetricDifferenceNodeValue
 
-class SymmetricDifferenceNodeValue : public BasicNodeValue {
+class SymmetricDifferenceNodeValue : public platypus::StandardNodeValue {
     public:
         SymmetricDifferenceNodeValue()
             : num_leaves_(0)
@@ -42,7 +42,7 @@ class SymmetricDifferenceNodeValue : public BasicNodeValue {
 ///////////////////////////////////////////////////////////////////////////////
 // SymmetricDifferenceTree
 
-class SymmetricDifferenceTree : public BasicTree<SymmetricDifferenceNodeValue> {
+class SymmetricDifferenceTree : public platypus::StandardTree<SymmetricDifferenceNodeValue> {
 
     public:
         typedef std::unordered_multiset<unsigned long> SizesSetType;
@@ -51,7 +51,7 @@ class SymmetricDifferenceTree : public BasicTree<SymmetricDifferenceNodeValue> {
         SymmetricDifferenceTree();
         SymmetricDifferenceTree(const SymmetricDifferenceTree & other);
         template <class T> SymmetricDifferenceTree(const T & other)
-            : BasicTree<SymmetricDifferenceNodeValue>(other) {
+            : platypus::StandardTree<SymmetricDifferenceNodeValue>(other) {
         }
         void calc_subtree_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmetricDifferenceTree & other);

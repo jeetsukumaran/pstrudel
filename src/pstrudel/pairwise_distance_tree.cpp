@@ -8,11 +8,11 @@ namespace pstrudel {
 // PairwiseDistanceTree
 
 PairwiseDistanceTree::PairwiseDistanceTree(bool is_rooted)
-        : BasicTree(is_rooted) {
+        : platypus::StandardTree<PairwiseDistanceNodeValue>(is_rooted) {
 }
 
 PairwiseDistanceTree::PairwiseDistanceTree(PairwiseDistanceTree && other)
-        : BasicTree(other)
+        : platypus::StandardTree<PairwiseDistanceNodeValue>(other)
           , weighted_pairwise_tip_distance_(std::move(other.weighted_pairwise_tip_distance_))
           , unweighted_pairwise_tip_distance_(std::move(other.unweighted_pairwise_tip_distance_))
           , total_tree_length_(other.total_tree_length_)
@@ -21,7 +21,7 @@ PairwiseDistanceTree::PairwiseDistanceTree(PairwiseDistanceTree && other)
 }
 
 PairwiseDistanceTree::PairwiseDistanceTree(const PairwiseDistanceTree & other)
-        : BasicTree(other)
+        : platypus::StandardTree<PairwiseDistanceNodeValue>(other)
           , weighted_pairwise_tip_distance_(other.weighted_pairwise_tip_distance_)
           , unweighted_pairwise_tip_distance_(other.unweighted_pairwise_tip_distance_)
           , total_tree_length_(other.total_tree_length_)
@@ -30,7 +30,7 @@ PairwiseDistanceTree::PairwiseDistanceTree(const PairwiseDistanceTree & other)
 }
 
 PairwiseDistanceTree & PairwiseDistanceTree::operator=(const PairwiseDistanceTree & other) {
-    BasicTree::operator=(other);
+    platypus::StandardTree<PairwiseDistanceNodeValue>::operator=(other);
     this->weighted_pairwise_tip_distance_ = other.weighted_pairwise_tip_distance_;
     this->unweighted_pairwise_tip_distance_ = other.unweighted_pairwise_tip_distance_;
     this->total_tree_length_ = other.total_tree_length_;

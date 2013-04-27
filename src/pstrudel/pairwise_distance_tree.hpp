@@ -10,7 +10,7 @@
 #include <map>
 #include <set>
 #include <colugo/utility.hpp>
-#include "basic_tree.hpp"
+#include <platypus/model/standardtree.hpp>
 #include "profile.hpp"
 
 namespace pstrudel {
@@ -18,26 +18,25 @@ namespace pstrudel {
 ////////////////////////////////////////////////////////////////////////////////
 // PairwiseDistanceNodeValue
 
-class PairwiseDistanceNodeValue : public BasicNodeValue {
+class PairwiseDistanceNodeValue : public platypus::StandardNodeValue {
     public:
-        PairwiseDistanceNodeValue(int index = -1)
-            : BasicNodeValue(0.0) {
+        PairwiseDistanceNodeValue(int index = -1) {
         }
         PairwiseDistanceNodeValue(PairwiseDistanceNodeValue&& other)
-            : BasicNodeValue(std::move(other))
+            : platypus::StandardNodeValue(std::move(other))
               , desc_path_lens_(std::move(other.desc_path_lens_)) {
         }
         PairwiseDistanceNodeValue(const PairwiseDistanceNodeValue& other)
-            : BasicNodeValue(other)
+            : platypus::StandardNodeValue(other)
               , desc_path_lens_(other.desc_path_lens_) {
         }
         PairwiseDistanceNodeValue& operator=(const PairwiseDistanceNodeValue& other) {
-            BasicNodeValue::operator=(other);
+            platypus::StandardNodeValue::operator=(other);
             this->desc_path_lens_ = other.desc_path_lens_;
             return *this;
         }
         void clear() override {
-            BasicNodeValue::clear();
+            platypus::StandardNodeValue::clear();
             this->desc_path_lens_.clear();
         }
         void set_desc_path_len(PairwiseDistanceNodeValue & nd, double len, unsigned long step_count) {
@@ -57,15 +56,13 @@ class PairwiseDistanceNodeValue : public BasicNodeValue {
         }
     private:
         int             index_;
-        double          edge_length_;
-        std::string     label_;
         std::map<PairwiseDistanceNodeValue *, std::pair<double, unsigned long>>    desc_path_lens_;
 }; // PairwiseDistanceNodeValue
 
 ////////////////////////////////////////////////////////////////////////////////
 // PairwiseDistanceTree
 
-class PairwiseDistanceTree : public BasicTree<PairwiseDistanceNodeValue> {
+class PairwiseDistanceTree : public platypus::StandardTree<PairwiseDistanceNodeValue> {
 
     public:
         const char * UNWEIGHTED_PAIRWISE_TIP = "unweighted pairwise tip";
