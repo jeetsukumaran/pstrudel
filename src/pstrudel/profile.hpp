@@ -44,6 +44,9 @@ class Profile {
             // store raw data as profile for `n` points
             auto & default_profile = this->interpolated_profiles_[this->raw_data_.size()];
             default_profile.insert(this->raw_data_.end(), src_begin, src_end);
+            if (this->fixed_size_ > 0 && this->fixed_size_ != this->raw_data_.size()) {
+                this->build_interpolated_profile(this->fixed_size_);
+            }
         }
 
         double get_distance(Profile & other);
