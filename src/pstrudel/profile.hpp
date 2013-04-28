@@ -25,10 +25,11 @@ class Profile {
                 Profile::InterpolationMethod interpolation_method=Profile::InterpolationMethod::PIECEWISE_LINEAR);
 
         template <class iterator>
-        void add_raw_data(
+        void set_raw_data(
                 iterator src_begin,
                 iterator src_end,
                 bool sort=true) {
+            this->raw_data_.clear();
             this->interpolate_profiles_.clear();
             this->raw_data_.insert(this->raw_data_.end(), src_begin, src_end);
             if (this->fixed_size_ > 0 && this->raw_data.size() > this->fixed_size_) {
