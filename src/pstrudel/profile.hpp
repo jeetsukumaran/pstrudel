@@ -32,12 +32,13 @@ class Profile {
             this->raw_data_.clear();
             this->interpolate_profiles_.clear();
             this->raw_data_.insert(this->raw_data_.end(), src_begin, src_end);
-            if (this->fixed_size_ > 0 && this->raw_data.size() > this->fixed_size_) {
+            if (this->fixed_size_ > 0 && (this->raw_data.size() > this->fixed_size_)) {
                 colugo::colugo_abort("Profile is fixed to ",
                         this->fixed_size_,
                         "but trying to add ",
                         this->raw_data_.size(),
                         " points as raw data");
+                exit(1);
             }
             if (sort) {
                 std::sort(this->raw_data_.begin(), this->raw_data_.end());
@@ -50,10 +51,11 @@ class Profile {
             }
         }
 
-        double get_distance(Profile & other);
-
+        double get_distance(Profile & other, bool normalize);
 
     private:
+        double calc_distance(Profile & other, unsigned long profile_size);
+        unsigned long get_profile_comparison_size(Profile & other);
         void build_interpolated_profile(unsigned long profile_size);
         static void interpolate_flat(std::vector<double> & subprofile, double value, unsigned long num_points);
         static void interpolate_linear(std::vector<double> & subprofile, double x1, double y1, double y2, unsigned long num_points, unsigned long max_points=0);

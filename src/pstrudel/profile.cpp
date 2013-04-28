@@ -18,7 +18,35 @@ void Profile::clear() {
     this->interpolated_profiles_.clear();
 }
 
-double Profile::get_distance(Profile & other) {
+double Profile::get_distance(Profile & other, bool normalize) {
+    unsigned long profile_size = this->get_profile_comparison_size(other);
+    double dist = this->calc_distance(other, profile_size);
+    if (normalize) {
+        return dist/profile_size;
+    } else {
+        return dist;
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
+// Profile (protected/private)
+
+double Profile::calc_distance(Profile & other, unsigned long profile_size) {
+    auto v1_iter = this->interpolated_profiles_.find(profile_size);
+    if (v1_iter == this->interpolated_profiles_.end()) {
+        this->build_interpolated_profile(profile_size);
+    }
+    auto v2_iter = other.interpolated_profiles_.find(profile_size);
+    if (v2_iter == other.interpolated_profiles_.end()) {
+        other.build_interpolated_profile(profile_size);
+    }
+    auto & v1 = this->interpolated_profiles_[profile_size];
+    auto & v2 = other.interpolated_profiles_[profile_size];
+    return Profile::calc_euclidean_distance(v1, v2);
+}
+
+
+unsigned long get_profile_comparison_size(Profile & other) {
     unsigned long profile_size = 0;
     if (this->fixed_size_ > 0 && other.fixed_size_ > 0) {
         // fixed size profiles
@@ -49,25 +77,10 @@ double Profile::get_distance(Profile & other) {
     } else {
         profile_size = std::max(this->raw_data_.size(), other.raw_data_.size());
     }
-    auto v1_iter = this->interpolated_profiles_.find(profile_size);
-    if (v1_iter == this->interpolated_profiles_.end()) {
-        this->build_interpolated_profile(profile_size);
-    }
-    auto v2_iter = other.interpolated_profiles_.find(profile_size);
-    if (v2_iter == other.interpolated_profiles_.end()) {
-        other.build_interpolated_profile(profile_size);
-    }
-    auto & v1 = this->interpolated_profiles_[profile_size];
-    auto & v2 = other.interpolated_profiles_[profile_size];
-    return Profile::calc_euclidean_distance(v1, v2);
+    return profile_size;
 }
 
-
-//////////////////////////////////////////////////////////////////////////////
-// Profile (protected/private)
-
-void Profile::build_interpolated_profile(
-        unsigned long profile_size) {
+void Profile::build_interpolated_profile(unsigned long profile_size) {
     std::vector<double> & interpolated_profile = this->interpolated_profiles_[profile_size];
     interpolated_profile.clear();
     unsigned long raw_data_size = raw_data_vector.size();
