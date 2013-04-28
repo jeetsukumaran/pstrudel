@@ -81,16 +81,32 @@
 ##############################################################################
 ## Specify the test directory
 SET(TEST_DIR "${PROJECT_BINARY_DIR}/test")
+INCLUDE_DIRECTORIES(
+  "${PROJECT_SOURCE_DIR}/src" # to find pstrudel/foo.hpp
+)
 
 ##############################################################################
 ## Install test driver script and data, and run test driver as target of
 ## ``make check``
-ADD_CUSTOM_TARGET(check
-    COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
-    COMMAND python "${TEST_DIR}/run-tests.py"
-    )
-INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
-INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
+
+# ADD_CUSTOM_TARGET(check
+#     COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
+#     COMMAND python "${TEST_DIR}/run-tests.py"
+#     )
+IF(CMAKE_CONFIGURATION_TYPES)
+    ADD_CUSTOM_TARGET(check
+        COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
+        COMMAND ${CMAKE_CTEST_COMMAND}
+            --force-new-ctest-process --output-on-failure
+            --build-config "$<CONFIGURATION>")
+ELSE()
+    ADD_CUSTOM_TARGET(check
+        COMMAND ${CMAKE_COMMAND} -D COMPONENT=testsuite -P cmake_install.cmake
+        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
+ENDIF()
+
+# INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+# INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
 ##############################################################################
 ## Build the main and test code base in a library, installing it as part of
@@ -129,7 +145,7 @@ INSTALL(TARGETS pstrudelmain DESTINATION ${LIBDIR} COMPONENT testsuite)
 
 ## Build the library for the test code base, setting it up to be installed
 ## during the ``testsuite`` COMPONENT install.
-ADD_LIBRARY(pstrudeltest src/testutils.cpp)
+ADD_LIBRARY(pstrudeltest src/supportlib.cpp)
 ADD_DEPENDENCIES(check pstrudeltest)
 INSTALL(TARGETS pstrudeltest DESTINATION ${LIBDIR} COMPONENT testsuite)
 
@@ -142,21 +158,8 @@ LINK_DIRECTORIES(${LIBDIR})
 ## The list of implementation files for the test executables that need to be
 ## built.
 SET(TEST_TARGET_SOURCES
-    src/profile_distances.cpp
-    src/profile_generation.cpp
-    src/read_dna_sequences.cpp
-    src/read_tree.cpp
-    src/set_value_symmetric_difference.cpp
-    src/subtree_leaf_set_sizes.cpp
-    src/tree_child_iter.cpp
-    src/tree_copy.cpp
-    src/tree_internal_iter.cpp
-    src/tree_leaf_iter.cpp
-    src/tree_pairwise_tip_distances.cpp
-    src/tree_postorder_iter.cpp
-    src/tree_preorder_iter.cpp
-    src/tree_reader.cpp
-    src/tree_splits_distances.cpp)
+    src/read_trees.cpp
+    )
 
 ## For each test source, create the corresponding executable, add it as ##
 ## dependency of the ``check`` target, and install it to the test directory.
@@ -170,7 +173,8 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         pstrudelmain
         pstrudeltest)
     ADD_DEPENDENCIES(check ${basename})
-    INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
+    ADD_TEST(${basename} ${basename})
+    # INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})
 ENDFOREACH()
 
 

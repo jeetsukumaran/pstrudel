@@ -46,7 +46,7 @@ double Profile::calc_distance(Profile & other, unsigned long profile_size) {
 }
 
 
-unsigned long get_profile_comparison_size(Profile & other) {
+unsigned long Profile::get_profile_comparison_size(Profile & other) {
     unsigned long profile_size = 0;
     if (this->fixed_size_ > 0 && other.fixed_size_ > 0) {
         // fixed size profiles
@@ -83,7 +83,7 @@ unsigned long get_profile_comparison_size(Profile & other) {
 void Profile::build_interpolated_profile(unsigned long profile_size) {
     std::vector<double> & interpolated_profile = this->interpolated_profiles_[profile_size];
     interpolated_profile.clear();
-    unsigned long raw_data_size = raw_data_vector.size();
+    unsigned long raw_data_size = this->raw_data_.size();
     COLUGO_ASSERT(raw_data_size > 1);
     if (profile_size < raw_data_size) {
         colugo::colugo_abort("Error interpolating points in profile ",

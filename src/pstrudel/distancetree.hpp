@@ -88,41 +88,57 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         ~DistanceTree() override {}
 
         /////////////////////////////////////////////////////////////////////////
-        // profile management
+        // basic stats
 
-        void clear();
-        void calc_profile_metrics();
-        void build_profile();
-        void calc_pairwise_tip_distances();
-        void poll_max_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
-        void set_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
+        void set_num_tips(unsigned long n) {
+            this->number_of_tips_ = n;
+        }
+        unsigned long get_num_tips() const {
+            return this->number_of_tips_;
+        }
+        void set_total_tree_length(double v) {
+            this->total_tree_length_ = v;
+        }
+        double get_total_tree_length() const {
+            return this->total_tree_length_;
+        }
 
         /////////////////////////////////////////////////////////////////////////
-        // querying metrics
+        // profile management
 
-        double get_weighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
-            if (&tip1 == &tip2) {
-                return 0.0;
-            }
-            auto v = this->find_pairwise_tip_distance(this->weighted_pairwise_tip_distance_, tip1, tip2);
-            return v->second;
-        }
+        // void clear();
+        // void calc_profile_metrics();
+        // void build_profile();
+        // void calc_pairwise_tip_distances();
+        // void poll_max_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
+        // void set_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
 
-        unsigned long get_unweighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
-            if (&tip1 == &tip2) {
-                return 0;
-            }
-            auto v = this->find_pairwise_tip_distance(this->unweighted_pairwise_tip_distance_, tip1, tip2);
-            return v->second;
-        }
+        /////////////////////////////////////////////////////////////////////////
+        // querying statistics
 
-        double get_unweighted_subprofile_distance(const DistanceTree& other) const {
-            return this->profile_.calc_subprofile_distance(other.profile_, this->UNWEIGHTED_PAIRWISE_TIP);
-        }
+        // double get_weighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
+        //     if (&tip1 == &tip2) {
+        //         return 0.0;
+        //     }
+        //     auto v = this->find_pairwise_tip_distance(this->weighted_pairwise_tip_distance_, tip1, tip2);
+        //     return v->second;
+        // }
 
-        double get_weighted_subprofile_distance(const DistanceTree& other) const {
-            return this->profile_.calc_subprofile_distance(other.profile_, this->WEIGHTED_PAIRWISE_TIP);
-        }
+        // unsigned long get_unweighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
+        //     if (&tip1 == &tip2) {
+        //         return 0;
+        //     }
+        //     auto v = this->find_pairwise_tip_distance(this->unweighted_pairwise_tip_distance_, tip1, tip2);
+        //     return v->second;
+        // }
+
+        // double get_unweighted_subprofile_distance(const DistanceTree& other) const {
+        //     return this->profile_.calc_subprofile_distance(other.profile_, this->UNWEIGHTED_PAIRWISE_TIP);
+        // }
+
+        // double get_weighted_subprofile_distance(const DistanceTree& other) const {
+        //     return this->profile_.calc_subprofile_distance(other.profile_, this->WEIGHTED_PAIRWISE_TIP);
+        // }
 
         void calc_subtree_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(DistanceTree & other);
@@ -154,8 +170,8 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
 
     private:
-        std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, double >             weighted_pairwise_tip_distance_;
-        std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, unsigned long >      unweighted_pairwise_tip_distance_;
+        // std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, double >             weighted_pairwise_tip_distance_;
+        // std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, unsigned long >      unweighted_pairwise_tip_distance_;
         unsigned long                                                                       number_of_tips_;
         double                                                                              total_tree_length_;
         Profile                                                                             profile_;

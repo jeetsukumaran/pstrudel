@@ -13,6 +13,7 @@
 #include <colugo/utility.hpp>
 // #include <platypus/platypus.hpp>
 #include <platypus/parse/nclreader.hpp>
+#include <platypus/model/standardtree.hpp>
 
 namespace pstrudel {
 
@@ -124,33 +125,31 @@ int read_from_stream(std::vector<TreeT>& trees,
         std::istream& src,
         const std::string& format) {
     std::function<TreeT& ()> tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
-    platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
-    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
-    return tree_reader.read_from_stream(src, format);
-
+    auto reader = platypus::NclTreeReader<TreeT>(tree_factory);
+    platypus::configure_producer_for_standard_interface(reader);
+    reader.set_tree_stats_num_leaf_nodes_setter([](TreeT & tree, unsigned long n) {tree.set_num_tips(n);});
+    // reader.set_tree_stats_num_internal_nodes_setter([](TreeT & tree, unsigned long n) {tree.num_internal_nodes = n;});
+    reader.set_tree_stats_tree_length_setter([](TreeT & tree, double n) {tree.set_total_tree_length(n);});
+    return reader.read_from_stream(src, format);
 }
 
 template <class TreeT>
 int read_from_filepath(std::vector<TreeT>& trees,
         const std::string& filepath,
         const std::string& format) {
-    std::function<TreeT& ()>  tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
-    platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
-    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
-    return tree_reader.read_from_filepath(filepath, format);
+    std::ifstream f(filepath);
+    // if (!f.good()) {
+    //     throw ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
+    // }
+    return read_from_stream(trees, f, format);
 }
 
 template <class TreeT>
 int read_from_string(std::vector<TreeT>& trees,
         const std::string& str,
         const std::string& format) {
-    std::function<TreeT& ()> tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
-    platypus::NclTreeReader<TreeT> tree_reader(tree_factory);
-    tree_reader.set_node_label_setter(&TreeT::value_type::set_label);
-    tree_reader.set_edge_length_setter(&TreeT::value_type::set_edge_length);
-    return tree_reader.read_from_string(str, format);
+    std::istringstream s(str);
+    return read_from_stream(trees, s, format);
 }
 
 

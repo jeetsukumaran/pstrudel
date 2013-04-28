@@ -1,6 +1,7 @@
 #ifndef PSTRUDEL_PROFILE_PROFILE_HPP
 #define PSTRUDEL_PROFILE_PROFILE_HPP
 
+#include <algorithm>
 #include <vector>
 #include <iostream>
 #include <cmath>
@@ -21,7 +22,7 @@ class Profile {
 
         // if fixed_size == 0, then profiles are dynamically interpolated when comparing
         // profiles to the maximum size of the profiles being compared
-        Profile(unsigned long fixed_size=0)
+        Profile(unsigned long fixed_size=0,
                 Profile::InterpolationMethod interpolation_method=Profile::InterpolationMethod::PIECEWISE_LINEAR);
 
         template <class iterator>
@@ -30,9 +31,9 @@ class Profile {
                 iterator src_end,
                 bool sort=true) {
             this->raw_data_.clear();
-            this->interpolate_profiles_.clear();
+            this->interpolated_profiles_.clear();
             this->raw_data_.insert(this->raw_data_.end(), src_begin, src_end);
-            if (this->fixed_size_ > 0 && (this->raw_data.size() > this->fixed_size_)) {
+            if (this->fixed_size_ > 0 && (this->raw_data_.size() > this->fixed_size_)) {
                 colugo::colugo_abort("Profile is fixed to ",
                         this->fixed_size_,
                         "but trying to add ",
@@ -51,6 +52,7 @@ class Profile {
             }
         }
 
+        void clear();
         double get_distance(Profile & other, bool normalize);
 
     private:
@@ -62,10 +64,10 @@ class Profile {
         static double calc_euclidean_distance(std::vector<double> & v1, std::vector<double> & v2);
 
     private:
-        unsigned long                               fixed_size_;
-        Profile::InterpolationMethod                interpolation_method_;
-        std::vector<double>                         raw_data_;
-        std::map<unsigned long, std::vector<double> interpolated_profiles_;
+        unsigned long                                   fixed_size_;
+        Profile::InterpolationMethod                    interpolation_method_;
+        std::vector<double>                             raw_data_;
+        std::map<unsigned long, std::vector<double>>    interpolated_profiles_;
 
 }; // Profile
 
