@@ -25,7 +25,7 @@ class Profile {
                 Profile::InterpolationMethod interpolation_method=Profile::InterpolationMethod::PIECEWISE_LINEAR);
 
         template <class iterator>
-        void set_raw_data(
+        void set_data(
                 iterator src_begin,
                 iterator src_end,
                 bool sort=true) {
