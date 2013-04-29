@@ -160,6 +160,7 @@ LINK_DIRECTORIES(${LIBDIR})
 SET(TEST_TARGET_SOURCES
     src/read_trees.cpp
     src/profile_generation.cpp
+    src/profile_comparison.cpp
     )
 
 ## For each test source, create the corresponding executable, add it as ##

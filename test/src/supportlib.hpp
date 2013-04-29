@@ -84,14 +84,16 @@ std::string execute_external_process(const std::string& cmd,
 
 template <typename T, typename U, typename... Types>
 int fail_test(const std::string& test_name,
+        unsigned long line_num,
         const T& expected,
         const U& observed,
         const Types&... args) {
-    std::cerr << "\n||[[ FAIL ]]]";
-    std::cerr << "\n||     Test: " << test_name;
-    log(std::cerr, "\n|| Expected: ", expected);
-    log(std::cerr, "\n|| Observed: ", observed);
-    log(std::cerr, "\n||  Remarks: ", args...);
+    std::cerr << "\n||[ FAIL ]";
+    std::cerr << "\n|     Test: " << test_name;
+    std::cerr << "\n|     Line: " << line_num;
+    log(std::cerr, "\n| Expected: ", expected);
+    log(std::cerr, "\n| Observed: ", observed);
+    log(std::cerr, "\n|  Remarks: ", args...);
     std::cerr << std::endl;
     return EXIT_FAILURE;
 }
@@ -101,9 +103,11 @@ int check_equal(
         const T& expected,
         const U& observed,
         const std::string& test_name,
+        unsigned long line_num,
         const Types&... args) {
     if (expected != observed) {
         return fail_test(test_name,
+                line_num,
                 expected,
                 observed,
                 args...);

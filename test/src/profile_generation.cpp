@@ -13,6 +13,7 @@ int test_basic_profile_population() {
             raw_data,
             profile.get_profile(raw_data.size()),
             __FILE__,
+            __LINE__,
             "incorrect raw-data sized profile");
     return fails;
 }
@@ -27,6 +28,7 @@ int test_basic_profile_interpolation() {
             expected,
             profile.get_profile(raw_data.size() * 2),
             __FILE__,
+            __LINE__,
             "incorrect interpolated profile");
     return fails;
 }

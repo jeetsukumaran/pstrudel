@@ -8,15 +8,28 @@ int main() {
     typedef pstrudel::DistanceTree  TreeType;
     std::vector<TreeType>  trees;
     pstrudel::treeio::read_from_filepath(trees, "data/trees/basic-patterns/n06-rooted-patterns.nex", "nexus");
+    int fails = 0;
     if (trees.size() != 6) {
-        return pstrudel::test::fail_test(__FILE__,
-                6, trees.size(), "Incorrect number of trees read from file");
+        fails += pstrudel::test::check_equal(
+                6UL,
+                trees.size(),
+                __FILE__,
+                __LINE__,
+                "Incorrect number of trees read from file");
     }
     for (auto & tree : trees) {
         if (tree.get_num_tips() != 6) {
-            return pstrudel::test::fail_test(__FILE__,
-                    6, tree.get_num_tips(), "Incorrect number of tips recorded");
+            fails += pstrudel::test::check_equal(
+                    6UL,
+                    tree.get_num_tips(),
+                    __FILE__,
+                    __LINE__,
+                    "Incorrect number of tips recorded");
         }
     }
-    return EXIT_SUCCESS;
+    if (fails > 0) {
+        return EXIT_FAILURE;
+    } else {
+        return EXIT_SUCCESS;
+    }
 }

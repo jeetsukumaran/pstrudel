@@ -1,6 +1,7 @@
 #ifndef PSTRUDEL_PROFILE_PROFILE_HPP
 #define PSTRUDEL_PROFILE_PROFILE_HPP
 
+#include <stdexcept>
 #include <algorithm>
 #include <vector>
 #include <iostream>
@@ -59,6 +60,15 @@ class Profile {
         }
         std::vector<double> & get_profile(unsigned long profile_size=0);
         double get_distance(Profile & other, bool normalize_by_profile_size=false);
+        void fix_size(unsigned long size) {
+            if (size > 0 && size < this->raw_data_.size()) {
+                throw std::runtime_error("Cannot fix size to less than data size");
+            }
+            this->fixed_size_ = size;
+        }
+        void unfix_size() {
+            this->fixed_size_ = 0;
+        }
 
     private:
         double calc_distance(Profile & other, unsigned long profile_size);
