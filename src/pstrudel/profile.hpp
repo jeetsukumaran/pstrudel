@@ -7,6 +7,7 @@
 #include <cmath>
 #include <map>
 #include <iterator>
+#include <colugo/utility.hpp>
 
 namespace pstrudel {
 
@@ -44,16 +45,20 @@ class Profile {
             if (sort) {
                 std::sort(this->raw_data_.begin(), this->raw_data_.end());
             }
-            // store raw data as profile for `n` points
-            auto & default_profile = this->interpolated_profiles_[this->raw_data_.size()];
-            default_profile.insert(this->raw_data_.end(), src_begin, src_end);
-            if (this->fixed_size_ > 0 && this->fixed_size_ != this->raw_data_.size()) {
-                this->build_interpolated_profile(this->fixed_size_);
-            }
+            // // store raw data as profile for `n` points
+            // auto & default_profile = this->interpolated_profiles_[this->raw_data_.size()];
+            // default_profile.insert(this->raw_data_.end(), src_begin, src_end);
+            // if (this->fixed_size_ > 0 && this->fixed_size_ != this->raw_data_.size()) {
+            //     this->build_interpolated_profile(this->fixed_size_);
+            // }
         }
 
         void clear();
-        double get_distance(Profile & other, bool normalize);
+        unsigned long data_size() const {
+            return this->raw_data_.size();
+        }
+        std::vector<double> & get_profile(unsigned long profile_size=0);
+        double get_distance(Profile & other, bool normalize_by_profile_size=false);
 
     private:
         double calc_distance(Profile & other, unsigned long profile_size);
@@ -68,6 +73,7 @@ class Profile {
         Profile::InterpolationMethod                    interpolation_method_;
         std::vector<double>                             raw_data_;
         std::map<unsigned long, std::vector<double>>    interpolated_profiles_;
+        unsigned long                                   last_profile_comparison_size_;
 
 }; // Profile
 

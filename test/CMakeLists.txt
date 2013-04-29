@@ -159,6 +159,7 @@ LINK_DIRECTORIES(${LIBDIR})
 ## built.
 SET(TEST_TARGET_SOURCES
     src/read_trees.cpp
+    src/profile_generation.cpp
     )
 
 ## For each test source, create the corresponding executable, add it as ##

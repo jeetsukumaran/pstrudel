@@ -10,7 +10,8 @@ namespace pstrudel {
 Profile::Profile(unsigned long fixed_size,
         Profile::InterpolationMethod interpolation_method)
     : fixed_size_(fixed_size)
-      , interpolation_method_(interpolation_method) {
+      , interpolation_method_(interpolation_method)
+      , last_profile_comparison_size_(0) {
 }
 
 void Profile::clear() {
@@ -18,10 +19,21 @@ void Profile::clear() {
     this->interpolated_profiles_.clear();
 }
 
-double Profile::get_distance(Profile & other, bool normalize) {
+std::vector<double> & Profile::get_profile(unsigned long profile_size) {
+    if (profile_size == 0) {
+        profile_size = this->raw_data_.size();
+    }
+    auto v1_iter = this->interpolated_profiles_.find(profile_size);
+    if (v1_iter == this->interpolated_profiles_.end()) {
+        this->build_interpolated_profile(profile_size);
+    }
+    return this->interpolated_profiles_[profile_size];
+}
+
+double Profile::get_distance(Profile & other, bool normalize_by_profile_size) {
     unsigned long profile_size = this->get_profile_comparison_size(other);
     double dist = this->calc_distance(other, profile_size);
-    if (normalize) {
+    if (normalize_by_profile_size) {
         return dist/profile_size;
     } else {
         return dist;
@@ -32,16 +44,10 @@ double Profile::get_distance(Profile & other, bool normalize) {
 // Profile (protected/private)
 
 double Profile::calc_distance(Profile & other, unsigned long profile_size) {
-    auto v1_iter = this->interpolated_profiles_.find(profile_size);
-    if (v1_iter == this->interpolated_profiles_.end()) {
-        this->build_interpolated_profile(profile_size);
-    }
-    auto v2_iter = other.interpolated_profiles_.find(profile_size);
-    if (v2_iter == other.interpolated_profiles_.end()) {
-        other.build_interpolated_profile(profile_size);
-    }
-    auto & v1 = this->interpolated_profiles_[profile_size];
-    auto & v2 = other.interpolated_profiles_[profile_size];
+    auto & v1 = this->get_profile(profile_size);
+    auto & v2 = other.get_profile(profile_size);
+    this->last_profile_comparison_size_ = profile_size;
+    other.last_profile_comparison_size_ = profile_size;
     return Profile::calc_euclidean_distance(v1, v2);
 }
 
