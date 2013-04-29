@@ -6,6 +6,7 @@
 #include <iterator>
 #include <iostream>
 #include <string>
+#include <cmath>
 
 #ifdef _WIN32
 const char FILESYSTEM_PATH_SEP = '\\';
@@ -88,7 +89,7 @@ int fail_test(const std::string& test_name,
         const T& expected,
         const U& observed,
         const Types&... args) {
-    std::cerr << "\n||[ FAIL ]";
+    std::cerr << "\n||| FAIL |||";
     std::cerr << "\n|     Test: " << test_name;
     std::cerr << "\n|     Line: " << line_num;
     log(std::cerr, "\n| Expected: ", expected);
@@ -106,6 +107,24 @@ int check_equal(
         unsigned long line_num,
         const Types&... args) {
     if (expected != observed) {
+        return fail_test(test_name,
+                line_num,
+                expected,
+                observed,
+                args...);
+    } else {
+        return EXIT_SUCCESS;
+    }
+}
+
+template <typename... Types>
+int check_almost_equal(
+        double expected,
+        double observed,
+        const std::string& test_name,
+        unsigned long line_num,
+        const Types&... args) {
+    if (std::fabs(observed-expected) > 1e-6)  {
         return fail_test(test_name,
                 line_num,
                 expected,
