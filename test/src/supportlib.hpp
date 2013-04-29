@@ -20,14 +20,14 @@ namespace pstrudel { namespace test {
 // Logging and printing
 
 template<class T>
-void write_container(const T& container, std::ostream& out, const std::string& separator=", ") {
+void write_container(std::ostream& out, const T& container, const std::string& separator=", ") {
     std::copy(container.cbegin(), container.cend(), std::ostream_iterator<typename T::value_type>(out, separator.c_str()));
 }
 
 template<class T>
 std::string join_container(const T& container, const std::string& separator=", ") {
     std::ostringstream out;
-    write_container(container, out, separator);
+    write_container(out, container, separator);
     return out.str();
 }
 
@@ -41,13 +41,13 @@ void log(S& stream, const T& arg1) {
 
 template <typename S, typename T>
 void log(S& stream, const std::vector<T>& arg1) {
-    write_container(arg1, stream, ", ");
+    write_container(stream, arg1, ", ");
     log(stream);
 }
 
 template <typename S, typename T, typename... Types>
 void log(S& stream, const std::vector<T>& arg1, const Types&... args) {
-    write_container(arg1, stream, ", ");
+    write_container(stream, arg1, ", ");
     log(stream, args...);
 }
 
