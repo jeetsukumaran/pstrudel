@@ -138,9 +138,9 @@ int read_from_filepath(std::vector<TreeT>& trees,
         const std::string& filepath,
         const std::string& format) {
     std::ifstream f(filepath);
-    // if (!f.good()) {
-    //     throw ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
-    // }
+    if (!f.good()) {
+        throw platypus::ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
+    }
     return read_from_stream(trees, f, format);
 }
 

@@ -106,7 +106,7 @@ ELSE()
 ENDIF()
 
 # INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
-# INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
+INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
 ##############################################################################
 ## Build the main and test code base in a library, installing it as part of
