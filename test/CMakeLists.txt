@@ -106,6 +106,7 @@ ELSE()
 ENDIF()
 
 INSTALL(PROGRAMS scripts/calc-splits-distances.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(PROGRAMS scripts/calc-pairwise-tip-distances.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
 ##############################################################################

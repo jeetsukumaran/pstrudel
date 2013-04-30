@@ -44,14 +44,43 @@ int main(int argc, const char * argv[]) {
         for (auto ndi = tree.leaf_begin(); ndi != tree.leaf_end(); ++ndi) {
             leaves.push_back(ndi->get_label());
         }
+        std::string command = "python " + test_dir + "/calc-pairwise-tip-distances.py " + test_data_filepath + " nexus";
+        std::string reference_results = pstrudel::test::execute_external_process(command, true, true);
+        std::istringstream src(reference_results);
+        int fails = 0;
+        std::string tip1;
+        std::string tip2;
+        unsigned long r_uwdist;
+        double r_wedist;
         std::sort(leaves.begin(), leaves.end());
         for (unsigned long idx1 = 0; idx1 < leaves.size() - 1; ++idx1) {
             for (unsigned long idx2= idx1 + 1; idx2 < leaves.size(); ++idx2) {
-                auto & tip1 = leaves[idx1];
-                auto & tip2 = leaves[idx2];
+                if (!src.good()) {
+                    throw std::runtime_error("Unexpected end of source");
+                }
+                src >> tip1;
+                src >> tip2;
+                src >> r_uwdist;
+                src >> r_wedist;
                 auto key = std::make_pair(tip1, tip2);
-                std::cout << tip1 << "\t" << tip2 << "\t" << uw_pwdists[key] << "\t" << we_pwdists[key] << "\n";
+                fails += pstrudel::test::check_equal(
+                        r_uwdist,
+                        uw_pwdists[key],
+                        __FILE__,
+                        __LINE__,
+                        "Incorrect unweighted pairwise tip distance for '", tip1, "' and '", tip2, "'");
+                fails += pstrudel::test::check_equal(
+                        r_wedist,
+                        we_pwdists[key],
+                        __FILE__,
+                        __LINE__,
+                        "Incorrect unweighted pairwise tip distance for '", tip1, "' and '", tip2, "'");
             }
+        }
+        if (fails > 0) {
+            return EXIT_FAILURE;
+        } else {
+            return EXIT_SUCCESS;
         }
     }
 }
