@@ -1,5 +1,6 @@
 #include <vector>
 #include <iostream>
+#include <sstream>
 #include <pstrudel/distancetree.hpp>
 #include <pstrudel/split.hpp>
 #include <pstrudel/dataio.hpp>
@@ -52,7 +53,23 @@ int main(int argc, const char * argv[]) {
 
     std::string command = "python " + test_dir + "/calc-splits-distances.py " + test_data_filepath + " nexus";
     std::string reference_results = pstrudel::test::execute_external_process(command, true, true);
+    std::istringstream src(reference_results);
     int fails = 0;
+    unsigned long row_idx = 0;
+    unsigned long col_idx = 0;
+    double val = 0.0;
+    std::vector<std::string> col_names{"false positives", "false negatives", "symmetric difference", "edge length distance"};
+    for (auto & row : results) {
+        col_idx = 0;
+        for (auto & col : row) {
+            src >> val;
+            if (!pstrudel::test::is_almost_equal(val, col)) {
+                std::cerr << "Comparison " << row_idx + 1 << ": incorrect " << col_names[col_idx] << ": expected " << val << " but found " << col << std::endl;
+                fails += 1;
+            }
+        }
+        row_idx += 1;
+    }
     if (fails > 0) {
         return EXIT_FAILURE;
     } else {

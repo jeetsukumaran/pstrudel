@@ -59,26 +59,36 @@ int test_profile_distance1() {
     std::vector<double> raw_data2{1.5, 3, 5, 7, 8, 9, 9.5, 10};
     profile2.set_data(raw_data2.begin(), raw_data2.end());
     fails += pstrudel::test::check_equal(
-            0,
+            0.0,
             profile1.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
     fails += pstrudel::test::check_equal(
-            0,
+            0.0,
             profile2.get_distance(profile1),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
     profile1.fix_size(1000);
+    // std::cout << "***" << std::endl;
+    // std::cout << "***" << std::endl;
+    // pstrudel::test::write_container(std::cout, profile1.get_profile(1000));
+    // std::cout << std::endl;
+    // std::cout << "***" << std::endl;
+    // std::cout << std::endl;
+    // pstrudel::test::write_container(std::cout, profile2.get_profile(1000));
+    // std::cout << std::endl;
+    // std::cout << "***" << std::endl;
+    // std::cout << "***" << std::endl;
     fails += pstrudel::test::check_almost_equal(
-            0,
+            0.0,
             profile1.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
     fails += pstrudel::test::check_almost_equal(
-            0,
+            0.0,
             profile2.get_distance(profile1),
             __FILE__,
             __LINE__,
@@ -114,12 +124,12 @@ int test_profile_distance2() {
     std::vector<double> raw_data3{1.5, 3, 5, 7, 8, 9, 9.5, 10};
     pstrudel::Profile   profile3(0);
     profile3.set_data(raw_data3.begin(), raw_data3.end());
-    std::cout << "***" << std::endl;
-    pstrudel::test::write_container(std::cout, profile3.get_profile());
-    std::cout << std::endl;
-    pstrudel::test::write_container(std::cout, profile2.get_profile(profile3.data_size()));
-    std::cout << std::endl;
-    std::cout << "***" << std::endl;
+    // std::cout << "***" << std::endl;
+    // pstrudel::test::write_container(std::cout, profile3.get_profile());
+    // std::cout << std::endl;
+    // pstrudel::test::write_container(std::cout, profile2.get_profile(profile3.data_size()));
+    // std::cout << std::endl;
+    // std::cout << "***" << std::endl;
 
     fails += pstrudel::test::check_almost_equal(
             0,

@@ -25,15 +25,16 @@ std::string execute_external_process(const std::string& cmd,
     // LOG.debug() << "Executing: '" << cmd << "'" << std::endl;
     FILE * process_stdout = popen(cmd.c_str(), "r");
     // unsigned long max_wait_cycles = timeout;
-    std::string results_store;
+    std::ostringstream results_store;
     stdout_buffer[0] = '\0';
     // while (stdout_buffer[0] == '\0' && max_wait_cycles > 0) {
     //     fgets(stdout_buffer, 1000, process_stdout);
     //     --max_wait_cycles;
     // }
     while (fgets(stdout_buffer, sizeof stdout_buffer, process_stdout)) {
-        results_store += stdout_buffer;
+        results_store << stdout_buffer;
     }
+    // results_store += stdout_buffer;
     int ret_code = pclose(process_stdout);
     if (stdout_buffer[0] == '\0' && error_on_timeout_empty) {
         std::cerr << "\nFailed to read data from standard output of process:\n\n   ";
@@ -45,7 +46,7 @@ std::string execute_external_process(const std::string& cmd,
         std::cerr << stdout_buffer << std::endl;
         throw std::runtime_error("External process failed");
     }
-    return std::string(results_store);
+    return results_store.str();
 }
 
 }} // namespace pstrudel::test
