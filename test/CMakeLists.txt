@@ -145,9 +145,9 @@ INSTALL(TARGETS pstrudelmain DESTINATION ${LIBDIR} COMPONENT testsuite)
 
 ## Build the library for the test code base, setting it up to be installed
 ## during the ``testsuite`` COMPONENT install.
-ADD_LIBRARY(pstrudeltest src/supportlib.cpp)
+ADD_LIBRARY(pstrudeltesting src/pstrudel_testing.cpp)
 ADD_DEPENDENCIES(check pstrudeltest)
-INSTALL(TARGETS pstrudeltest DESTINATION ${LIBDIR} COMPONENT testsuite)
+INSTALL(TARGETS pstrudeltesting DESTINATION ${LIBDIR} COMPONENT testsuite)
 
 ## Point the linker to the library directory.
 LINK_DIRECTORIES(${LIBDIR})
@@ -173,7 +173,7 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
     TARGET_LINK_LIBRARIES(${basename}
         ${NCL_LIBRARIES}
         pstrudelmain
-        pstrudeltest)
+        pstrudeltesting)
     ADD_DEPENDENCIES(check ${basename})
     ADD_TEST(${basename} ${basename})
     # INSTALL(TARGETS ${basename} DESTINATION ${TEST_DIR})

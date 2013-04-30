@@ -1,5 +1,5 @@
-#ifndef PSTRUDEL_TEST_SUPPORT_LIB
-#define PSTRUDEL_TEST_SUPPORT_LIB
+#ifndef PSTRUDEL_TESTTING_HPP
+#define PSTRUDEL_TESTTING_HPP
 
 #include <vector>
 #include <sstream>

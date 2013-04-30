@@ -2,7 +2,7 @@
 #include <iostream>
 #include <pstrudel/distancetree.hpp>
 #include <pstrudel/dataio.hpp>
-#include "supportlib.hpp"
+#include "pstrudel_testing.hpp"
 
 int main() {
     typedef pstrudel::DistanceTree  TreeType;

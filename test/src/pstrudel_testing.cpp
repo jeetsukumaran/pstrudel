@@ -1,6 +1,6 @@
 #include <sstream>
 #include <stdexcept>
-#include "supportlib.hpp"
+#include "pstrudel_testing.hpp"
 
 namespace pstrudeltest {
 const unsigned long MAX_PROCESS_BUFFER_SIZE = 10000;

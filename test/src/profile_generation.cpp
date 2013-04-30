@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <pstrudel/profile.hpp>
-#include "supportlib.hpp"
+#include "pstrudel_testing.hpp"
 
 int test_basic_profile_population() {
     int fails=0;

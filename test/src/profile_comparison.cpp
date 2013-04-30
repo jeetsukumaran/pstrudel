@@ -1,7 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <pstrudel/profile.hpp>
-#include "supportlib.hpp"
+#include "pstrudel_testing.hpp"
 
 int test_profile_distance0() {
     int fails=0;
