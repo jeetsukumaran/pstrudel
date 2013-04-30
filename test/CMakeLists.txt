@@ -162,6 +162,7 @@ SET(TEST_TARGET_SOURCES
     src/profile_generation.cpp
     src/profile_comparison.cpp
     src/labeled_symmetric_difference.cpp
+    src/pairwise_tip_distance.cpp
     )
 
 ## For each test source, create the corresponding executable, add it as ##
