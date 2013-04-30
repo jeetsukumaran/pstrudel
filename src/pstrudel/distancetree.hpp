@@ -106,39 +106,69 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         /////////////////////////////////////////////////////////////////////////
         // profile management
 
-        // void clear();
-        // void calc_profile_metrics();
-        // void build_profile();
-        // void calc_pairwise_tip_distances();
-        // void poll_max_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
-        // void set_num_interpolated_profile_points(std::map<const std::string, unsigned long>& num_interpolated_points);
+        void build_pairwise_tip_distance_profiles() {
+            std::multiset<unsigned long> unweighted_distances;
+            std::multiset<double> weighted_distances;
+            auto f = [&unweighted_distances, &weighted_distances] (DistanceNodeValue &,
+                    DistanceNodeValue &,
+                    unsigned long u,
+                    double w) {
+                unweighted_distances.insert(u);
+                weighted_distances.insert(w);
+            };
+            this->calc_pairwise_tip_distances(f);
+            this->unweighted_pairwise_tip_distance_profile_.set_data(unweighted_distances.begin(),
+                    unweighted_distances.end());
+            this->weighted_pairwise_tip_distance_profile_.set_data(weighted_distances.begin(),
+                    weighted_distances.end());
+        }
 
-        /////////////////////////////////////////////////////////////////////////
-        // querying statistics
-
-        // double get_weighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
-        //     if (&tip1 == &tip2) {
-        //         return 0.0;
-        //     }
-        //     auto v = this->find_pairwise_tip_distance(this->weighted_pairwise_tip_distance_, tip1, tip2);
-        //     return v->second;
-        // }
-
-        // unsigned long get_unweighted_pairwise_tip_distance(DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
-        //     if (&tip1 == &tip2) {
-        //         return 0;
-        //     }
-        //     auto v = this->find_pairwise_tip_distance(this->unweighted_pairwise_tip_distance_, tip1, tip2);
-        //     return v->second;
-        // }
-
-        // double get_unweighted_subprofile_distance(const DistanceTree& other) const {
-        //     return this->profile_.calc_subprofile_distance(other.profile_, this->UNWEIGHTED_PAIRWISE_TIP);
-        // }
-
-        // double get_weighted_subprofile_distance(const DistanceTree& other) const {
-        //     return this->profile_.calc_subprofile_distance(other.profile_, this->WEIGHTED_PAIRWISE_TIP);
-        // }
+        // This calculates the distances, but does not actually store them.
+        // Client code eshould pass in appropriate storage behavior by using a
+        // functor for the parameter `store_pairwise_tip_dist_fn`:
+        //
+        //      f(DistanceNodeValue & t1, DistanceNodeValue & t2, unsigned long steps, double weighted_steps)
+        //
+        // where first two arguments are the two tips, followed by the number
+        // of edges connecting the two, followed by the sum of edge weights
+        // along the edges.
+        template <typename T>
+        void calc_pairwise_tip_distances(T store_pairwise_tip_dist_fn) {
+            this->total_tree_length_ = 0.0;
+            this->number_of_tips_ = 0;
+            // std::multiset<unsigned long> unweighted_distances;
+            // std::multiset<double> weighted_distances;
+            for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
+                this->total_tree_length_ += ndi->get_edge_length();
+                if (ndi.is_leaf()) {
+                    ++this->number_of_tips_;
+                    ndi->set_desc_path_len(*ndi, 0.0, 0);
+                } else {
+                    for (auto chi1 = this->children_begin(ndi) ; chi1 != this->children_end(ndi) ; ++chi1) {
+                        for (auto & desc1 : chi1->get_desc_paths()) {
+                            auto & desc1_nd = desc1.first;
+                            auto & desc1_weight = desc1.second.first;
+                            auto & desc1_steps = desc1.second.second;
+                            ndi->set_desc_path_len(desc1_nd, chi1->get_edge_length() + desc1_weight, desc1_steps + 1);
+                            for (auto chi2 = this->next_sibling_begin(chi1) ; chi2 != this->next_sibling_end(chi1) ; ++chi2) {
+                                for (auto & desc2 : chi2->get_desc_paths()) {
+                                    auto & desc2_nd = desc2.first;
+                                    auto & desc2_weight = desc2.second.first;
+                                    auto & desc2_steps = desc2.second.second;
+                                    auto weight = ndi->get_desc_path_weight(desc1_nd) + desc2_weight + chi2->get_edge_length();
+                                    auto steps = ndi->get_desc_path_count(desc1_nd) + desc2_steps + 1;
+                                    store_pairwise_tip_dist_fn(*desc1_nd, *desc2_nd, steps, weight);
+                                    // this->weighted_pairwise_tip_distance_[std::make_pair(&(*desc1_nd), &(*desc2_nd))] = weight;
+                                    // this->unweighted_pairwise_tip_distance_[std::make_pair(&(*desc1_nd), &(*desc2_nd))] = steps;
+                                    // unweighted_distances.insert(steps);
+                                    // weighted_distances.insert(weight);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         void calc_subtree_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(DistanceTree & other);
@@ -155,27 +185,23 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 SizesSetType * unmatched1 = nullptr,
                 SizesSetType * unmatched2 = nullptr);
 
-    private:
-        template <typename T>
-        typename T::const_iterator find_pairwise_tip_distance(T& container, DistanceNodeValue& tip1, DistanceNodeValue& tip2) {
-            auto v = container.find(std::make_pair(&tip1, &tip2));
-            if (v == container.end()) {
-                v = container.find(std::make_pair(&tip2, &tip1));
-                if (v == container.end()) {
-                    colugo::colugo_abort("Nodes not found on tree");
-                }
-                return v;
-            }
-            return v;
-        }
+            // this->profile_.add_subprofile_source(this->UNWEIGHTED_PAIRWISE_TIP,
+            //         unweighted_distances.begin(),
+            //         unweighted_distances.end(),
+            //         unweighted_distances.size(),
+            //         false);
+            // this->profile_.add_subprofile_source(this->WEIGHTED_PAIRWISE_TIP,
+            //         weighted_distances.begin(),
+            //         weighted_distances.end(),
+            //         weighted_distances.size(),
+            //         false);
 
     private:
-        // std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, double >             weighted_pairwise_tip_distance_;
-        // std::map< std::pair<DistanceNodeValue *, DistanceNodeValue *>, unsigned long >      unweighted_pairwise_tip_distance_;
-        unsigned long                                                                       number_of_tips_;
-        double                                                                              total_tree_length_;
-        Profile                                                                             profile_;
-        SizesSetType                                                                        subtree_leaf_set_sizes_;
+        Profile                 unweighted_pairwise_tip_distance_profile_;
+        Profile                 weighted_pairwise_tip_distance_profile_;
+        unsigned long           number_of_tips_;
+        double                  total_tree_length_;
+        SizesSetType            subtree_leaf_set_sizes_;
 
 }; // DistanceTree
 

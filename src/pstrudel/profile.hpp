@@ -29,6 +29,8 @@ class Profile {
         // profiles to the maximum size of the profiles being compared
         Profile(unsigned long fixed_size=0,
                 Profile::InterpolationMethod interpolation_method=Profile::InterpolationMethod::PIECEWISE_LINEAR);
+        Profile(const Profile & other);
+        Profile & operator=(const Profile & other);
 
         template <class iterator>
         void set_data(

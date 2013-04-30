@@ -96,11 +96,12 @@ int test_profile_distance1() {
     return fails;
 }
 
+// options(digits=22)
 // euc.dist = function(x1, x2) { sqrt(sum((x1 - x2) ^ 2))}
 // a = c(0, 1.5, 3, 5, 7, 8, 9, 9.5, 10)
 // b = c(0, 3, 6, 7.5, 9, 11, 13, 15, 17)
 // euc.dist(a, b)
-// 11.21383
+// 11.2138307460029018614
 int test_profile_distance2() {
 
     int fails=0;
@@ -113,9 +114,8 @@ int test_profile_distance2() {
     pstrudel::Profile   profile2(0);
     profile2.set_data(raw_data2.begin(), raw_data2.end());
 
-    double dist = 8.83176;
     fails += pstrudel::test::check_almost_equal(
-            dist,
+            8.831760866327847736557,
             profile1.get_distance(profile2, false),
             __FILE__,
             __LINE__,
@@ -130,7 +130,6 @@ int test_profile_distance2() {
     // pstrudel::test::write_container(std::cout, profile2.get_profile(profile3.data_size()));
     // std::cout << std::endl;
     // std::cout << "***" << std::endl;
-
     fails += pstrudel::test::check_almost_equal(
             0,
             profile1.get_distance(profile3, false),
@@ -139,7 +138,7 @@ int test_profile_distance2() {
             "incorrect profile distance");
 
     fails += pstrudel::test::check_almost_equal(
-            11.21383,
+            11.2138307460029018614,
             profile2.get_distance(profile3, false),
             __FILE__,
             __LINE__,

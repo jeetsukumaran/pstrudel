@@ -14,9 +14,23 @@ Profile::Profile(unsigned long fixed_size,
       , last_profile_comparison_size_(0) {
 }
 
+Profile::Profile(const Profile & other) {
+    *this = other;
+}
+
+Profile & Profile::operator=(const Profile & other) {
+    this->fixed_size_ = other.fixed_size_;
+    this->interpolation_method_ = other.interpolation_method_;
+    this->raw_data_ = other.raw_data_;
+    this->interpolated_profiles_ = other.interpolated_profiles_;
+    this->last_profile_comparison_size_ = other.last_profile_comparison_size_;
+    return * this;
+}
+
 void Profile::clear() {
     this->raw_data_.clear();
     this->interpolated_profiles_.clear();
+    this->last_profile_comparison_size_ = 0;
 }
 
 ProfileMetricVectorType & Profile::get_profile(unsigned long profile_size) {
