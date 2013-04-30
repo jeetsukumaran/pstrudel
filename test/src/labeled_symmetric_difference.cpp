@@ -67,6 +67,7 @@ int main(int argc, const char * argv[]) {
                 std::cerr << "Comparison " << row_idx + 1 << ": incorrect " << col_names[col_idx] << ": expected " << val << " but found " << col << std::endl;
                 fails += 1;
             }
+            col_idx += 1;
         }
         row_idx += 1;
     }
