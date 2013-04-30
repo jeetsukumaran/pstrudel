@@ -135,6 +135,8 @@ inline bool is_almost_equal(double a, double b, double tolerance=1e-6) {
         // shortcut, handles infinities
         return true;
     } else if (abs_a < tolerance && abs_b < tolerance) {
+        // not sure about this: without it, tests fail if, e.g. a = 0 and b =
+        // 6.786e-15 ... is this a real failure?
         return true;
     } else if (a == 0 || b == 0 || diff < MIN_DOUBLE_VALUE)  {
         // a or b is zero or both are extremely close to it
@@ -144,8 +146,34 @@ inline bool is_almost_equal(double a, double b, double tolerance=1e-6) {
         // use relative error
         return (diff / (abs_a + abs_b)) < tolerance;
     }
-
 }
+
+// inline bool is_almost_equal(double a, double b) {
+//     double abs_a = std::fabs(a);
+//     double abs_b = std::fabs(b);
+//     double diff = std::fabs(a - b);
+//     const static double MIN_DOUBLE_VALUE = std::numeric_limits<double>::min();
+//     const static double EPSILON = std::numeric_limits<double>::epsilon();
+//     if (a == b) {
+//         // shortcut, handles infinities
+//         return true;
+//     } else if (a == 0 || b == 0 || diff < MIN_DOUBLE_VALUE)  {
+//         // a or b is zero or both are extremely close to it
+//         // relative error is less meaningful here
+//         return diff < (EPSILON * MIN_DOUBLE_VALUE);
+//     } else {
+//         // use relative error
+//         return (diff / (abs_a + abs_b)) < EPSILON;
+//     }
+// }
+
+// inline bool is_almost_equal(double x, double y) {
+//    // static const double EPSILON = 1E-14;
+//    static const double EPSILON = std::numeric_limits<double>::epsilon();
+//    if (x == 0) return std::fabs(y) <= EPSILON;
+//    if (y == 0) return std::fabs(x) <= EPSILON;
+//    return (std::fabs(x - y) / std::max(std::fabs(x), std::fabs(y))) <= EPSILON;
+// }
 
 template <typename... Types>
 int check_almost_equal(
