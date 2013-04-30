@@ -105,7 +105,7 @@ ELSE()
         COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process --output-on-failure)
 ENDIF()
 
-# INSTALL(PROGRAMS scripts/run-tests.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(PROGRAMS scripts/calc-splits-distances.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
 ##############################################################################
@@ -161,6 +161,7 @@ SET(TEST_TARGET_SOURCES
     src/read_trees.cpp
     src/profile_generation.cpp
     src/profile_comparison.cpp
+    src/labeled_symmetric_difference.cpp
     )
 
 ## For each test source, create the corresponding executable, add it as ##

@@ -7,7 +7,7 @@
 int main() {
     typedef pstrudel::DistanceTree  TreeType;
     std::vector<TreeType>  trees;
-    pstrudel::treeio::read_from_filepath(trees, "data/trees/basic-patterns/n06-rooted-patterns.nex", "nexus");
+    pstrudel::treeio::read_from_filepath(trees, "data/trees/general/n06-rooted-patterns.nex", "nexus");
     int fails = 0;
     if (trees.size() != 6) {
         fails += pstrudel::test::check_equal(

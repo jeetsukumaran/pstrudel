@@ -135,21 +135,10 @@ class TaxonSet {
 }; // TaxonSet
 
 ////////////////////////////////////////////////////////////////////////////////
-// TreeComparisonResult
-struct TreeComparisonResult {
-    public:
-        unsigned long   false_positives;
-        unsigned long   false_negatives;
-        unsigned long   symmetric_difference;
-        double          edge_len_euclidean_distance;
-        double          weighted_rf_distance;
-}; // TreeComparisonResult
-
-////////////////////////////////////////////////////////////////////////////////
-// TreeComparisonCalculator
+// TreeSplitsDifferences
 
 template <class T>
-class TreeComparisonCalculator {
+class TreeSplitsDifferences {
 
 
     public:
@@ -161,10 +150,10 @@ class TreeComparisonCalculator {
 
     public:
 
-        TreeComparisonCalculator() {
+        TreeSplitsDifferences() {
         }
 
-        TreeComparisonCalculator(SetNodeSplitFuncType set_node_split_func)
+        TreeSplitsDifferences(SetNodeSplitFuncType set_node_split_func)
             : set_node_split_func_(set_node_split_func) {
         }
 
@@ -208,28 +197,34 @@ class TreeComparisonCalculator {
             return this->tree_splits_[&tree];
         }
 
-        TreeComparisonResult compare_trees(const TreeType& tree1, const TreeType& tree2) {
-            TreeComparisonResult result;
+        void calc_labeled_symmetric_difference(
+                const TreeType& tree1,
+                const TreeType& tree2,
+                unsigned long & false_positives,
+                unsigned long & false_negatives,
+                unsigned long & symmetric_difference,
+                double & edge_length_distance
+                ) {
             auto & split_set1 = this->get_tree_split_map(tree1);
             auto & split_set2 = this->get_tree_split_map(tree2);
-            result.false_positives = 0;
-            result.false_negatives = 0;
-            result.symmetric_difference = 0;
-            result.edge_len_euclidean_distance = 0.0;
-            result.weighted_rf_distance = 0.0;
+            false_positives = 0;
+            false_negatives = 0;
+            symmetric_difference = 0;
+            edge_length_distance = 0.0;
+            // weighted_rf_distance = 0.0;
             for (auto & sp1_iter : split_set1) {
                 auto & split1 = sp1_iter.first;
                 auto & edge1 = sp1_iter.second;
                 auto sp2_iter = split_set2.find(split1);
                 if (sp2_iter == split_set2.end()) {
-                    result.false_negatives += 1;
-                    result.edge_len_euclidean_distance += std::pow(edge1, 2);
-                    result.weighted_rf_distance += edge1;
+                    false_negatives += 1;
+                    edge_length_distance += std::pow(edge1, 2);
+                    // weighted_rf_distance += edge1;
                 } else {
                     auto & edge2 = sp2_iter->second;
                     double v = edge1 - edge2;
-                    result.edge_len_euclidean_distance += std::pow(v, 2);
-                    result.weighted_rf_distance += std::abs(v);
+                    edge_length_distance += std::pow(v, 2);
+                    // weighted_rf_distance += std::abs(v);
                 }
             }
             for (auto & sp2_iter : split_set2) {
@@ -237,14 +232,13 @@ class TreeComparisonCalculator {
                 auto & edge2 = sp2_iter.second;
                 auto sp1_iter = split_set1.find(split2);
                 if (sp1_iter == split_set1.end()) {
-                    result.false_positives += 1;
-                    result.edge_len_euclidean_distance += std::pow(edge2, 2);
-                    result.weighted_rf_distance += edge2;
+                    false_positives += 1;
+                    edge_length_distance += std::pow(edge2, 2);
+                    // weighted_rf_distance += edge2;
                 }
             }
-            result.symmetric_difference = result.false_positives + result.false_negatives;
-            result.edge_len_euclidean_distance = std::sqrt(result.edge_len_euclidean_distance);
-            return result;
+            symmetric_difference = false_positives + false_negatives;
+            edge_length_distance = std::sqrt(edge_length_distance);
         }
 
     private:
@@ -252,7 +246,7 @@ class TreeComparisonCalculator {
         std::map<const TreeType *, TreeSplitMapType>    tree_splits_;
         SetNodeSplitFuncType                            set_node_split_func_;
 
-}; // TreeComparisonCalculator
+}; // TreeSplitsDifferences
 
 
 } // namespace pstrudel
