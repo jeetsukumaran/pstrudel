@@ -153,7 +153,7 @@ int main() {
     fails += test_profile_distance0();
     fails += test_profile_distance1();
     fails += test_profile_distance2();
-    if (fails > 0) {
+    if (fails != 0) {
         return EXIT_FAILURE;
     } else {
         return EXIT_SUCCESS;

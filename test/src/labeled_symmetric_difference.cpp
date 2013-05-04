@@ -74,7 +74,7 @@ int main(int argc, const char * argv[]) {
         }
         row_idx += 1;
     }
-    if (fails > 0) {
+    if (fails != 0) {
         return EXIT_FAILURE;
     } else {
         return EXIT_SUCCESS;

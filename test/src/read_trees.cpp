@@ -27,7 +27,7 @@ int main() {
                     "Incorrect number of tips recorded");
         }
     }
-    if (fails > 0) {
+    if (fails != 0) {
         return EXIT_FAILURE;
     } else {
         return EXIT_SUCCESS;

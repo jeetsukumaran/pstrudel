@@ -37,7 +37,7 @@ int main() {
     int fails = 0;
     fails += test_basic_profile_population();
     fails += test_basic_profile_interpolation();
-    if (fails > 0) {
+    if (fails != 0) {
         return EXIT_FAILURE;
     } else {
         return EXIT_SUCCESS;

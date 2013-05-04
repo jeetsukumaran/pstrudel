@@ -77,7 +77,7 @@ int main(int argc, const char * argv[]) {
                         "Incorrect unweighted pairwise tip distance for '", tip1, "' and '", tip2, "'");
             }
         }
-        if (fails > 0) {
+        if (fails != 0) {
             return EXIT_FAILURE;
         } else {
             return EXIT_SUCCESS;

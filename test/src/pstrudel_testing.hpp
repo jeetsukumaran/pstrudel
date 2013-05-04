@@ -61,6 +61,43 @@ void log(S& stream, const T& arg1, const Types&... args) {
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// Reading
+
+template <typename T>
+long read_data_vector(std::istream& input, std::vector<T>& data) {
+    std::string tmp;
+    if (std::getline(input, tmp).good()) {
+        std::stringstream ss(tmp);
+        unsigned long count = 0;
+        T val;
+        while (ss >> val) {
+            data.push_back(val);
+            ++count;
+        }
+        return count;
+    } else {
+        return -1;
+    }
+}
+
+template <typename T>
+long read_data_vectors(std::istream& input, std::vector<std::vector<T>>& data) {
+    std::string tmp;
+    unsigned long count = 0;
+    while (std::getline(input, tmp).good()) {
+        data.emplace_back();
+        auto & v = data.back();
+        std::stringstream ss(tmp);
+        T val;
+        while (ss >> val) {
+            v.push_back(val);
+        }
+        ++count;
+    }
+    return count;
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // Paths and filesystem
 
 std::string get_dir(const char * argv0);
