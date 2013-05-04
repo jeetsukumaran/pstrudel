@@ -37,8 +37,8 @@ int main(int argc, const char * argv[]) {
         //      1 1 2 2 3 3 6 7 8
         //      1 2 2 3 4 5 6 8 9
         //      common = 1, 2, 2, 3, 6, 8
-        //      remaining1 = 3, 6, 7
-        //      remaining2 = 3, 4, 9
+        //      remaining1 = 1, 3, 7
+        //      remaining2 = 4, 5, 9
         //      diff = 6
         //
         assert(output.size() == 3);
