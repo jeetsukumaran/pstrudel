@@ -3,7 +3,7 @@
 #include <colugo/utility.hpp>
 #include <colugo/logger.hpp>
 #include <colugo/textutil.hpp>
-#include <platypus/model/archetypaltree.hpp>
+#include <platypus/model/treepattern.hpp>
 #include <platypus/serialize/newick.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
