@@ -9,7 +9,7 @@ int test_basic_profile_population() {
     std::vector<double> raw_data{3, 7, 9, 10};
     profile.set_data(raw_data.begin(), raw_data.end());
     raw_data.insert(raw_data.begin(), 0); // profile generation adds '0'
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             raw_data,
             profile.get_profile(raw_data.size()),
             __FILE__,
@@ -24,7 +24,7 @@ int test_basic_profile_interpolation() {
     std::vector<double> raw_data{3, 7, 9, 10};
     profile.set_data(raw_data.begin(), raw_data.end());
     std::vector<double> expected{0, 1.5, 3, 5, 7, 8, 9, 9.5, 10};
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             expected,
             profile.get_profile(raw_data.size() * 2),
             __FILE__,

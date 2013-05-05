@@ -10,7 +10,7 @@ int main() {
     pstrudel::treeio::read_from_filepath(trees, "data/trees/general/n06-rooted-patterns.nex", "nexus");
     int fails = 0;
     if (trees.size() != 6) {
-        fails += pstrudel::test::check_equal(
+        fails += platypus::testing::compare_equal(
                 6UL,
                 trees.size(),
                 __FILE__,
@@ -19,7 +19,7 @@ int main() {
     }
     for (auto & tree : trees) {
         if (tree.get_num_tips() != 6) {
-            fails += pstrudel::test::check_equal(
+            fails += platypus::testing::compare_equal(
                     6UL,
                     tree.get_num_tips(),
                     __FILE__,

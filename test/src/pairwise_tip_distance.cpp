@@ -63,13 +63,13 @@ int main(int argc, const char * argv[]) {
                 src >> r_uwdist;
                 src >> r_wedist;
                 auto key = std::make_pair(tip1, tip2);
-                fails += pstrudel::test::check_equal(
+                fails += platypus::testing::compare_equal(
                         r_uwdist,
                         uw_pwdists[key],
                         __FILE__,
                         __LINE__,
                         "Incorrect unweighted pairwise tip distance for '", tip1, "' and '", tip2, "'");
-                fails += pstrudel::test::check_equal(
+                fails += platypus::testing::compare_equal(
                         r_wedist,
                         we_pwdists[key],
                         __FILE__,

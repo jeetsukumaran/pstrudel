@@ -66,7 +66,7 @@ int main(int argc, const char * argv[]) {
                 throw std::runtime_error("Unexpected end of source");
             }
             src >> val;
-            if (!pstrudel::test::is_almost_equal(val, col)) {
+            if (!platypus::testing::is_almost_equal(val, col)) {
                 std::cerr << "Comparison " << row_idx + 1 << ": incorrect " << col_names[col_idx] << ": expected " << val << " but found " << col << std::endl;
                 fails += 1;
             }

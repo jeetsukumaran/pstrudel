@@ -10,38 +10,38 @@ int test_profile_distance0() {
     std::vector<double> raw_data{3, 7, 9, 10, 19, 17, 19, 1};
     profile1.set_data(raw_data.begin(), raw_data.end());
     profile2.set_data(raw_data.begin(), raw_data.end());
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile1.get_distance(profile1),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile2.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile1.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
     profile1.fix_size(1000);
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile1.get_distance(profile1),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile2.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0,
             profile1.get_distance(profile2),
             __FILE__,
@@ -58,13 +58,13 @@ int test_profile_distance1() {
     profile1.set_data(raw_data1.begin(), raw_data1.end());
     std::vector<double> raw_data2{1.5, 3, 5, 7, 8, 9, 9.5, 10};
     profile2.set_data(raw_data2.begin(), raw_data2.end());
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0.0,
             profile1.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_equal(
+    fails += platypus::testing::compare_equal(
             0.0,
             profile2.get_distance(profile1),
             __FILE__,
@@ -81,13 +81,13 @@ int test_profile_distance1() {
     // std::cout << std::endl;
     // std::cout << "***" << std::endl;
     // std::cout << "***" << std::endl;
-    fails += pstrudel::test::check_almost_equal(
+    fails += platypus::testing::compare_almost_equal(
             0.0,
             profile1.get_distance(profile2),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
-    fails += pstrudel::test::check_almost_equal(
+    fails += platypus::testing::compare_almost_equal(
             0.0,
             profile2.get_distance(profile1),
             __FILE__,
@@ -114,7 +114,7 @@ int test_profile_distance2() {
     pstrudel::Profile   profile2(0);
     profile2.set_data(raw_data2.begin(), raw_data2.end());
 
-    fails += pstrudel::test::check_almost_equal(
+    fails += platypus::testing::compare_almost_equal(
             8.831760866327847736557,
             profile1.get_distance(profile2, false),
             __FILE__,
@@ -130,14 +130,14 @@ int test_profile_distance2() {
     // pstrudel::test::write_container(std::cout, profile2.get_profile(profile3.data_size()));
     // std::cout << std::endl;
     // std::cout << "***" << std::endl;
-    fails += pstrudel::test::check_almost_equal(
-            0,
+    fails += platypus::testing::compare_almost_equal(
+            0.0,
             profile1.get_distance(profile3, false),
             __FILE__,
             __LINE__,
             "incorrect profile distance");
 
-    fails += pstrudel::test::check_almost_equal(
+    fails += platypus::testing::compare_almost_equal(
             11.2138307460029018614,
             profile2.get_distance(profile3, false),
             __FILE__,
