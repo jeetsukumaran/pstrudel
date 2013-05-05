@@ -6,16 +6,12 @@
 #include "pstrudel.hpp"
 #include "distancetree.hpp"
 
-typedef std::map< unsigned long, std::map<unsigned long, double> > TreeDistanceMatrixType;
-
 int main(int argc, const char * argv[]) {
     std::string prog_id = pstrudel::get_program_identification("PSTRUDEL-TREES").c_str();
     std::string format = "nexus";
-    // bool force_rooted = false;
-    // bool force_unrooted = false;
     unsigned long num_interpolated_points = 0;
     bool calculate_symmetric_diff = false;
-    std::string output_prefix = "";
+    std::string output_prefix = "pstrudel-trees";
     bool suppress_header_row = false;
     bool quiet = false;
 
@@ -24,18 +20,20 @@ int main(int argc, const char * argv[]) {
             "Calculate and report distances between trees.",
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
     parser.add_option<std::string>(&format, "-f", "--format",
-            "format for input source ('nexus', 'newick'; default = 'nexus')");
+            "Format for input source ('nexus', 'newick'; default = 'nexus').");
     parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
-            "number of interpolated points in profile metric; if specified, this must be equal or greater to than the largest input data size; if not specified, will default to the largest input data size");
+            "Number of interpolated points in profile metric; if specified."
+            " This must be equal or greater to than the largest input data size."
+            " If not specified, will default to the largest input data size.");
     parser.add_switch(&calculate_symmetric_diff,
             NULL,
             "--sym-diff",
-            "calculate (unlabeled) symmetric difference between trees");
+            "Calculate (unlabeled) symmetric difference between trees.");
     parser.add_option<std::string>(&output_prefix, "-o", "--output-prefix",
-            "prefix (directory path and filename stem) for output file(s); if not specified, will write to standard output");
-    parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row", "do not write column/field name row in reuslts");
-    // parser.add_switch(&rooted, "--rooted", "force all source_trees to be rooted");
-    // parser.add_switch(&unrooted, "--unrooted", "force all source_trees to be unrooted");
+            "Prefix (directory path and filename stem) for output file(s); if"
+            " not specified, will default to '%default'.");
+    parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
+            "Do not write column/field name row in reuslts.");
     parser.add_switch(&quiet, "-q", "--quiet", "suppress all informational/progress messages");
     parser.parse(argc, argv);
 
