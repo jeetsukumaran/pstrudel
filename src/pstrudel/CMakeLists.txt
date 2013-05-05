@@ -1,9 +1,3 @@
-SET(COLUGO_SOURCES
-   ../colugo-utilities/colugo/cmdopt.cpp
-   ../colugo-utilities/colugo/filesys.cpp
-   ../colugo-utilities/colugo/logger.cpp
-   ../colugo-utilities/colugo/textutil.cpp
-   ../colugo-utilities/colugo/utility.cpp)
 SET(PSTRUDEL_MAIN_LIB_SOURCES
     character.cpp
     distancetree.cpp
@@ -21,7 +15,6 @@ FOREACH(main_prog_source ${PSTRUDEL_MAIN_PROG_SOURCES})
     # MESSAGE(${progname})
     ADD_EXECUTABLE(${progname}
         ${main_prog_source}
-        ${COLUGO_SOURCES}
         ${PSTRUDEL_MAIN_LIB_SOURCES}
         )
     TARGET_LINK_LIBRARIES(${progname} ${NCL_LIBRARIES})

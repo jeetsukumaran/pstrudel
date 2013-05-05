@@ -8,7 +8,7 @@
 #include <cmath>
 #include <map>
 #include <iterator>
-#include <colugo/utility.hpp>
+#include <colugo/console.hpp>
 
 namespace pstrudel {
 
@@ -41,7 +41,7 @@ class Profile {
             this->interpolated_profiles_.clear();
             this->raw_data_.insert(this->raw_data_.end(), src_begin, src_end);
             if (this->fixed_size_ > 0 && (this->raw_data_.size() > this->fixed_size_)) {
-                colugo::colugo_abort("Profile is fixed to ",
+                colugo::console::abort("Profile is fixed to ",
                         this->fixed_size_,
                         "but trying to add ",
                         this->raw_data_.size(),

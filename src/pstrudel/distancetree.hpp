@@ -9,7 +9,6 @@
 #include <stack>
 #include <map>
 #include <set>
-#include <colugo/utility.hpp>
 #include <platypus/model/standardtree.hpp>
 #include "profile.hpp"
 

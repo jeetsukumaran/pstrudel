@@ -10,8 +10,7 @@
 #include <functional>
 #include <map>
 #include <ncl/nxsmultiformat.h>
-#include <colugo/utility.hpp>
-// #include <platypus/platypus.hpp>
+#include <colugo/console.hpp>
 #include <platypus/parse/nclreader.hpp>
 #include <platypus/model/standardtree.hpp>
 
@@ -44,11 +43,11 @@ int read_from_stream(
     unsigned num_taxa_blocks = reader.GetNumTaxaBlocks();
     NxsTaxaBlock *  taxa_block = reader.GetTaxaBlock(num_taxa_blocks-1);
     if (!taxa_block) {
-        colugo::colugo_abort("No taxon definitions were parsed (invalid file format?)");
+        colugo::console::abort("No taxon definitions were parsed (invalid file format?)");
     }
     NxsCharactersBlock * chars_block = reader.GetCharactersBlock(taxa_block, 0);
     if (!chars_block) {
-        colugo::colugo_abort("No character states were parsed (invalid file format?)");
+        colugo::console::abort("No character states were parsed (invalid file format?)");
     }
     unsigned int ntax = taxa_block->GetNTaxTotal();
     for (unsigned int taxon_idx = 0; taxon_idx < ntax; ++taxon_idx) {
@@ -76,7 +75,7 @@ int read_from_filepath(
         const std::string& format) {
     std::ifstream f(filepath);
     if (!f.good()) {
-        colugo::colugo_abort("Error opening file for input");
+        colugo::console::abort("Error opening file for input");
     }
     return read_from_stream(sequences, f, format);
 }
@@ -284,7 +283,7 @@ void write_nexus(std::vector<TreeT>& trees,
 // //     unsigned num_taxa_blocks = reader.GetNumTaxaBlocks();
 // //     NxsTaxaBlock *  taxa_block = reader.GetTaxaBlock(num_taxa_blocks-1);
 // //     if (!taxa_block) {
-// //         colugo::colugo_abort("No taxon definitions were parsed (invalid file format?)");
+// //         colugo::console::abort("No taxon definitions were parsed (invalid file format?)");
 // //     }
 // //     NxsTreesBlock * trees_block = reader.GetTreesBlock(taxa_block, 0);
 // //     if (!trees_block) {
@@ -434,9 +433,9 @@ void write_nexus(std::vector<TreeT>& trees,
 //         std::string label;
 
 //         // if (nchildren > 2) {
-//         //     colugo::colugo_abort("Tree has node with more than 2 children");
+//         //     colugo::console::abort("Tree has node with more than 2 children");
 //         if (nchildren == 1) {
-//             colugo::colugo_abort("Tree has node with only 1 child");
+//             colugo::console::abort("Tree has node with only 1 child");
 //         } else if (nchildren == 0) {
 //             unsigned int ncl_taxon_idx = ncl_node->GetTaxonIndex();
 //             // label = NxsString::GetEscaped(tb->GetTaxonLabel(ncl_taxon_idx)).c_str();
@@ -458,11 +457,11 @@ void write_nexus(std::vector<TreeT>& trees,
 //         ncl_to_native[ncl_node] = new_node;
 //         if (ncl_par) {
 //             if (ncl_to_native.find(ncl_par) == ncl_to_native.end()) {
-//                 colugo::colugo_abort("Parent node not visited in preorder traversal");
+//                 colugo::console::abort("Parent node not visited in preorder traversal");
 //             }
 //             node_parent = ncl_to_native[ncl_par];
 //             if (!node_parent) {
-//                 colugo::colugo_abort("Null parent node");
+//                 colugo::console::abort("Null parent node");
 //             }
 //             node_parent->add_child(new_node);
 //         }
@@ -499,7 +498,7 @@ void write_nexus(std::vector<TreeT>& trees,
 //     unsigned num_taxa_blocks = reader.GetNumTaxaBlocks();
 //     NxsTaxaBlock *  taxa_block = reader.GetTaxaBlock(num_taxa_blocks-1);
 //     if (!taxa_block) {
-//         colugo::colugo_abort("No taxon definitions were parsed (invalid file format?)");
+//         colugo::console::abort("No taxon definitions were parsed (invalid file format?)");
 //     }
 //     NxsTreesBlock * trees_block = reader.GetTreesBlock(taxa_block, 0);
 //     if (!trees_block) {
@@ -608,9 +607,9 @@ void write_nexus(std::vector<TreeT>& trees,
 //         std::string label;
 
 //         // if (nchildren > 2) {
-//         //     colugo::colugo_abort("Tree has node with more than 2 children");
+//         //     colugo::console::abort("Tree has node with more than 2 children");
 //         if (nchildren == 1) {
-//             colugo::colugo_abort("Tree has node with only 1 child");
+//             colugo::console::abort("Tree has node with only 1 child");
 //         } else if (nchildren == 0) {
 //             unsigned int ncl_taxon_idx = ncl_node->GetTaxonIndex();
 //             // label = NxsString::GetEscaped(tb->GetTaxonLabel(ncl_taxon_idx)).c_str();
@@ -636,11 +635,11 @@ void write_nexus(std::vector<TreeT>& trees,
 //         ncl_to_native[ncl_node] = new_node;
 //         if (ncl_par) {
 //             if (ncl_to_native.find(ncl_par) == ncl_to_native.end()) {
-//                 colugo::colugo_abort("Parent node not visited in preorder traversal");
+//                 colugo::console::abort("Parent node not visited in preorder traversal");
 //             }
 //             node_parent = ncl_to_native[ncl_par];
 //             if (!node_parent) {
-//                 colugo::colugo_abort("Null parent node");
+//                 colugo::console::abort("Null parent node");
 //             }
 //             node_parent->add_child(new_node);
 //         }
@@ -673,7 +672,7 @@ void write_nexus(std::vector<TreeT>& trees,
 //     unsigned num_taxa_blocks = reader.GetNumTaxaBlocks();
 //     NxsTaxaBlock *  taxa_block = reader.GetTaxaBlock(num_taxa_blocks-1);
 //     if (!taxa_block) {
-//         colugo::colugo_abort("No taxon definitions were parsed (invalid file format?)");
+//         colugo::console::abort("No taxon definitions were parsed (invalid file format?)");
 //     }
 //     NxsTreesBlock * trees_block = reader.GetTreesBlock(taxa_block, 0);
 //     if (!trees_block) {
@@ -714,7 +713,7 @@ void write_nexus(std::vector<TreeT>& trees,
 //         unsigned long max_tips=0) {
 //     std::ifstream f(filepath);
 //     if (!f.good()) {
-//         colugo::colugo_abort("Error opening file for input");
+//         colugo::console::abort("Error opening file for input");
 //     }
 //     return read_from_stream<TreeT>(trees,
 //             f,

@@ -123,7 +123,6 @@ INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 FILE(GLOB
     PROJECT_SOURCES_ALL
     "../src/pstrudel/*.cpp"
-    "../src/colugo-utilities/colugo/*.cpp"
     )
 
 ## We need to filter out the actual application source (i.e., implementation

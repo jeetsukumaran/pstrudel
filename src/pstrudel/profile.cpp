@@ -1,5 +1,6 @@
 #include <algorithm>
-#include <colugo/utility.hpp>
+#include <colugo/assert.hpp>
+#include <colugo/console.hpp>
 #include "profile.hpp"
 
 namespace pstrudel {
@@ -71,14 +72,14 @@ unsigned long Profile::get_profile_comparison_size(Profile & other) {
     if (this->fixed_size_ > 0 && other.fixed_size_ > 0) {
         // fixed size profiles
         if (this->fixed_size_ != other.fixed_size_) {
-            colugo::colugo_abort("Comparing two profiles locked to different sizes: ",
+            colugo::console::abort("Comparing two profiles locked to different sizes: ",
                     this->fixed_size_, " and ", other.fixed_size_);
             exit(1);
         }
         profile_size = this->fixed_size_;
     } else if (this->fixed_size_ == 0 && other.fixed_size_ > 0) {
         if (other.fixed_size_ < this->raw_data_.size()) {
-            colugo::colugo_abort("Cannot interpolate points in current profile:",
+            colugo::console::abort("Cannot interpolate points in current profile:",
                     " raw data size is ", this->raw_data_.size(),
                     " but comparison requires ", other.fixed_size_,
                     " because other profile is locked to fixed size");
@@ -87,7 +88,7 @@ unsigned long Profile::get_profile_comparison_size(Profile & other) {
         profile_size = other.fixed_size_;
     } else if (this->fixed_size_ > 0 && other.fixed_size_ == 0) {
         if (this->fixed_size_ < other.raw_data_.size()) {
-            colugo::colugo_abort("Cannot interpolate points in other profile:",
+            colugo::console::abort("Cannot interpolate points in other profile:",
                     " other raw data size is ", other.raw_data_.size(),
                     " but comparison requires ", this->fixed_size_,
                     " because this profile is locked to fixed size");
@@ -106,7 +107,7 @@ void Profile::build_interpolated_profile(unsigned long profile_size) {
     unsigned long raw_data_size = this->raw_data_.size();
     COLUGO_ASSERT(raw_data_size > 1);
     if (profile_size < raw_data_size) {
-        colugo::colugo_abort("Error interpolating points in profile ",
+        colugo::console::abort("Error interpolating points in profile ",
                 ": Number of requested interpolated points (",
                 profile_size,
                 ") less than raw data size (",

@@ -9,7 +9,8 @@
 #include <sstream>
 #include <vector>
 #include <map>
-#include <colugo/utility.hpp>
+#include <colugo/console.hpp>
+#include <colugo/assert.hpp>
 
 namespace pstrudel {
 
@@ -93,7 +94,7 @@ class NucleotideSequence {
         inline static const CharacterStateType get_state_from_symbol(char s) {
             auto state_lookup = NucleotideSequence::symbol_to_state_map_.find(s);
             if (state_lookup == NucleotideSequence::symbol_to_state_map_.end()) {
-                colugo::colugo_abort("Invalid state symbol '", s, "'");
+                colugo::console::abort("Invalid state symbol '", s, "'");
                 return 4;
             } else {
                 return state_lookup->second;
@@ -102,7 +103,7 @@ class NucleotideSequence {
         inline static const char get_symbol_from_state(CharacterStateType s) {
             auto symbol_lookup = NucleotideSequence::state_to_symbol_map_.find(s);
             if (symbol_lookup == NucleotideSequence::state_to_symbol_map_.end()) {
-                colugo::colugo_abort("Invalid state: ", s);
+                colugo::console::abort("Invalid state: ", s);
             }
             return symbol_lookup->second;
         }

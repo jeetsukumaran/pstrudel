@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <iterator>
-#include <colugo/utility.hpp>
+#include <colugo/console.hpp>
 #include "character.hpp"
 
 namespace pstrudel {
@@ -116,7 +116,7 @@ std::string NucleotideSequence::get_states_as_symbols() const {
 //         } else {
 //             for (auto & c : line) {
 //                 if (seq == nullptr) {
-//                     colugo::colugo_abort("FASTA file read error: Line ",
+//                     colugo::console::abort("FASTA file read error: Line ",
 //                             line_idx+1,
 //                             "Expecting sequence label (i.e., line starting with '>')");
 //                 }
@@ -161,7 +161,7 @@ void NucleotideSequences::read_fasta(std::istream& src) {
         } else {
             for (auto & c : line) {
                 if (!seq) {
-                    colugo::colugo_abort("Expecting sequence label (i.e., line starting with '>')");
+                    colugo::console::abort("Expecting sequence label (i.e., line starting with '>')");
                 }
                 if (!std::isspace(c)) {
                     seq->append_state_by_symbol(c);

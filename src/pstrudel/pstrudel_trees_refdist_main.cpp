@@ -1,26 +1,3 @@
-#include <cassert>
-#include <colugo/cmdopt.hpp>
-#include <colugo/utility.hpp>
-#include <colugo/logger.hpp>
-#include <colugo/textutil.hpp>
-#include <platypus/model/treepattern.hpp>
-#include <platypus/serialize/newick.hpp>
-#include "dataio.hpp"
-#include "split.hpp"
-#include "pstrudel.hpp"
-
-typedef std::map<unsigned long, double> TreeReferenceDistanceType;
-
-template <class TreeT>
-platypus::NewickWriter<TreeT> get_newick_writer(bool include_edge_lengths=true) {
-    platypus::NewickWriter<TreeT>  newick_writer;
-    newick_writer.set_tree_is_rooted_getter([](const TreeT & tree)->bool {return tree.is_rooted();} );
-    newick_writer.set_node_label_getter([](const typename TreeT::value_type & nv)->std::string {return nv.get_label();} );
-    if (include_edge_lengths) {
-        newick_writer.set_edge_length_getter([](const typename TreeT::value_type & nv)->double {return nv.get_edge_length();} );
-    }
-    return newick_writer;
-}
 
 int main(int argc, const char * argv[]) {
     // std::string prog_id = pstrudel::get_program_identification("PSTRUDEL-TREES-REFDIST").c_str();
