@@ -14,7 +14,7 @@ int main(int argc, const char * argv[]) {
     // bool force_rooted = false;
     // bool force_unrooted = false;
     unsigned long num_interpolated_points = 0;
-    bool calculate_other_distance_metrics = false;
+    bool calculate_symmetric_diff = false;
     std::string output_prefix = "";
     bool suppress_header_row = false;
     bool quiet = false;
@@ -27,10 +27,10 @@ int main(int argc, const char * argv[]) {
             "format for input source ('nexus', 'newick'; default = 'nexus')");
     parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
             "number of interpolated points in profile metric; if specified, this must be equal or greater to than the largest input data size; if not specified, will default to the largest input data size");
-    parser.add_switch(&calculate_other_distance_metrics,
-            "-a",
-            "--calculate-other-distance-metrics",
-            "calculate other distance metrics (i.e., unlabeled symmetric difference, etc.)");
+    parser.add_switch(&calculate_symmetric_diff,
+            NULL,
+            "--sym-diff",
+            "calculate (unlabeled) symmetric difference between trees");
     parser.add_option<std::string>(&output_prefix, "-o", "--output-prefix",
             "prefix (directory path and filename stem) for output file(s); if not specified, will write to standard output");
     parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row", "do not write column/field name row in reuslts");
