@@ -8,41 +8,73 @@
 #include "distancetree.hpp"
 
 int main(int argc, const char * argv[]) {
-    std::string prog_id = pstrudel::get_program_identification("PSTRUDEL-TREES").c_str();
-    std::string format = "nexus";
-    unsigned long num_interpolated_points = 0;
-    bool suppress_pairwise_distances = false;
-    bool suppress_canonical_distances = false;
-    bool calculate_symmetric_diff = false;
-    std::string default_output_filename_stem = "pstrudel-trees";
-    std::string output_prefix = default_output_filename_stem;
-    bool suppress_copying_of_source_trees = false;
-    bool suppress_header_row = false;
-    bool quiet = false;
+    std::string      prog_id                                =     pstrudel::get_program_identification("PSTRUDEL-TREES").c_str();
+    std::string      format                                 =     "nexus";
+    unsigned         long num_interpolated_points           =     0;
+    bool             calculate_baseline_distances           =     false;
+    bool             calculate_pairwise_distances           =     false;
+    bool             calculate_symmetric_diff               =     false;
+    std::string      reference_trees_filepath               =     "";
+    std::string      default_output_filename_stem           =     "pstrudel-trees";
+    std::string      output_prefix                          =     default_output_filename_stem;
+    bool             suppress_copying_of_comparison_trees   =     false;
+    bool             suppress_header_row                    =     false;
+    bool             replace_existing_output_files          =     false;
+    bool             quiet                                  =     false;
 
     colugo::OptionParser parser = colugo::OptionParser(
             prog_id.c_str(),
             "Calculate and report distances between trees.",
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
-    parser.add_option<std::string>(&format, "-f", "--format",
-            "Format for input source ('nexus', 'newick'; default = 'nexus').");
+    parser.add_switch(&calculate_baseline_distances,
+            "-b",
+            "--baseline",
+            "Calculate distances from every tree to reference trees"
+            " (trees in file given by '--reference-trees' or canonical tree "
+            " patterns if '--reference-trees' not specified).");
+    parser.add_switch(&calculate_pairwise_distances,
+            "-p",
+            "--pairwise",
+            "Calculate distances from every tree to every other tree.");
     parser.add_switch(&calculate_symmetric_diff,
-            NULL,
-            "--sym-diff",
-            "Calculate (unlabeled) symmetric difference between trees.");
+            "-s",
+            "--symmetric-difference",
+            "Calculate (unlabeled) Robinson-Foulds symmetric difference distance from"
+            " every tree to every other tree.");
+    parser.add_option<std::string>(&reference_trees_filepath, "-t", "--reference-trees",
+            "Tree(s) to use as benchmark(s) when calculating baseline distances;"
+            " if not specified, canonical tree patterns will be used.",
+            "REFERENCE-TREE-FILEPATH");
+    parser.add_option<std::string>(&format, "-f", "--format",
+            "Format for tree sources, one of:'nexus' [default] or 'newick'.",
+            "FORMAT");
     parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
             "Number of interpolated points in profile metric; if specified."
             " This must be equal or greater to than the largest input data size."
-            " If not specified, will default to the largest input data size.");
+            " If not specified, will default to the largest input data size.",
+            "SIZE");
     parser.add_option<std::string>(&output_prefix, "-o", "--output-prefix",
             "Prefix (directory path and filename stem) for output file(s); if"
-            " not specified, will default to '%default'.");
-    parser.add_switch(&suppress_copying_of_source_trees, NULL, "--suppress-source-tree-copy",
-            "Do not save an aggregated copy of the source tree files.");
+            " not specified, will default to '%default'.",
+            "PATH/TO/OUTPUT");
+    parser.add_switch(&replace_existing_output_files,
+            "-r",
+            "--replace-existing-output",
+            "Replace (overwrite) existing output files.");
+    parser.add_switch(&suppress_copying_of_comparison_trees, NULL, "--suppress-comparison-tree-copy",
+            "Do not save an aggregated copy of the comparison tree files.");
     parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
             "Do not write column/field name row in results.");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
+
+    // set up run logger
+    colugo::Logger logger("pstrudel-trees");
+    if (quiet) {
+        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
+    } else {
+        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::INFO);
+    }
 
     // set up output filepaths
     if (COLUGO_FILESYS_PATH_SEPARATOR[0] == output_prefix[output_prefix.size()-1]) {
@@ -53,33 +85,56 @@ int main(int argc, const char * argv[]) {
     }
     std::map<std::string, std::string> output_filepaths;
     output_filepaths["log"] = output_prefix + "log";
-    output_filepaths["source-trees"] = output_prefix + "source.trees";
-    output_filepaths["canonical-trees"] = output_prefix + "canonical.trees";
-    output_filepaths["distances"] = output_prefix + "distances.txt";
-    output_filepaths["distances-stacked"] = output_prefix + "distances.stacked.txt";
-
-    // set up run logger
-    colugo::Logger logger("pstrudel-trees");
-    if (quiet) {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
-    } else {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::INFO);
+    if (!suppress_copying_of_comparison_trees) {
+        output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
+    }
+    if (calculate_baseline_distances) {
+        output_filepaths["reference-trees"] = output_prefix + "reference.trees";
+        output_filepaths["baseline-distances"] = output_prefix + "distances.baseline.txt";
+        output_filepaths["baseline-distances-stacked"] = output_prefix + "distances.baseline.stacked.txt";
+    }
+    if (calculate_pairwise_distances) {
+        output_filepaths["pairwise-distances"] = output_prefix + "distances.pairwise.txt";
+        output_filepaths["pairwise-distances-stacked"] = output_prefix + "distances.pairwise.stacked.txt";
     }
 
-    // get source trees
+    if (!replace_existing_output_files) {
+        // make sure we are not overwriting
+        std::set<std::string> existing_output_files;
+        for (auto & off : output_filepaths) {
+            if (colugo::filesys::exists(off.second)) {
+                existing_output_files.insert(off.second);
+            }
+        }
+        if (!existing_output_files.empty()) {
+            colugo::console::err_wrapped("The following files will be overwritten by the current command:\n");
+            for (auto & ef : existing_output_files) {
+                colugo::console::err_line("  - ", ef);
+            }
+            colugo::console::err_wrapped("\nRe-run the command using the '-r'/'--replace-existing-output' option to overwrite the files "
+                    "or specify a different output prefix using the '-o'/'--output-prefix' option. Alternatively, you "
+                    "may prefer to rename, move, or simply delete these files before proceeding.");
+            exit(EXIT_FAILURE);
+        }
+    }
+    for (auto & off : output_filepaths) {
+        std::ofstream o(off.second);
+    }
+
+    // get comparison trees
     std::vector<std::string> args = parser.get_args();
-    std::vector<pstrudel::DistanceTree> source_trees;
+    std::vector<pstrudel::DistanceTree> comparison_trees;
     if (args.size() == 0) {
         logger.info("(reading trees from standard input)");
-        pstrudel::treeio::read_from_stream(source_trees, std::cin, format);
+        pstrudel::treeio::read_from_stream(comparison_trees, std::cin, format);
     } else {
         unsigned file_idx = 1;
         for (auto & arg : args) {
-            logger.info("Reading tree source file ", file_idx, " of ", args.size(), ": ", arg);
-            pstrudel::treeio::read_from_filepath(source_trees, arg, format);
+            logger.info("Reading tree comparison file ", file_idx, " of ", args.size(), ": ", arg);
+            pstrudel::treeio::read_from_filepath(comparison_trees, arg, format);
             ++file_idx;
         }
-        logger.info(source_trees.size(), " trees read.");
+        logger.info(comparison_trees.size(), " trees read.");
     }
 
     // // process source_trees
