@@ -5,6 +5,7 @@
 #include <platypus/model/datatable.hpp>
 #include <platypus/serialize/newick.hpp>
 #include <platypus/model/treepattern.hpp>
+#include <platypus/model/standardtree.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pstrudel.hpp"
@@ -31,12 +32,12 @@ void build_canonical_tree_patterns(TreePatternCollectionType & tree_patterns,
         unsigned long num_tips,
         bool labeled=false) {
     auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
-    auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips);
+    auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
     platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
     ub_tree.build_pairwise_tip_distance_profiles();
     ub_tree.calc_subtree_sizes();
     auto & bal_tree = tree_patterns[num_tips]["max.balanced"];
-    auto bal_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips);
+    auto bal_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
     platypus::build_maximally_balanced_tree(bal_tree, bal_leaves.begin(), bal_leaves.end());
     bal_tree.build_pairwise_tip_distance_profiles();
     bal_tree.calc_subtree_sizes();
@@ -260,6 +261,8 @@ int main(int argc, const char * argv[]) {
             {
                 auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
                 platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
+                ref_tree_writer.set_suppress_edge_lengths(true);
+                platypus::configure_writer_for_standard_interface(ref_tree_writer);
                 std::ofstream ref_trees_out(ref_trees_output_fpath);
                 for (auto & tp_by_size : tree_patterns) {
                     for (auto & tp_by_type : tp_by_size.second) {
