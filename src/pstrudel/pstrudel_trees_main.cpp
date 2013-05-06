@@ -2,10 +2,45 @@
 #include <colugo/filesys.hpp>
 #include <colugo/cmdopt.hpp>
 #include <colugo/logger.hpp>
+#include <platypus/model/datatable.hpp>
+#include <platypus/serialize/newick.hpp>
+#include <platypus/model/treepattern.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pstrudel.hpp"
 #include "distancetree.hpp"
+
+typedef std::map<unsigned long, std::map<std::string, pstrudel::DistanceTree>> TreePatternCollectionType;
+
+template <class TreeT>
+std::vector<typename TreeT::value_type> generate_leaves(unsigned long num_tips,
+        bool labeled=false) {
+    std::vector<typename TreeT::value_type> leaves;
+    leaves.reserve(num_tips);
+    for (unsigned long i = 0; i < num_tips; ++i) {
+        leaves.emplace_back();
+        if (labeled) {
+            auto & leaf = leaves.back();
+            leaf.set_label("t" + std::to_string(i+1));
+        }
+    }
+    return leaves;
+}
+
+void build_canonical_tree_patterns(TreePatternCollectionType & tree_patterns,
+        unsigned long num_tips,
+        bool labeled=false) {
+    auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
+    auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips);
+    platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
+    ub_tree.build_pairwise_tip_distance_profiles();
+    ub_tree.calc_subtree_sizes();
+    auto & bal_tree = tree_patterns[num_tips]["max.balanced"];
+    auto bal_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips);
+    platypus::build_maximally_balanced_tree(bal_tree, bal_leaves.begin(), bal_leaves.end());
+    bal_tree.build_pairwise_tip_distance_profiles();
+    bal_tree.calc_subtree_sizes();
+}
 
 int main(int argc, const char * argv[]) {
     std::string      prog_name                            = "pstrudel-trees";
@@ -16,11 +51,13 @@ int main(int argc, const char * argv[]) {
     bool             calculate_pairwise_distances         = false;
     bool             calculate_symmetric_diff             = false;
     std::string      reference_trees_filepath             = "";
-    std::string      default_output_filename_stem         = "pstrudel-trees";
+    std::string      default_output_filename_stem         = "pstrudel-trees-results";
     std::string      output_prefix                        = default_output_filename_stem;
     bool             suppress_copying_of_comparison_trees = false;
     bool             suppress_header_row                  = false;
+    bool             suppress_tree_source_key             = false;
     bool             replace_existing_output_files        = false;
+    unsigned long    log_frequency                        = 0;
     bool             quiet                                = false;
 
     colugo::OptionParser parser = colugo::OptionParser(
@@ -66,8 +103,14 @@ int main(int argc, const char * argv[]) {
             "Replace (overwrite) existing output files.");
     parser.add_switch(&suppress_copying_of_comparison_trees, NULL, "--suppress-comparison-tree-copy",
             "Do not save an aggregated copy of the comparison tree files.");
+    parser.add_switch(&suppress_header_row, NULL, "--suppress-tree-source-key",
+            "Do not add a column in the results identifying the filename of the source of the tree(s) being compared.");
     parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
             "Do not write column/field name row in results.");
+    parser.add_switch(&log_frequency,
+            NULL,
+            "--log-frequency",
+            "Frequency with which to log tree processing progress.");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
 
@@ -179,6 +222,54 @@ int main(int argc, const char * argv[]) {
             ++file_idx;
         }
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
+    }
+
+    // reference distances
+    if (calculate_reference_distances) {
+        // set up table
+        platypus::DataTable results_table;
+        results_table.add_key_column<unsigned long>("tree.idx");
+        if (!suppress_tree_source_key) {
+            results_table.add_key_column<std::string>("source.filepath");
+        }
+        if (!reference_trees_filepath.empty()) {
+            // user-supplied ref trees
+            colugo::console::abort("User-specified reference trees not yet implemented");
+        } else {
+            // canonical ref trees
+            results_table.add_data_column<double>("y.uw.max.unbalanced");
+            results_table.add_data_column<double>("y.uw.max.balanced");
+            if (calculate_symmetric_diff) {
+                results_table.add_data_column<double>("urf.uw.max.unbalanced");
+                results_table.add_data_column<double>("urf.uw.max.balanced");
+            }
+            TreePatternCollectionType tree_patterns;
+            if (log_frequency == 0) {
+                log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
+            }
+            logger.info("Begining calculating profile distances between comparison trees and canoncial tree patterns");
+            for (auto & comparison_tree : comparison_trees) {
+                auto comparison_tree_size = comparison_tree.get_num_tips();
+                if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
+                    logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
+                    build_canonical_tree_patterns(tree_patterns, comparison_tree_size, true);
+                }
+            } // tree comparison
+
+            // output canonical reference trees
+            {
+                auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
+                platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
+                std::ofstream ref_trees_out(ref_trees_output_fpath);
+                for (auto & tp_by_size : tree_patterns) {
+                    for (auto & tp_by_type : tp_by_size.second) {
+                        ref_tree_writer.write_tree(tp_by_type.second, ref_trees_out);
+                        ref_trees_out << std::endl;
+                    }
+                }
+            }
+
+        } // canonical ref trees
     }
 }
 
