@@ -116,18 +116,21 @@ int main(int argc, const char * argv[]) {
         logger.add_channel(std::cerr,
                 colugo::Logger::LoggingLevel::WARNING,
                 true,
-                colugo::Logger::LoggingLevel::NONE);
+                colugo::Logger::LoggingLevel::NOTSET);
     } else {
         logger.add_channel(std::cerr,
                 colugo::Logger::LoggingLevel::INFO,
                 true,
-                colugo::Logger::LoggingLevel::WARNING);
+                colugo::Logger::LoggingLevel::NOTSET);
     }
     std::ofstream logfile(output_filepaths["log"]);
     logger.add_channel(logfile,
             colugo::Logger::LoggingLevel::INFO,
             true,
-            colugo::Logger::LoggingLevel::WARNING);
+            colugo::Logger::LoggingLevel::NOTSET);
+
+    // log program identification
+    logger.info(prog_id, " is running");
 
     // get and identify omparison trees
     std::vector<std::string> args = parser.get_args();
@@ -155,7 +158,7 @@ int main(int argc, const char * argv[]) {
                     "' (total number of trees in comparison set: ", comparison_trees.size(), ")");
             ++file_idx;
         }
-        logger.info(comparison_trees.size(), " trees read.");
+        logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
 
     // // process source_trees
