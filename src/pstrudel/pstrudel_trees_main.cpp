@@ -8,27 +8,28 @@
 #include "distancetree.hpp"
 
 int main(int argc, const char * argv[]) {
-    std::string      prog_id                                =     pstrudel::get_program_identification("PSTRUDEL-TREES").c_str();
-    std::string      format                                 =     "nexus";
-    unsigned         long num_interpolated_points           =     0;
-    bool             calculate_baseline_distances           =     false;
-    bool             calculate_pairwise_distances           =     false;
-    bool             calculate_symmetric_diff               =     false;
-    std::string      reference_trees_filepath               =     "";
-    std::string      default_output_filename_stem           =     "pstrudel-trees";
-    std::string      output_prefix                          =     default_output_filename_stem;
-    bool             suppress_copying_of_comparison_trees   =     false;
-    bool             suppress_header_row                    =     false;
-    bool             replace_existing_output_files          =     false;
-    bool             quiet                                  =     false;
+    std::string      prog_name                            = "pstrudel-trees";
+    std::string      prog_id                              = pstrudel::get_program_identification(prog_name).c_str();
+    std::string      format                               = "nexus";
+    unsigned         long num_interpolated_points         = 0;
+    bool             calculate_reference_distances        = false;
+    bool             calculate_pairwise_distances         = false;
+    bool             calculate_symmetric_diff             = false;
+    std::string      reference_trees_filepath             = "";
+    std::string      default_output_filename_stem         = "pstrudel-trees";
+    std::string      output_prefix                        = default_output_filename_stem;
+    bool             suppress_copying_of_comparison_trees = false;
+    bool             suppress_header_row                  = false;
+    bool             replace_existing_output_files        = false;
+    bool             quiet                                = false;
 
     colugo::OptionParser parser = colugo::OptionParser(
             prog_id.c_str(),
-            "Calculate and report distances between trees.",
+            "Calculate structural distances between unlabeled phylogenetic trees of various sizes.",
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
-    parser.add_switch(&calculate_baseline_distances,
-            "-b",
-            "--baseline",
+    parser.add_switch(&calculate_reference_distances,
+            "-r",
+            "--reference",
             "Calculate distances from every tree to reference trees"
             " (trees in file given by '--reference-trees' or canonical tree "
             " patterns if '--reference-trees' not specified).");
@@ -40,9 +41,11 @@ int main(int argc, const char * argv[]) {
             "-s",
             "--symmetric-difference",
             "Calculate (unlabeled) Robinson-Foulds symmetric difference distance from"
-            " every tree to every other tree.");
+            " every tree to every other tree (within the comparison set, to the"
+            " reference trees, or both, depending on whether '-r'/'--reference', "
+            " '-p'/'--pairwise', or both options are specified).");
     parser.add_option<std::string>(&reference_trees_filepath, "-t", "--reference-trees",
-            "Tree(s) to use as benchmark(s) when calculating baseline distances;"
+            "Tree(s) to use as benchmark(s) when calculating reference distances;"
             " if not specified, canonical tree patterns will be used.",
             "REFERENCE-TREE-FILEPATH");
     parser.add_option<std::string>(&format, "-f", "--format",
@@ -58,7 +61,7 @@ int main(int argc, const char * argv[]) {
             " not specified, will default to '%default'.",
             "PATH/TO/OUTPUT");
     parser.add_switch(&replace_existing_output_files,
-            "-r",
+            "-x",
             "--replace-existing-output",
             "Replace (overwrite) existing output files.");
     parser.add_switch(&suppress_copying_of_comparison_trees, NULL, "--suppress-comparison-tree-copy",
@@ -67,6 +70,23 @@ int main(int argc, const char * argv[]) {
             "Do not write column/field name row in results.");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
+
+    if (!quiet) {
+        // std::string border(prog_id.size(), '=');
+        std::string border(78, '=');
+        colugo::console::out_ln(border);
+        colugo::console::out_ln(prog_name, " - Phylogenetic STRUctural Distance EvaLuation (on Trees)");
+        colugo::console::out_ln("[Revision: ", pstrudel::get_program_source_identification(), "]");
+        colugo::console::out_ln("By Jeet Sukumaran");
+        parser.write_description(std::cout);
+        std::cout << "\n";
+        colugo::console::out_ln(border);
+    }
+
+    if (!calculate_reference_distances && !calculate_pairwise_distances) {
+        colugo::console::err_line("Need to specify at least one of '-r'/'--reference' or '-p'/'--pairwise' options");
+        exit(EXIT_FAILURE);
+    }
 
     // set up output filepaths
     if (COLUGO_FILESYS_PATH_SEPARATOR[0] == output_prefix[output_prefix.size()-1]) {
@@ -80,10 +100,10 @@ int main(int argc, const char * argv[]) {
     if (!suppress_copying_of_comparison_trees) {
         output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
     }
-    if (calculate_baseline_distances) {
+    if (calculate_reference_distances) {
         output_filepaths["reference-trees"] = output_prefix + "reference.trees";
-        output_filepaths["baseline-distances"] = output_prefix + "distances.baseline.txt";
-        output_filepaths["baseline-distances-stacked"] = output_prefix + "distances.baseline.stacked.txt";
+        output_filepaths["reference-distances"] = output_prefix + "distances.reference.txt";
+        output_filepaths["reference-distances-stacked"] = output_prefix + "distances.reference.stacked.txt";
     }
     if (calculate_pairwise_distances) {
         output_filepaths["pairwise-distances"] = output_prefix + "distances.pairwise.txt";
@@ -103,7 +123,7 @@ int main(int argc, const char * argv[]) {
             for (auto & ef : existing_output_files) {
                 colugo::console::err_line("  - '", ef, "'");
             }
-            colugo::console::err_wrapped("\nRe-run the command using the '-r'/'--replace-existing-output' option to overwrite the files "
+            colugo::console::err_wrapped("\nRe-run the command using the '-x'/'--replace-existing-output' option to overwrite the files "
                     "or specify a different output prefix using the '-o'/'--output-prefix' option. Alternatively, you "
                     "may prefer to rename, move, or simply delete these files before proceeding.");
             exit(EXIT_FAILURE);
@@ -132,7 +152,7 @@ int main(int argc, const char * argv[]) {
     // log program identification
     logger.info(prog_id, " is running");
 
-    // get and identify omparison trees
+    // get and identify comparison trees
     std::vector<std::string> args = parser.get_args();
     std::vector<pstrudel::DistanceTree> comparison_trees;
     std::vector<std::string> comparison_tree_sources;
@@ -160,108 +180,6 @@ int main(int argc, const char * argv[]) {
         }
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
-
-    // // process source_trees
-    // logger.info("Calculating tree metrics ...");
-    // for (auto & tree : source_trees) {
-    //     tree.calc_profile_metrics();
-    // }
-
-    // // get number of interpolated points
-    // if (num_interpolated_points == 0) {
-    //     logger.info("Calculating number of interpolated points in profiles ...");
-    //     std::map<const std::string, unsigned long> global_num_interpolated_points;
-    //     for (auto & tree : source_trees) {
-    //         tree.poll_max_num_interpolated_profile_points(global_num_interpolated_points);
-    //     }
-    //     unsigned long min_points = 0;
-    //     unsigned long max_points = 0;
-    //     for (auto npi : global_num_interpolated_points) {
-    //         if (min_points < npi.second) {
-    //             min_points = npi.second;
-    //         }
-    //         if (max_points < npi.second) {
-    //             max_points = npi.second;
-    //         }
-    //     }
-    //     logger.info("Minumum number of interpolated profile points: ", min_points);
-    //     logger.info("Maximum number of interpolated profile points: ", max_points);
-    //     logger.info("Configuring profile build regime ...");
-    //     for (auto & tree : source_trees) {
-    //         tree.set_num_interpolated_profile_points(global_num_interpolated_points);
-    //     }
-    // }
-
-    // // build profiles
-    // logger.info("Building tree profiles ...");
-    // for (auto & tree : source_trees) {
-    //     tree.build_profile();
-    // }
-
-    // // calculate pairwise profile distances
-    // TreeDistanceMatrixType  unweighted_profile_distances;
-    // TreeDistanceMatrixType  weighted_profile_distances;
-    // TreeDistanceMatrixType  full_distances;
-    // logger.info("Calculating all pairwise profile distances ...");
-    // for (unsigned long tree_idx1 = 0; tree_idx1 < source_trees.size() - 1; ++tree_idx1) {
-    //     auto & tree1 = source_trees[tree_idx1];
-    //     for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < source_trees.size(); ++tree_idx2) {
-    //         auto & tree2 = source_trees[tree_idx2];
-    //         unweighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_unweighted_subprofile_distance(tree2);
-    //         weighted_profile_distances[tree_idx1][tree_idx2] = tree1.get_weighted_subprofile_distance(tree2);
-    //         full_distances[tree_idx1][tree_idx2] = tree1.get_distance(tree2);
-    //     }
-    // }
-
-    // // calculate pairwise symmetric distances
-    // TreeDistanceMatrixType  unlabeled_symmetric_differences;
-    // if (calculate_other_distance_metrics) {
-    //     logger.info("Calculating other metrics ...");
-    //     std::vector<pstrudel::SymmetricDifferenceTree> symmetric_difference_trees;
-    //     symmetric_difference_trees.reserve(source_trees.size());
-    //     for (auto & tree1 : source_trees) {
-    //         symmetric_difference_trees.emplace_back(tree1);
-    //         auto & sd_tree = symmetric_difference_trees.back();
-    //         sd_tree.calc_subtree_sizes();
-    //     }
-    //     COLUGO_ASSERT(symmetric_difference_trees.size() == source_trees.size());
-    //     for (unsigned long tree_idx1 = 0; tree_idx1 < symmetric_difference_trees.size() - 1; ++tree_idx1) {
-    //         auto & tree1 = symmetric_difference_trees[tree_idx1];
-    //         for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < symmetric_difference_trees.size(); ++tree_idx2) {
-    //             auto & tree2 = symmetric_difference_trees[tree_idx2];
-    //             unlabeled_symmetric_differences[tree_idx1][tree_idx2] = tree1.calc_leaf_set_sizes_unlabeled_symmetric_difference(tree2);
-    //         }
-    //     }
-    // }
-
-    // std::ostream& out = std::cout;
-    // if (!suppress_header_row) {
-    //     out << "Tree_i";
-    //     out << "\t" << "Tree_j";
-    //     out << "\t" << "uw.profile.dist";
-    //     out << "\t" << "w.profile.dist";
-    //     out << "\t" << "a.profile.dist";
-    //     if (calculate_other_distance_metrics) {
-    //         out << "\t" << "sym.diff.dist";
-    //     }
-    //     out << std::endl;
-    // }
-
-    // unsigned long num_trees = source_trees.size();
-    // for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
-    //     for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
-    //         out << tree_idx1 + 1;
-    //         out << "\t" << tree_idx2 + 1;
-    //         out << "\t" << std::setprecision(20) << unweighted_profile_distances[tree_idx1][tree_idx2];
-    //         out << "\t" << std::setprecision(20) << weighted_profile_distances[tree_idx1][tree_idx2];
-    //         out << "\t" << std::setprecision(20) << full_distances[tree_idx1][tree_idx2];
-    //         if (calculate_other_distance_metrics) {
-    //             out << "\t" << unlabeled_symmetric_differences[tree_idx1][tree_idx2];
-    //         }
-    //         out << std::endl;
-    //     }
-    // }
-
 }
 
 
