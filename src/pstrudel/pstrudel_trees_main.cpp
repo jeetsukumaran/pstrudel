@@ -113,12 +113,21 @@ int main(int argc, const char * argv[]) {
     // set up run logger
     colugo::Logger logger("pstrudel-trees");
     if (quiet) {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
+        logger.add_channel(std::cerr,
+                colugo::Logger::LoggingLevel::WARNING,
+                true,
+                colugo::Logger::LoggingLevel::NONE);
     } else {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::INFO);
+        logger.add_channel(std::cerr,
+                colugo::Logger::LoggingLevel::INFO,
+                true,
+                colugo::Logger::LoggingLevel::WARNING);
     }
     std::ofstream logfile(output_filepaths["log"]);
-    logger.add_channel(logfile, colugo::Logger::LoggingLevel::INFO);
+    logger.add_channel(logfile,
+            colugo::Logger::LoggingLevel::INFO,
+            true,
+            colugo::Logger::LoggingLevel::WARNING);
 
     // get and identify omparison trees
     std::vector<std::string> args = parser.get_args();
