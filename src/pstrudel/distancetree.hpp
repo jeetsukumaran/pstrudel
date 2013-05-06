@@ -80,6 +80,10 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         const char * WEIGHTED_PAIRWISE_TIP = "weighted pairwise tip";
 
     public:
+
+        /////////////////////////////////////////////////////////////////////////
+        // lifecycle and assignment
+
         DistanceTree(bool is_rooted=true);
         DistanceTree(DistanceTree && other);
         DistanceTree(const DistanceTree & other);

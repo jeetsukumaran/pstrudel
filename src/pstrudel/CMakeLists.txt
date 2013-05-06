@@ -4,8 +4,7 @@ SET(PSTRUDEL_MAIN_LIB_SOURCES
     profile.cpp
     split.cpp)
 SET(PSTRUDEL_MAIN_PROG_SOURCES
-    pstrudel_trees_main.cpp
-    pstrudel_trees_refdist_main.cpp)
+    pstrudel_trees_main.cpp)
 FOREACH(main_prog_source ${PSTRUDEL_MAIN_PROG_SOURCES})
     get_filename_component(basename ${main_prog_source} NAME_WE)
     # STRING(REGEX REPLACE <pattern> <replacement string>

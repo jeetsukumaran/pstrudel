@@ -68,14 +68,6 @@ int main(int argc, const char * argv[]) {
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
 
-    // set up run logger
-    colugo::Logger logger("pstrudel-trees");
-    if (quiet) {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
-    } else {
-        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::INFO);
-    }
-
     // set up output filepaths
     if (COLUGO_FILESYS_PATH_SEPARATOR[0] == output_prefix[output_prefix.size()-1]) {
         output_prefix = default_output_filename_stem;
@@ -109,7 +101,7 @@ int main(int argc, const char * argv[]) {
         if (!existing_output_files.empty()) {
             colugo::console::err_wrapped("The following files will be overwritten by the current command:\n");
             for (auto & ef : existing_output_files) {
-                colugo::console::err_line("  - ", ef);
+                colugo::console::err_line("  - '", ef, "'");
             }
             colugo::console::err_wrapped("\nRe-run the command using the '-r'/'--replace-existing-output' option to overwrite the files "
                     "or specify a different output prefix using the '-o'/'--output-prefix' option. Alternatively, you "
@@ -117,21 +109,41 @@ int main(int argc, const char * argv[]) {
             exit(EXIT_FAILURE);
         }
     }
-    for (auto & off : output_filepaths) {
-        std::ofstream o(off.second);
-    }
 
-    // get comparison trees
+    // set up run logger
+    colugo::Logger logger("pstrudel-trees");
+    if (quiet) {
+        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
+    } else {
+        logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::INFO);
+    }
+    std::ofstream logfile(output_filepaths["log"]);
+    logger.add_channel(logfile, colugo::Logger::LoggingLevel::INFO);
+
+    // get and identify omparison trees
     std::vector<std::string> args = parser.get_args();
     std::vector<pstrudel::DistanceTree> comparison_trees;
+    std::vector<std::string> comparison_tree_sources;
     if (args.size() == 0) {
-        logger.info("(reading trees from standard input)");
+        logger.info("(reading trees for comparison from standard input)");
         pstrudel::treeio::read_from_stream(comparison_trees, std::cin, format);
+        comparison_tree_sources.reserve(comparison_trees.size());
+        for (unsigned long i = 0; i < comparison_trees.size(); ++i) {
+            comparison_tree_sources.push_back("<stdin>");
+        }
+        logger.info(comparison_trees.size(), " trees read from standard input");
     } else {
         unsigned file_idx = 1;
+        unsigned long num_trees_read = 0;
         for (auto & arg : args) {
-            logger.info("Reading tree comparison file ", file_idx, " of ", args.size(), ": ", arg);
-            pstrudel::treeio::read_from_filepath(comparison_trees, arg, format);
+            auto fullpath = colugo::filesys::absolute_path(arg);
+            logger.info("Reading trees for comparison from file ", file_idx, " of ", args.size(), ": '", fullpath, "'");
+            num_trees_read = pstrudel::treeio::read_from_filepath(comparison_trees, fullpath, format);
+            for (unsigned long i = 0; i < num_trees_read; ++i) {
+                comparison_tree_sources.push_back(fullpath);
+            }
+            logger.info(num_trees_read, " trees read from '", fullpath,
+                    "' (total number of trees in comparison set: ", comparison_trees.size(), ")");
             ++file_idx;
         }
         logger.info(comparison_trees.size(), " trees read.");
