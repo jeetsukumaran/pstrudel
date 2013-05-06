@@ -15,7 +15,7 @@ typedef std::map<unsigned long, std::map<std::string, pstrudel::DistanceTree>> T
 
 template <class TreeT>
 std::vector<typename TreeT::value_type> generate_leaves(unsigned long num_tips,
-        bool labeled=false) {
+        bool labeled) {
     std::vector<typename TreeT::value_type> leaves;
     leaves.reserve(num_tips);
     for (unsigned long i = 0; i < num_tips; ++i) {
@@ -28,38 +28,61 @@ std::vector<typename TreeT::value_type> generate_leaves(unsigned long num_tips,
     return leaves;
 }
 
-void build_canonical_tree_patterns(TreePatternCollectionType & tree_patterns,
+template <typename BuildFnT>
+void build_tree_pattern(pstrudel::DistanceTree & tree, BuildFnT tree_building_fn, unsigned long num_tips, bool labeled) {
+    auto leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
+    tree_building_fn(tree, leaves.begin(), leaves.end());
+    tree.build_pairwise_tip_distance_profiles();
+    tree.calc_subtree_sizes();
+}
+
+void build_canonical_tree_patterns(
+        TreePatternCollectionType & tree_patterns,
         unsigned long num_tips,
-        bool labeled=false) {
-    auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
-    auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
-    platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
-    ub_tree.build_pairwise_tip_distance_profiles();
-    ub_tree.calc_subtree_sizes();
-    auto & bal_tree = tree_patterns[num_tips]["max.balanced"];
-    auto bal_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
-    platypus::build_maximally_balanced_tree(bal_tree, bal_leaves.begin(), bal_leaves.end());
-    bal_tree.build_pairwise_tip_distance_profiles();
-    bal_tree.calc_subtree_sizes();
+        bool labeled) {
+    build_tree_pattern(
+            tree_patterns[num_tips]["max.unbalanced"],
+            [](pstrudel::DistanceTree & tree,
+                std::vector<pstrudel::DistanceNodeValue>::iterator i1,
+                std::vector<pstrudel::DistanceNodeValue>::iterator i2){ platypus::build_maximally_unbalanced_tree(tree, i1, i2);},
+            num_tips,
+            labeled);
+    build_tree_pattern(
+            tree_patterns[num_tips]["max.balanced"],
+            [](pstrudel::DistanceTree & tree,
+                std::vector<pstrudel::DistanceNodeValue>::iterator i1,
+                std::vector<pstrudel::DistanceNodeValue>::iterator i2){ platypus::build_maximally_balanced_tree(tree, i1, i2);},
+            num_tips,
+            labeled);
+    // auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
+    // auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
+    // platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
+    // ub_tree.build_pairwise_tip_distance_profiles();
+    // ub_tree.calc_subtree_sizes();
+    // auto & bal_tree = tree_patterns[num_tips]["max.balanced"];
+    // auto bal_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
+    // platypus::build_maximally_balanced_tree(bal_tree, bal_leaves.begin(), bal_leaves.end());
+    // bal_tree.build_pairwise_tip_distance_profiles();
+    // bal_tree.calc_subtree_sizes();
 }
 
 int main(int argc, const char * argv[]) {
-    std::string      prog_name                            = "pstrudel-trees";
-    std::string      prog_id                              = pstrudel::get_program_identification(prog_name).c_str();
-    std::string      format                               = "nexus";
-    unsigned         long num_interpolated_points         = 0;
-    bool             calculate_reference_distances        = false;
-    bool             calculate_pairwise_distances         = false;
-    bool             calculate_symmetric_diff             = false;
-    std::string      reference_trees_filepath             = "";
-    std::string      default_output_filename_stem         = "pstrudel-trees-results";
-    std::string      output_prefix                        = default_output_filename_stem;
-    bool             suppress_copying_of_comparison_trees = false;
-    bool             suppress_header_row                  = false;
-    bool             suppress_tree_source_key             = false;
-    bool             replace_existing_output_files        = false;
-    unsigned long    log_frequency                        = 0;
-    bool             quiet                                = false;
+    std::string      prog_name                               = "pstrudel-trees";
+    std::string      prog_id                                 = pstrudel::get_program_identification(prog_name).c_str();
+    std::string      format                                  = "nexus";
+    unsigned         long num_interpolated_points            = 0;
+    bool             calculate_reference_distances           = false;
+    bool             calculate_pairwise_distances            = false;
+    bool             calculate_symmetric_diff                = false;
+    std::string      reference_trees_filepath                = "";
+    std::string      default_output_filename_stem            = "pstrudel-trees-results";
+    std::string      output_prefix                           = default_output_filename_stem;
+    bool             create_aggregated_comparison_trees_copy = false;
+    bool             suppress_header_row                     = false;
+    bool             add_tree_source_key                     = false;
+    bool             replace_existing_output_files           = false;
+    unsigned long    log_frequency                           = 0;
+    bool             quiet                                   = false;
 
     colugo::OptionParser parser = colugo::OptionParser(
             prog_id.c_str(),
@@ -102,10 +125,10 @@ int main(int argc, const char * argv[]) {
             "-x",
             "--replace-existing-output",
             "Replace (overwrite) existing output files.");
-    parser.add_switch(&suppress_copying_of_comparison_trees, NULL, "--suppress-comparison-tree-copy",
-            "Do not save an aggregated copy of the comparison tree files.");
-    parser.add_switch(&suppress_header_row, NULL, "--suppress-tree-source-key",
-            "Do not add a column in the results identifying the filename of the source of the tree(s) being compared.");
+    parser.add_switch(&create_aggregated_comparison_trees_copy, NULL, "--save-comparison-trees",
+            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).");
+    parser.add_switch(&add_tree_source_key, NULL, "--add-tree-source-key",
+            "Add a column in the results identifying the filename of the source of the tree(s) being compared.");
     parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
             "Do not write column/field name row in results.");
     parser.add_switch(&log_frequency,
@@ -141,7 +164,7 @@ int main(int argc, const char * argv[]) {
     }
     std::map<std::string, std::string> output_filepaths;
     output_filepaths["log"] = output_prefix + "log";
-    if (!suppress_copying_of_comparison_trees) {
+    if (create_aggregated_comparison_trees_copy) {
         output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
     }
     if (calculate_reference_distances) {
@@ -230,9 +253,10 @@ int main(int argc, const char * argv[]) {
         // set up table
         platypus::DataTable results_table;
         results_table.add_key_column<unsigned long>("tree.idx");
-        if (!suppress_tree_source_key) {
+        if (add_tree_source_key) {
             results_table.add_key_column<std::string>("source.filepath");
         }
+        results_table.add_key_column<unsigned long>("num.tips");
         if (!reference_trees_filepath.empty()) {
             // user-supplied ref trees
             colugo::console::abort("User-specified reference trees not yet implemented");
@@ -248,13 +272,36 @@ int main(int argc, const char * argv[]) {
             if (log_frequency == 0) {
                 log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
             }
+
             logger.info("Begining calculating profile distances between comparison trees and canoncial tree patterns");
+            unsigned long comparison_tree_idx = 0;
             for (auto & comparison_tree : comparison_trees) {
+                auto & results_table_row = results_table.add_row();
+
                 auto comparison_tree_size = comparison_tree.get_num_tips();
                 if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                     logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
                     build_canonical_tree_patterns(tree_patterns, comparison_tree_size, true);
                 }
+
+                results_table_row.set("tree.idx", comparison_tree_idx);
+                if (add_tree_source_key) {
+                    results_table_row.set("source.filepath", comparison_tree_sources.at(comparison_tree_idx));
+                }
+                comparison_tree.build_pairwise_tip_distance_profiles();
+                comparison_tree.calc_subtree_sizes();
+                results_table_row.set("y.uw.max.unbalanced", comparison_tree_size);
+                results_table_row.set("y.uw.max.balanced", comparison_tree_size);
+                if (calculate_symmetric_diff) {
+                    results_table_row.set("urf.uw.max.unbalanced",
+                            comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]));
+                    results_table_row.set("urf.uw.max.balanced",
+                            comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]));
+                }
+
+
+
+                comparison_tree_idx += 1;
             } // tree comparison
 
             // output canonical reference trees
