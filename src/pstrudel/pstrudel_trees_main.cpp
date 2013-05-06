@@ -1,4 +1,5 @@
 #include <cassert>
+#include <colugo/filesys.hpp>
 #include <colugo/cmdopt.hpp>
 #include <colugo/logger.hpp>
 #include "dataio.hpp"
@@ -10,8 +11,12 @@ int main(int argc, const char * argv[]) {
     std::string prog_id = pstrudel::get_program_identification("PSTRUDEL-TREES").c_str();
     std::string format = "nexus";
     unsigned long num_interpolated_points = 0;
+    bool suppress_pairwise_distances = false;
+    bool suppress_canonical_distances = false;
     bool calculate_symmetric_diff = false;
-    std::string output_prefix = "pstrudel-trees";
+    std::string default_output_filename_stem = "pstrudel-trees";
+    std::string output_prefix = default_output_filename_stem;
+    bool suppress_copying_of_source_trees = false;
     bool suppress_header_row = false;
     bool quiet = false;
 
@@ -21,23 +26,39 @@ int main(int argc, const char * argv[]) {
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
     parser.add_option<std::string>(&format, "-f", "--format",
             "Format for input source ('nexus', 'newick'; default = 'nexus').");
-    parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
-            "Number of interpolated points in profile metric; if specified."
-            " This must be equal or greater to than the largest input data size."
-            " If not specified, will default to the largest input data size.");
     parser.add_switch(&calculate_symmetric_diff,
             NULL,
             "--sym-diff",
             "Calculate (unlabeled) symmetric difference between trees.");
+    parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
+            "Number of interpolated points in profile metric; if specified."
+            " This must be equal or greater to than the largest input data size."
+            " If not specified, will default to the largest input data size.");
     parser.add_option<std::string>(&output_prefix, "-o", "--output-prefix",
             "Prefix (directory path and filename stem) for output file(s); if"
             " not specified, will default to '%default'.");
+    parser.add_switch(&suppress_copying_of_source_trees, NULL, "--suppress-source-tree-copy",
+            "Do not save an aggregated copy of the source tree files.");
     parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
-            "Do not write column/field name row in reuslts.");
-    parser.add_switch(&quiet, "-q", "--quiet", "suppress all informational/progress messages");
+            "Do not write column/field name row in results.");
+    parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
 
-    // set up logger
+    // set up output filepaths
+    if (COLUGO_FILESYS_PATH_SEPARATOR[0] == output_prefix[output_prefix.size()-1]) {
+        output_prefix = default_output_filename_stem;
+    }
+    if (output_prefix[output_prefix.size() - 1] != '.') {
+        output_prefix = output_prefix + '.';
+    }
+    std::map<std::string, std::string> output_filepaths;
+    output_filepaths["log"] = output_prefix + "log";
+    output_filepaths["source-trees"] = output_prefix + "source.trees";
+    output_filepaths["canonical-trees"] = output_prefix + "canonical.trees";
+    output_filepaths["distances"] = output_prefix + "distances.txt";
+    output_filepaths["distances-stacked"] = output_prefix + "distances.stacked.txt";
+
+    // set up run logger
     colugo::Logger logger("pstrudel-trees");
     if (quiet) {
         logger.add_channel(std::cerr, colugo::Logger::LoggingLevel::WARNING);
