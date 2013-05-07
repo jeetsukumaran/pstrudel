@@ -70,15 +70,21 @@ class DistanceNodeValue : public platypus::StandardNodeValue {
 }; // DistanceNodeValue
 
 //////////////////////////////////////////////////////////////////////////////
-// PairwiseTipDistanceProfileCalculator
+// forward declaration
 
 class DistanceTree;
+
+//////////////////////////////////////////////////////////////////////////////
+// PairwiseTipDistanceProfileCalculator
+
 class PairwiseTipDistanceProfileCalculator {
 
     public:
         PairwiseTipDistanceProfileCalculator(DistanceTree & tree)
             : tree_(tree) { }
         PairwiseTipDistanceProfileCalculator & operator=(const PairwiseTipDistanceProfileCalculator & other);
+        double get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other);
+        double get_weighted_distance(PairwiseTipDistanceProfileCalculator & other);
 
     private:
         void build_pairwise_tip_distance_profiles();
@@ -153,8 +159,18 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         /////////////////////////////////////////////////////////////////////////
         // Calculators
 
+        double get_unweighted_pairwise_tip_profile_distance(DistanceTree & other) {
+            return this->pairwise_tip_distance_profile_calculator_.get_unweighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        }
+        double get_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
+            return this->pairwise_tip_distance_profile_calculator_.get_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        }
+
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
+        }
+        unsigned long get_unlabeled_symmetric_difference(DistanceTree & other) {
+            return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
         /////////////////////////////////////////////////////////////////////////

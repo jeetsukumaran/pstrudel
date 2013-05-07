@@ -28,6 +28,25 @@ void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles(
             weighted_distances.end());
 }
 
+double PairwiseTipDistanceProfileCalculator::get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+    if (this->unweighted_pairwise_tip_distance_profile_.empty()) {
+        this->build_pairwise_tip_distance_profiles();
+    }
+    if (other.unweighted_pairwise_tip_distance_profile_.empty()) {
+        other.build_pairwise_tip_distance_profiles();
+    }
+    return this->unweighted_pairwise_tip_distance_profile_.get_distance(other.unweighted_pairwise_tip_distance_profile_);
+}
+
+double PairwiseTipDistanceProfileCalculator::get_weighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+    if (this->weighted_pairwise_tip_distance_profile_.empty()) {
+        this->build_pairwise_tip_distance_profiles();
+    }
+    if (other.weighted_pairwise_tip_distance_profile_.empty()) {
+        other.build_pairwise_tip_distance_profiles();
+    }
+    return this->weighted_pairwise_tip_distance_profile_.get_distance(other.weighted_pairwise_tip_distance_profile_);
+}
 
 //////////////////////////////////////////////////////////////////////////////
 // SymmetricDifferenceCalculator
