@@ -69,6 +69,55 @@ class DistanceNodeValue : public platypus::StandardNodeValue {
         unsigned long                                                     num_leaves_;
 }; // DistanceNodeValue
 
+//////////////////////////////////////////////////////////////////////////////
+// PairwiseTipDistanceProfileCalculator
+
+class DistanceTree;
+class PairwiseTipDistanceProfileCalculator {
+
+    public:
+        PairwiseTipDistanceProfileCalculator(DistanceTree & tree)
+            : tree_(tree) { }
+        PairwiseTipDistanceProfileCalculator & operator=(const PairwiseTipDistanceProfileCalculator & other);
+
+    private:
+        void build_pairwise_tip_distance_profiles();
+
+    private:
+        DistanceTree &    tree_;
+        Profile           unweighted_pairwise_tip_distance_profile_;
+        Profile           weighted_pairwise_tip_distance_profile_;
+
+}; // PairwiseTipDistanceProfileCalculator
+
+//////////////////////////////////////////////////////////////////////////////
+// SymmetricDifferenceCalculator
+
+class SymmetricDifferenceCalculator {
+    public:
+        typedef std::unordered_multiset<unsigned long> SizesSetType;
+
+    public:
+        SymmetricDifferenceCalculator(DistanceTree & tree)
+            : tree_(tree) { }
+        SymmetricDifferenceCalculator & operator=(const SymmetricDifferenceCalculator & other);
+        void calc_subtree_sizes();
+        unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmetricDifferenceCalculator & other);
+        unsigned long get_unlabeled_symmetric_difference(SymmetricDifferenceCalculator & other);
+        unsigned long get_unweighted_labeled_symmetric_difference(SymmetricDifferenceCalculator & other);
+        unsigned long get_weighted_labeled_symmetric_difference(SymmetricDifferenceCalculator & other);
+        static unsigned long calc_set_symmetric_difference(
+                const SizesSetType & set1,
+                const SizesSetType & set2,
+                SizesSetType * common = nullptr,
+                SizesSetType * unmatched1 = nullptr,
+                SizesSetType * unmatched2 = nullptr);
+
+    private:
+        DistanceTree &    tree_;
+        SizesSetType      subtree_leaf_set_sizes_;
+}; // SymmetricDifferenceCalculator
+
 ////////////////////////////////////////////////////////////////////////////////
 // DistanceTree
 
@@ -76,8 +125,6 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
 
     public:
         typedef std::unordered_multiset<unsigned long> SizesSetType;
-        const char * UNWEIGHTED_PAIRWISE_TIP = "unweighted pairwise tip";
-        const char * WEIGHTED_PAIRWISE_TIP = "weighted pairwise tip";
 
     public:
 
@@ -107,25 +154,6 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
 
         /////////////////////////////////////////////////////////////////////////
-        // profile management
-
-        void build_pairwise_tip_distance_profiles() {
-            std::multiset<unsigned long> unweighted_distances;
-            std::multiset<double> weighted_distances;
-            auto f = [&unweighted_distances, &weighted_distances] (DistanceNodeValue &,
-                    DistanceNodeValue &,
-                    unsigned long u,
-                    double w) {
-                unweighted_distances.insert(u);
-                weighted_distances.insert(w);
-            };
-            this->calc_pairwise_tip_distances(f);
-            this->unweighted_pairwise_tip_distance_profile_.set_data(unweighted_distances.begin(),
-                    unweighted_distances.end());
-            this->weighted_pairwise_tip_distance_profile_.set_data(weighted_distances.begin(),
-                    weighted_distances.end());
-        }
-
         // This calculates the distances, but does not actually store them.
         // Client code eshould pass in appropriate storage behavior by using a
         // functor for the parameter `store_pairwise_tip_dist_fn`:
@@ -205,8 +233,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         unsigned long           number_of_tips_;
         double                  total_tree_length_;
         SizesSetType            subtree_leaf_set_sizes_;
+        PairwiseTipDistanceProfileCalculator pairwise_tip_distance_profile_calculator_;
+        SymmetricDifferenceCalculator                     symmetric_difference_calculator_;
 
 }; // DistanceTree
+
+
 
 } // namespace pstrudel
 #endif

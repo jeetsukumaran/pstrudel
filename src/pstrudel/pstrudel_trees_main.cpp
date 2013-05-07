@@ -32,8 +32,6 @@ template <typename BuildFnT>
 void build_tree_pattern(pstrudel::DistanceTree & tree, BuildFnT tree_building_fn, unsigned long num_tips, bool labeled) {
     auto leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
     tree_building_fn(tree, leaves.begin(), leaves.end());
-    tree.build_pairwise_tip_distance_profiles();
-    tree.calc_subtree_sizes();
 }
 
 void build_canonical_tree_patterns(
@@ -288,16 +286,14 @@ int main(int argc, const char * argv[]) {
                 if (add_tree_source_key) {
                     results_table_row.set("source.filepath", comparison_tree_sources.at(comparison_tree_idx));
                 }
-                comparison_tree.build_pairwise_tip_distance_profiles();
-                comparison_tree.calc_subtree_sizes();
-                results_table_row.set("y.uw.max.unbalanced", comparison_tree_size);
-                results_table_row.set("y.uw.max.balanced", comparison_tree_size);
-                if (calculate_symmetric_diff) {
-                    results_table_row.set("urf.uw.max.unbalanced",
-                            comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]));
-                    results_table_row.set("urf.uw.max.balanced",
-                            comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]));
-                }
+                // results_table_row.set("y.uw.max.unbalanced", comparison_tree_size);
+                // results_table_row.set("y.uw.max.balanced", comparison_tree_size);
+                // if (calculate_symmetric_diff) {
+                //     results_table_row.set("urf.uw.max.unbalanced",
+                //             comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]));
+                //     results_table_row.set("urf.uw.max.balanced",
+                //             comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]));
+                // }
 
 
 
