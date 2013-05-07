@@ -52,7 +52,14 @@ int main(int argc, const char * argv[]) {
                 __FILE__,
                 __LINE__,
                 "Incorrect weighted pairwise tip profile distance for tree ", tidx1, " and tree ", tidx2);
+        comparisons.erase(std::make_pair(tidx1, tidx2));
     }
+    fails += platypus::testing::compare_equal(
+            0UL,
+            comparisons.size(),
+            __FILE__,
+            __LINE__,
+            "Not all trees checked");
 
     if (fails != 0) {
         return EXIT_FAILURE;
