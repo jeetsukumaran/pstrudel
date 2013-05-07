@@ -52,7 +52,7 @@ int main(int argc, const char * argv[]) {
         SizesSetType common;
         SizesSetType unmatched1;
         SizesSetType unmatched2;
-        unsigned long obs_diff = pstrudel::DistanceTree::calc_set_symmetric_difference(s1, s2, &common, &unmatched1, &unmatched2);
+        unsigned long obs_diff = pstrudel::SymmetricDifferenceCalculator::calc_set_symmetric_difference(s1, s2, &common, &unmatched1, &unmatched2);
         fails += platypus::testing::compare_equal(
                 expected_diff,
                 obs_diff,

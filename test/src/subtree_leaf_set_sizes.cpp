@@ -18,13 +18,11 @@ int main(int argc, const char * argv[]) {
     std::string test_data_filepath = pstrudel::test::join_path(test_dir, "data", "trees", "general", "n10-rooted-patterns.nex");
     pstrudel::treeio::read_from_filepath(trees, test_data_filepath, "nexus");
 
-
-
     std::map<unsigned long, std::map<std::string, unsigned long>> obs_subtree_leaf_set_sizes;
     std::map<unsigned long, std::multiset<std::string>> obs_subtree_nodes;
     unsigned long tree_idx = 0;
     for (auto & tree : trees) {
-        tree.calc_subtree_sizes();
+        tree.get_symmetric_difference_calculator().calc_subtree_leaf_set_sizes();
         for (auto nd_iter = tree.postorder_begin(); nd_iter != tree.postorder_end(); ++nd_iter) {
             if (nd_iter.is_leaf()) {
                 continue;

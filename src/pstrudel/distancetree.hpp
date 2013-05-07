@@ -101,7 +101,7 @@ class SymmetricDifferenceCalculator {
         SymmetricDifferenceCalculator(DistanceTree & tree)
             : tree_(tree) { }
         SymmetricDifferenceCalculator & operator=(const SymmetricDifferenceCalculator & other);
-        void calc_subtree_sizes();
+        void calc_subtree_leaf_set_sizes();
         unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(SymmetricDifferenceCalculator & other);
         unsigned long get_unlabeled_symmetric_difference(SymmetricDifferenceCalculator & other);
         unsigned long get_unweighted_labeled_symmetric_difference(SymmetricDifferenceCalculator & other);
@@ -124,12 +124,9 @@ class SymmetricDifferenceCalculator {
 class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
 
     public:
-        typedef std::unordered_multiset<unsigned long> SizesSetType;
-
-    public:
 
         /////////////////////////////////////////////////////////////////////////
-        // lifecycle and assignment
+        // Lifecycle and assignment
 
         DistanceTree(bool is_rooted=true);
         DistanceTree(DistanceTree && other);
@@ -138,7 +135,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         ~DistanceTree() override {}
 
         /////////////////////////////////////////////////////////////////////////
-        // basic stats
+        // Basic metrics
 
         void set_num_tips(unsigned long n) {
             this->number_of_tips_ = n;
@@ -151,6 +148,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
         double get_total_tree_length() const {
             return this->total_tree_length_;
+        }
+
+        /////////////////////////////////////////////////////////////////////////
+        // Calculators
+
+        SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
+            return this->symmetric_difference_calculator_;
         }
 
         /////////////////////////////////////////////////////////////////////////
@@ -201,40 +205,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             }
         }
 
-        void calc_subtree_sizes();
-        unsigned long calc_leaf_set_sizes_unlabeled_symmetric_difference(DistanceTree & other);
-        unsigned long get_unlabeled_symmetric_difference(DistanceTree & other);
-        unsigned long get_unweighted_labeled_symmetric_difference(DistanceTree & other);
-        unsigned long get_weighted_labeled_symmetric_difference(DistanceTree & other);
-
     public:
 
-        static unsigned long calc_set_symmetric_difference(
-                const SizesSetType & set1,
-                const SizesSetType & set2,
-                SizesSetType * common = nullptr,
-                SizesSetType * unmatched1 = nullptr,
-                SizesSetType * unmatched2 = nullptr);
-
-            // this->profile_.add_subprofile_source(this->UNWEIGHTED_PAIRWISE_TIP,
-            //         unweighted_distances.begin(),
-            //         unweighted_distances.end(),
-            //         unweighted_distances.size(),
-            //         false);
-            // this->profile_.add_subprofile_source(this->WEIGHTED_PAIRWISE_TIP,
-            //         weighted_distances.begin(),
-            //         weighted_distances.end(),
-            //         weighted_distances.size(),
-            //         false);
-
     private:
-        Profile                 unweighted_pairwise_tip_distance_profile_;
-        Profile                 weighted_pairwise_tip_distance_profile_;
-        unsigned long           number_of_tips_;
-        double                  total_tree_length_;
-        SizesSetType            subtree_leaf_set_sizes_;
-        PairwiseTipDistanceProfileCalculator pairwise_tip_distance_profile_calculator_;
-        SymmetricDifferenceCalculator                     symmetric_difference_calculator_;
+        unsigned long                           number_of_tips_;
+        double                                  total_tree_length_;
+        PairwiseTipDistanceProfileCalculator    pairwise_tip_distance_profile_calculator_;
+        SymmetricDifferenceCalculator           symmetric_difference_calculator_;
 
 }; // DistanceTree
 
