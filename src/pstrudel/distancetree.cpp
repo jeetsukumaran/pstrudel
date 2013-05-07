@@ -2,6 +2,16 @@
 
 namespace pstrudel {
 
+//////////////////////////////////////////////////////////////////////////////
+// DistanceTreeProfile
+
+
+//////////////////////////////////////////////////////////////////////////////
+// DistanceTreeSymmetricDifference
+
+//////////////////////////////////////////////////////////////////////////////
+// DistanceTree
+
 DistanceTree::DistanceTree(bool is_rooted)
         : platypus::StandardTree<DistanceNodeValue>(is_rooted) {
 }
@@ -33,7 +43,6 @@ DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
     this->subtree_leaf_set_sizes_ = other.subtree_leaf_set_sizes_;
     return *this;
 }
-
 
 void DistanceTree::calc_subtree_sizes() {
     this->subtree_leaf_set_sizes_.clear();

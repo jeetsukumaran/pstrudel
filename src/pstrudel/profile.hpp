@@ -60,6 +60,9 @@ class Profile {
         }
 
         void clear();
+        bool empty() const {
+            return this->raw_data_.empty();
+        }
         unsigned long data_size() const {
             return this->raw_data_.size();
         }
