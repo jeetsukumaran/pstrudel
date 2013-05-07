@@ -110,6 +110,7 @@ INSTALL(PROGRAMS scripts/calc-pairwise-tip-distances.py DESTINATION ${TEST_DIR} 
 INSTALL(PROGRAMS scripts/calc-multiset-symmetric-difference.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(PROGRAMS scripts/calc-subtree-leaf-set-sizes.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(PROGRAMS scripts/calc-tree-pairwise-profile-distance.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(PROGRAMS scripts/calc-tree-unlabeled-symmetric-difference.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 
 INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
@@ -170,6 +171,7 @@ SET(TEST_TARGET_SOURCES
     src/symmetric_difference_of_multisets.cpp
     src/subtree_leaf_set_sizes.cpp
     src/tree_pairwise_profile_distance.cpp
+    src/tree_unlabeled_symmetric_difference_distance.cpp
     )
 
 ## For each test source, create the corresponding executable, add it as ##
