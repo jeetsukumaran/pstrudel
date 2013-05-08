@@ -12,7 +12,7 @@
 #include <ncl/nxsmultiformat.h>
 #include <colugo/console.hpp>
 #include <platypus/parse/nclreader.hpp>
-#include <platypus/model/standardtree.hpp>
+#include <platypus/model/standardinterface.hpp>
 
 namespace pstrudel {
 
@@ -120,16 +120,22 @@ namespace treeio {
 // convenience functions
 
 template <class TreeT>
+void postprocess_tree(TreeT & tree, unsigned long idx, unsigned long ntips, unsigned long nints, double tree_length) {
+    // tree.set_index(idx);
+    tree.set_num_tips(ntips);
+    // tree.set_nints(nints);
+    tree.set_total_tree_length(tree_length);
+}
+
+template <class TreeT>
 int read_from_stream(std::vector<TreeT>& trees,
         std::istream& src,
         const std::string& format) {
-    std::function<TreeT& ()> tree_factory = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
-    auto reader = platypus::NclTreeReader<TreeT>(tree_factory);
-    platypus::configure_producer_for_standard_interface(reader);
-    reader.set_tree_stats_num_leaf_nodes_setter([](TreeT & tree, unsigned long n) {tree.set_num_tips(n);});
-    // reader.set_tree_stats_num_internal_nodes_setter([](TreeT & tree, unsigned long n) {tree.num_internal_nodes = n;});
-    reader.set_tree_stats_tree_length_setter([](TreeT & tree, double n) {tree.set_total_tree_length(n);});
-    return reader.read_from_stream(src, format);
+    auto reader = platypus::NclTreeReader<TreeT>();
+    platypus::bind_standard_interface(reader);
+    reader.set_tree_postprocess_fn(postprocess_tree<TreeT>);
+    std::function<TreeT& ()> get_new_tree_reference = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
+    return reader.read(src, get_new_tree_reference);
 }
 
 template <class TreeT>

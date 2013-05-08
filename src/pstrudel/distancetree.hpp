@@ -9,7 +9,7 @@
 #include <stack>
 #include <map>
 #include <set>
-#include <platypus/model/standardtree.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include "profile.hpp"
 
 namespace pstrudel {
@@ -17,29 +17,29 @@ namespace pstrudel {
 ////////////////////////////////////////////////////////////////////////////////
 // DistanceNodeValue
 
-class DistanceNodeValue : public platypus::StandardNodeValue {
+class DistanceNodeValue : public platypus::StandardNodeValue<double> {
     public:
         DistanceNodeValue()
             : num_leaves_(0) {
         }
         DistanceNodeValue(DistanceNodeValue&& other)
-            : platypus::StandardNodeValue(std::move(other))
+            : platypus::StandardNodeValue<double>(std::move(other))
             , desc_path_lens_(std::move(other.desc_path_lens_))
             , num_leaves_(other.num_leaves_) {
         }
         DistanceNodeValue(const DistanceNodeValue& other)
-            : platypus::StandardNodeValue(other)
+            : platypus::StandardNodeValue<double>(other)
             , desc_path_lens_(other.desc_path_lens_)
             , num_leaves_(other.num_leaves_) {
         }
         DistanceNodeValue& operator=(const DistanceNodeValue& other) {
-            platypus::StandardNodeValue::operator=(other);
+            platypus::StandardNodeValue<double>::operator=(other);
             this->desc_path_lens_ = other.desc_path_lens_;
             this->num_leaves_ = other.num_leaves_;
             return *this;
         }
         void clear() override {
-            platypus::StandardNodeValue::clear();
+            platypus::StandardNodeValue<double>::clear();
             this->desc_path_lens_.clear();
             this->num_leaves_ = 0;
         }
