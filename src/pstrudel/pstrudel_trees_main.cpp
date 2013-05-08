@@ -5,7 +5,7 @@
 #include <platypus/model/datatable.hpp>
 #include <platypus/serialize/newick.hpp>
 #include <platypus/model/treepattern.hpp>
-#include <platypus/model/standardtree.hpp>
+#include <platypus/model/standardinterface.hpp>
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pstrudel.hpp"
@@ -305,11 +305,11 @@ int main(int argc, const char * argv[]) {
                 auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
                 platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
                 ref_tree_writer.set_suppress_edge_lengths(true);
-                platypus::configure_writer_for_standard_interface(ref_tree_writer);
+                platypus::bind_standard_interface(ref_tree_writer);
                 std::ofstream ref_trees_out(ref_trees_output_fpath);
                 for (auto & tp_by_size : tree_patterns) {
                     for (auto & tp_by_type : tp_by_size.second) {
-                        ref_tree_writer.write_tree(tp_by_type.second, ref_trees_out);
+                        ref_tree_writer.write(ref_trees_out, tp_by_type.second);
                         ref_trees_out << std::endl;
                     }
                 }
