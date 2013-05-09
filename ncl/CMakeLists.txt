@@ -27,36 +27,36 @@ ADD_LIBRARY (${NCL_LIBRARY}
     ncl/nxsunalignedblock.cpp
     )
 
-OPTION(INSTALL_NCL "INSTALL_NCL" OFF)
-IF (INSTALL_NCL)
-    MESSAGE(STATUS "On 'make install', NCL will be installed to: ${CMAKE_INSTALL_PREFIX}")
-    INSTALL(TARGETS ${NCL_LIBRARY} DESTINATION lib)
-    SET(NCL_HEADERS
-        ncl/ncl.h
-        ncl/nxsallocatematrix.h
-        ncl/nxsassumptionsblock.h
-        ncl/nxsblock.cpp
-        ncl/nxsblock.h
-        ncl/nxscharactersblock.h
-        ncl/nxscdiscretematrix.h
-        ncl/nxscxxdiscretematrix.h
-        ncl/nxsdatablock.h
-        ncl/nxsdefs.h
-        ncl/nxsdiscretedatum.h
-        ncl/nxsdistancedatum.h
-        ncl/nxsdistancesblock.h
-        ncl/nxsexception.h
-        ncl/nxsmultiformat.h
-        ncl/nxspublicblocks.h
-        ncl/nxsreader.h
-        ncl/nxssetreader.h
-        ncl/nxsstring.h
-        ncl/nxstaxablock.h
-        ncl/nxstaxaassociationblock.h
-        ncl/nxstoken.h
-        ncl/nxstreesblock.h
-        ncl/nxsunalignedblock.h
-        ncl/nxsutilcopy.h
-        )
-    INSTALL(FILES ${NCL_HEADERS} DESTINATION include/ncl)
-ENDIF()
+SET(INSTALL_NCL_TARGET "install.ncl")
+ADD_CUSTOM_TARGET(${INSTALL_NCL_TARGET}
+    COMMAND ${CMAKE_COMMAND} -D COMPONENT=ncl -P cmake_install.cmake)
+ADD_DEPENDENCIES(${INSTALL_NCL_TARGET} ${NCL_LIBRARY})
+INSTALL(TARGETS ${NCL_LIBRARY} DESTINATION lib COMPONENT ncl)
+SET(NCL_HEADERS
+    ncl/ncl.h
+    ncl/nxsallocatematrix.h
+    ncl/nxsassumptionsblock.h
+    ncl/nxsblock.cpp
+    ncl/nxsblock.h
+    ncl/nxscharactersblock.h
+    ncl/nxscdiscretematrix.h
+    ncl/nxscxxdiscretematrix.h
+    ncl/nxsdatablock.h
+    ncl/nxsdefs.h
+    ncl/nxsdiscretedatum.h
+    ncl/nxsdistancedatum.h
+    ncl/nxsdistancesblock.h
+    ncl/nxsexception.h
+    ncl/nxsmultiformat.h
+    ncl/nxspublicblocks.h
+    ncl/nxsreader.h
+    ncl/nxssetreader.h
+    ncl/nxsstring.h
+    ncl/nxstaxablock.h
+    ncl/nxstaxaassociationblock.h
+    ncl/nxstoken.h
+    ncl/nxstreesblock.h
+    ncl/nxsunalignedblock.h
+    ncl/nxsutilcopy.h
+    )
+INSTALL(FILES ${NCL_HEADERS} DESTINATION include/ncl COMPONENT ncl)
