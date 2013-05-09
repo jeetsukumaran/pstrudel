@@ -354,6 +354,14 @@ int main(int argc, const char * argv[]) {
                 results_table.write(out);
             }
 
+            // output stacked results
+            {
+                auto & out_fpath = output_filepaths["reference-distances-stacked"];
+                std::ofstream out(out_fpath);
+                results_table.write_stacked(out,
+                        "dist.type", "dist");
+            }
+
         } // canonical ref trees
     } // reference distances
 
