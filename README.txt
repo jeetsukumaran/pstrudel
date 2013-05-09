@@ -7,9 +7,6 @@ different sizes.
 Dependencies
 ------------
 
-Internal Dependencies
-.....................
-
 This project has the following internal dependencies:
 
     * platypus-phyloinformary
@@ -25,70 +22,26 @@ you will have to initialize and checkout the dependencies as submodules:
     $ git submodule init
     $ git submodule update
 
-External Dependencies
-.....................
+Building
+--------
 
-This project has the following external dependencies:
+Standard System-Wide Install
+----------------------------
 
-    * The NEXUS Class Library (NCL)
-      http://sourceforge.net/projects/ncl/
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make
+    $ sudo make install
 
-You can download and install these yourself separately, or else run the helper
-scripts below (e.g., see ``Developer Setup and Installation``).
-
-Developer Setup and Installation
---------------------------------
-
-The following steps will download, build and (locally) install all
-dependencies, as well as build and install the project in the local source
-tree.
-
-If this source code was cloned from a repository, then make sure to run:
-
-    $ git submodule init
-    $ git submodule update
-
-Invoke the following script from the top-level directory to download, build,
-and install the external dependencies in the local source tree:
-
-    $ ./install_prerequisites.sh
-
-Run the following script in the top-level directory set up the autotools build
-framework:
-
-    $ ./bootstrap.sh
-
-Create a build directory and configure the build framework (assuming
-'install_prerequisites.sh' was run):
+Development Testing and Install
+-------------------------------
 
     $ mkdir -p build/debug
     $ cd build/debug
-    $ ../../cfgcommand.sh debug
-
-Or, for release/production build:
-
-    $ mkdir -p build/release
-    $ cd build/release
-    $ ../../cfgcommand.sh release
-
-Build and install the project in the build directory (assuming 'install_prerequisites.sh'
-was run, and in build subdirectory, e.g. 'build/release'):
-
-    $ make
+    $ cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/install"
+    $ make check
     $ make install
-
-Following this recipe will result in all products being installed in
-subdirectory 'installed/' of the build directory.
-
-To run the tests:
-
-    $ source ../../pstrudel_deps_env.sh
-    $ installed/opt/pstrudel/test/run-tests.py
-
-If you get an error message regarding missing libraries during the build or
-run, just make sure that the environmental variables are correctly set:
-
-    $ source ../../pstrudel_deps_env.sh
 
 Copyright and License
 ---------------------

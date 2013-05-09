@@ -73,23 +73,26 @@ INCLUDE_DIRECTORIES(
 
 ##############################################################################
 ## Prerequisite: NCL
-set(NCL_INSTALL_DIR ext/v2.1/build/installed)
-set(NCL_INCLUDE_DIR ext/v2.1/build/installed/include)
-set(NCL_LIBRARY_DIR ext/v2.1/build/installed/lib/ncl)
-INCLUDE_DIRECTORIES(
-  "${NCL_INCLUDE_DIR}"      # for NCL
-    )
-FIND_LIBRARY(NCL_LIBRARY
-    NAMES ncl                   # name of the library as passed to '-l' flag, e.g. '-lncl'
-    PATHS ${NCL_LIBRARY_DIR}    # explicit paths to search on, other than the usual
-    REQUIRED                    # error if library not found
-    )
-IF (NOT NCL_LIBRARY )
-    MESSAGE(FATAL_ERROR "Unable to locate the NCL libraries")
-ENDIF()
-SET(NCL_LIBRARIES ${NCL_LIBRARY} )
-# set(NCL_LIBRARIES ${NCL_LIBRARIES} debug ${NCL_LIBRARY_DIR}/libncl.a)
-# set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
+SET(NCL_LIBRARY "libncl")
+INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
+ADD_SUBDIRECTORY(ncl)
+# set(NCL_INSTALL_DIR ext/v2.1/build/installed)
+# set(NCL_INCLUDE_DIR ext/v2.1/build/installed/include)
+# set(NCL_LIBRARY_DIR ext/v2.1/build/installed/lib/ncl)
+# INCLUDE_DIRECTORIES(
+#   "${NCL_INCLUDE_DIR}"      # for NCL
+#     )
+# FIND_LIBRARY(NCL_LIBRARY
+#     NAMES ncl                   # name of the library as passed to '-l' flag, e.g. '-lncl'
+#     PATHS ${NCL_LIBRARY_DIR}    # explicit paths to search on, other than the usual
+#     REQUIRED                    # error if library not found
+#     )
+# IF (NOT NCL_LIBRARY )
+#     MESSAGE(FATAL_ERROR "Unable to locate the NCL libraries")
+# ENDIF()
+# SET(NCL_LIBRARIES ${NCL_LIBRARY} )
+# ### set(NCL_LIBRARIES ${NCL_LIBRARIES} debug ${NCL_LIBRARY_DIR}/libncl.a)
+# ### set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
 
 ##############################################################################
 ## Sources

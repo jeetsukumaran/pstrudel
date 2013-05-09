@@ -1,0 +1,293 @@
+K 25
+svn:wc:ra_dav:version-url
+V 43
+/svnroot/ncl/!svn/ver/654/branches/v2.1/ncl
+END
+nxsassumptionsblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/ncl/!svn/ver/637/branches/v2.1/ncl/nxsassumptionsblock.h
+END
+nxsstring.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/ncl/!svn/ver/636/branches/v2.1/ncl/nxsstring.cpp
+END
+nxsmultiformat.h
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ncl/!svn/ver/601/branches/v2.1/ncl/nxsmultiformat.h
+END
+nxstaxablock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxstaxablock.cpp
+END
+nxscxxdiscretematrix.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svnroot/ncl/!svn/ver/636/branches/v2.1/ncl/nxscxxdiscretematrix.cpp
+END
+nxstaxaassociationblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svnroot/ncl/!svn/ver/623/branches/v2.1/ncl/nxstaxaassociationblock.h
+END
+nxsutilcopy.h
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/ncl/!svn/ver/507/branches/v2.1/ncl/nxsutilcopy.h
+END
+nxssetreader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ncl/!svn/ver/574/branches/v2.1/ncl/nxssetreader.cpp
+END
+nxsallocatematrix.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ncl/!svn/ver/483/branches/v2.1/ncl/nxsallocatematrix.h
+END
+nxstoken.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/ncl/!svn/ver/651/branches/v2.1/ncl/nxstoken.cpp
+END
+strictness.dox
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/ncl/!svn/ver/514/branches/v2.1/ncl/strictness.dox
+END
+nxspublicblocks.h
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/ncl/!svn/ver/623/branches/v2.1/ncl/nxspublicblocks.h
+END
+nxsunalignedblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsunalignedblock.cpp
+END
+nxsdefs.h
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/ncl/!svn/ver/628/branches/v2.1/ncl/nxsdefs.h
+END
+nxsdatablock.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/ncl/!svn/ver/614/branches/v2.1/ncl/nxsdatablock.h
+END
+basicapi.dox
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/ncl/!svn/ver/514/branches/v2.1/ncl/basicapi.dox
+END
+nxsblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsblock.cpp
+END
+nxscharactersblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxscharactersblock.cpp
+END
+nxsdistancesblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsdistancesblock.h
+END
+nxstreesblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/svnroot/ncl/!svn/ver/654/branches/v2.1/ncl/nxstreesblock.cpp
+END
+quirks.dox
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/ncl/!svn/ver/514/branches/v2.1/ncl/quirks.dox
+END
+nxsassumptionsblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsassumptionsblock.cpp
+END
+nxsmultiformat.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/ncl/!svn/ver/629/branches/v2.1/ncl/nxsmultiformat.cpp
+END
+nxsexception.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/ncl/!svn/ver/523/branches/v2.1/ncl/nxsexception.h
+END
+nxstaxaassociationblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svnroot/ncl/!svn/ver/633/branches/v2.1/ncl/nxstaxaassociationblock.cpp
+END
+nxsreader.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/ncl/!svn/ver/544/branches/v2.1/ncl/nxsreader.h
+END
+nxsstring.h
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/ncl/!svn/ver/636/branches/v2.1/ncl/nxsstring.h
+END
+nxspublicblocks.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ncl/!svn/ver/628/branches/v2.1/ncl/nxspublicblocks.cpp
+END
+nxstaxablock.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/ncl/!svn/ver/628/branches/v2.1/ncl/nxstaxablock.h
+END
+nxscxxdiscretematrix.h
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svnroot/ncl/!svn/ver/634/branches/v2.1/ncl/nxscxxdiscretematrix.h
+END
+nxssetreader.h
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/svnroot/ncl/!svn/ver/488/branches/v2.1/ncl/nxssetreader.h
+END
+doc.dox
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/ncl/!svn/ver/514/branches/v2.1/ncl/doc.dox
+END
+nxsdatablock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ncl/!svn/ver/614/branches/v2.1/ncl/nxsdatablock.cpp
+END
+query.dox
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svnroot/ncl/!svn/ver/516/branches/v2.1/ncl/query.dox
+END
+nxstoken.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/ncl/!svn/ver/651/branches/v2.1/ncl/nxstoken.h
+END
+faq.dox
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svnroot/ncl/!svn/ver/514/branches/v2.1/ncl/faq.dox
+END
+nxsunalignedblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 63
+/svnroot/ncl/!svn/ver/627/branches/v2.1/ncl/nxsunalignedblock.h
+END
+nxsdistancesblock.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsdistancesblock.cpp
+END
+ncl.h
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svnroot/ncl/!svn/ver/517/branches/v2.1/ncl/ncl.h
+END
+nxsdistancedatum.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/ncl/!svn/ver/488/branches/v2.1/ncl/nxsdistancedatum.h
+END
+nxsexception.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsexception.cpp
+END
+Makefile.am
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svnroot/ncl/!svn/ver/623/branches/v2.1/ncl/Makefile.am
+END
+nxsblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svnroot/ncl/!svn/ver/634/branches/v2.1/ncl/nxsblock.h
+END
+nxscdiscretematrix.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/ncl/!svn/ver/462/branches/v2.1/ncl/nxscdiscretematrix.h
+END
+nxscharactersblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/svnroot/ncl/!svn/ver/628/branches/v2.1/ncl/nxscharactersblock.h
+END
+nxsreader.cpp
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/svnroot/ncl/!svn/ver/635/branches/v2.1/ncl/nxsreader.cpp
+END
+nxsdiscretedatum.h
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svnroot/ncl/!svn/ver/488/branches/v2.1/ncl/nxsdiscretedatum.h
+END
+nxstreesblock.h
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svnroot/ncl/!svn/ver/654/branches/v2.1/ncl/nxstreesblock.h
+END
