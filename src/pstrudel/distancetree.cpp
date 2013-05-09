@@ -133,6 +133,8 @@ unsigned long SymmetricDifferenceCalculator::calc_set_symmetric_difference(
 
 DistanceTree::DistanceTree(bool is_rooted)
         : platypus::StandardTree<DistanceNodeValue>(is_rooted)
+          , number_of_tips_(0)
+          , total_tree_length_(0.0)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this) {
 }

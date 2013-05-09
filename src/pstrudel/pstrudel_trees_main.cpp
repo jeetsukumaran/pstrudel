@@ -264,6 +264,7 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("source.filepath");
         }
         results_table.add_key_column<unsigned long>("num.tips");
+        results_table.add_key_column<double>("tree.length");
         if (!reference_trees_filepath.empty()) {
             // user-supplied ref trees
             colugo::console::abort("User-specified reference trees not yet implemented");
@@ -306,6 +307,8 @@ int main(int argc, const char * argv[]) {
                 if (add_tree_source_key) {
                     results_table_row.set("source.filepath", comparison_tree_sources.at(comparison_tree_idx));
                 }
+                results_table_row.set("num.tips", comparison_tree_size);
+                results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
 
                 double d = 0.0;
 
