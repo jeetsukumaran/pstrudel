@@ -62,6 +62,55 @@ SET(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wcast-align -W
 -Wno-unused")
 
 ##############################################################################
+## Prerequisites
+
+OPTION(NCL_PREFIX "NCL_PREFIX" "")
+OPTION(NCL_DEFAULT "NCL_DEFAULT" OFF)
+IF (NCL_PREFIX)
+    SET(NCL_HEADER_TEST_PATH  "${NCL_PREFIX}/include/ncl/ncl.h")
+    IF(EXISTS "${NCL_HEADER_TEST_PATH}")
+        MESSAGE(STATUS "Found NCL header '${NCL_HEADER_TEST_PATH}'")
+    ELSE()
+        MESSAGE(FATAL_ERROR "Cannot find '${NCL_HEADER_TEST_PATH}'")
+    ENDIF()
+    INCLUDE_DIRECTORIES("${NCL_PREFIX}/include")
+    FIND_LIBRARY(NCL_LIBRARY
+        NAMES "ncl"
+        PATHS ${NCL_PREFIX}/lib
+        PATH_SUFFIXES "ncl"
+        REQUIRED)
+    IF (NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
+        MESSAGE(STATUS "Found NCL binary: '${NCL_LIBRARY}'")
+    ELSE()
+        MESSAGE(FATAL_ERROR "NCL library not found in: '${NCL_PREFIX}/lib'")
+    ENDIF()
+    find_path(CHECK_NCL_H "ncl/ncl.h" REQUIRED)
+ELSEIF(NCL_DEFAULT)
+    find_path(CHECK_NCL_H
+        "ncl.h"
+        PATH_SUFFIXES "ncl")
+    IF (CHECK_NCL_H)
+        MESSAGE(STATUS "Found NCL headers in: '${CHECK_NCL_H}'")
+    ELSE()
+        MESSAGE(FATAL_ERROR "NCL headers not found")
+    ENDIF()
+    FIND_LIBRARY(NCL_LIBRARY
+        NAMES "ncl"
+        PATH_SUFFIXES "ncl"
+        REQUIRED)
+    IF (NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
+        MESSAGE(STATUS "Found NCL binary: '${NCL_LIBRARY}'")
+    ELSE()
+        MESSAGE(FATAL_ERROR "NCL library not found")
+    ENDIF()
+ELSE()
+    MESSAGE(STATUS "Using local NCL")
+    SET(NCL_LIBRARY "ncl")
+    INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
+    ADD_SUBDIRECTORY(ncl)
+ENDIF()
+
+##############################################################################
 ## Global source and include directory setup
 SET(MAIN_PSTRUDEL_SOURCE_DIR
     ${PROJECT_SOURCE_DIR}/pstrudel CACHE PATH "Directory of main source code")
@@ -70,33 +119,6 @@ INCLUDE_DIRECTORIES(
   "${PROJECT_SOURCE_DIR}/src/colugo-utilities/include"
   "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary/include"
 )
-
-##############################################################################
-## Prerequisite: NCL
-FIND_LIBRARY(NCL_LIBRARY "ncl")
-IF (NOT NCL_LIBRARY)
-    MESSAGE(STATUS "NCL not found: will build local copy")
-    SET(NCL_LIBRARY "ncl")
-    INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
-    ADD_SUBDIRECTORY(ncl)
-ENDIF()
-# set(NCL_INSTALL_DIR ext/v2.1/build/installed)
-# set(NCL_INCLUDE_DIR ext/v2.1/build/installed/include)
-# set(NCL_LIBRARY_DIR ext/v2.1/build/installed/lib/ncl)
-# INCLUDE_DIRECTORIES(
-#   "${NCL_INCLUDE_DIR}"      # for NCL
-#     )
-# FIND_LIBRARY(NCL_LIBRARY
-#     NAMES ncl                   # name of the library as passed to '-l' flag, e.g. '-lncl'
-#     PATHS ${NCL_LIBRARY_DIR}    # explicit paths to search on, other than the usual
-#     REQUIRED                    # error if library not found
-#     )
-# IF (NOT NCL_LIBRARY )
-#     MESSAGE(FATAL_ERROR "Unable to locate the NCL libraries")
-# ENDIF()
-# SET(NCL_LIBRARIES ${NCL_LIBRARY} )
-# ### set(NCL_LIBRARIES ${NCL_LIBRARIES} debug ${NCL_LIBRARY_DIR}/libncl.a)
-# ### set(NCL_LIBRARIES ${NCL_LIBRARIES} optimized ${NCL_LIBRARY_DIR}/libncl.dylib)
 
 ##############################################################################
 ## Sources
