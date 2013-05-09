@@ -64,30 +64,35 @@ SET(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wcast-align -W
 ##############################################################################
 ## Prerequisites
 
-OPTION(NCL_PREFIX "NCL_PREFIX" "")
+SET(NCL_PREFIX "" CACHE PATH "Set path to NCL installation to use" )
 OPTION(NCL_DEFAULT "NCL_DEFAULT" OFF)
 IF (NCL_PREFIX)
-    SET(NCL_HEADER_TEST_PATH  "${NCL_PREFIX}/include/ncl/ncl.h")
-    IF(EXISTS "${NCL_HEADER_TEST_PATH}")
-        MESSAGE(STATUS "Found NCL header '${NCL_HEADER_TEST_PATH}'")
-    ELSE()
-        MESSAGE(FATAL_ERROR "Cannot find '${NCL_HEADER_TEST_PATH}'")
-    ENDIF()
     INCLUDE_DIRECTORIES("${NCL_PREFIX}/include")
-    FIND_LIBRARY(NCL_LIBRARY
-        NAMES "ncl"
-        PATHS ${NCL_PREFIX}/lib
-        PATH_SUFFIXES "ncl"
-        REQUIRED)
-    IF (NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
-        MESSAGE(STATUS "Found NCL binary: '${NCL_LIBRARY}'")
-    ELSE()
-        MESSAGE(FATAL_ERROR "NCL library not found in: '${NCL_PREFIX}/lib'")
-    ENDIF()
-    find_path(CHECK_NCL_H "ncl/ncl.h" REQUIRED)
-ELSEIF(NCL_DEFAULT)
+    LINK_DIRECTORIES(${NCL_PREFIX})
+    SET(NCL_DEFAULT "yes")
+    # SET(NCL_HEADER_TEST_PATH  "${NCL_PREFIX}/include/ncl/ncl.h")
+    # IF(EXISTS "${NCL_HEADER_TEST_PATH}")
+    #     MESSAGE(STATUS "Found NCL header '${NCL_HEADER_TEST_PATH}'")
+    # ELSE()
+    #     MESSAGE(FATAL_ERROR "Cannot find '${NCL_HEADER_TEST_PATH}'")
+    # ENDIF()
+    # INCLUDE_DIRECTORIES("${NCL_PREFIX}/include")
+    # FIND_LIBRARY(NCL_LIBRARY
+    #     NAMES "ncl"
+    #     PATHS ${NCL_PREFIX}/lib
+    #     PATH_SUFFIXES "ncl"
+    #     REQUIRED)
+    # IF (NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
+    #     MESSAGE(STATUS "Found NCL binary: '${NCL_LIBRARY}'")
+    # ELSE()
+    #     MESSAGE(FATAL_ERROR "NCL library not found in: '${NCL_PREFIX}/lib'")
+    # ENDIF()
+    # find_path(CHECK_NCL_H "ncl/ncl.h" REQUIRED)
+ENDIF()
+IF(NCL_DEFAULT)
     find_path(CHECK_NCL_H
         "ncl.h"
+        PATHS ${NCL_PREFIX}/include
         PATH_SUFFIXES "ncl")
     IF (CHECK_NCL_H)
         MESSAGE(STATUS "Found NCL headers in: '${CHECK_NCL_H}'")
@@ -96,6 +101,7 @@ ELSEIF(NCL_DEFAULT)
     ENDIF()
     FIND_LIBRARY(NCL_LIBRARY
         NAMES "ncl"
+        PATHS ${NCL_PREFIX}/lib
         PATH_SUFFIXES "ncl"
         REQUIRED)
     IF (NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
