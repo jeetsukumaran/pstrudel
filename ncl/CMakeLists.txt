@@ -2,6 +2,10 @@ INCLUDE_DIRECTORIES(
   "${CMAKE_CURRENT_LIST_DIR}"
 )
 
+IF(NOT DEFINED ${NCL_LIBRARY})
+    SET(NCL_LIBRARY, "ncl")
+ENDIF()
+
 ADD_LIBRARY (${NCL_LIBRARY}
     ncl/nxsassumptionsblock.cpp
     ncl/nxsblock.cpp

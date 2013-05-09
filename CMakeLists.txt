@@ -73,9 +73,12 @@ INCLUDE_DIRECTORIES(
 
 ##############################################################################
 ## Prerequisite: NCL
-SET(NCL_LIBRARY "libncl")
-INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
-ADD_SUBDIRECTORY(ncl)
+FIND_LIBRARY(NCL_LIBRARY "ncl")
+IF (NOT NCL_LIBRARY)
+    SET(NCL_LIBRARY "ncl")
+    INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
+    ADD_SUBDIRECTORY(ncl)
+ENDIF()
 # set(NCL_INSTALL_DIR ext/v2.1/build/installed)
 # set(NCL_INCLUDE_DIR ext/v2.1/build/installed/include)
 # set(NCL_LIBRARY_DIR ext/v2.1/build/installed/lib/ncl)
