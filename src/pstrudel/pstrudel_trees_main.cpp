@@ -271,14 +271,14 @@ int main(int argc, const char * argv[]) {
         } else {
             // canonical ref trees
             results_table.add_data_column<double>("y.uw.max.unbalanced");
-            results_table.add_data_column<double>("y.uw.max.unbalanced.norm");
+            results_table.add_data_column<double>("y.uw.max.unbalanced.scaled");
             results_table.add_data_column<double>("y.uw.max.balanced");
-            results_table.add_data_column<double>("y.uw.max.balanced.norm");
+            results_table.add_data_column<double>("y.uw.max.balanced.scaled");
             if (calculate_symmetric_diff) {
                 results_table.add_data_column<double>("urf.uw.max.unbalanced");
-                results_table.add_data_column<double>("urf.uw.max.unbalanced.norm");
+                results_table.add_data_column<double>("urf.uw.max.unbalanced.scaled");
                 results_table.add_data_column<double>("urf.uw.max.balanced");
-                results_table.add_data_column<double>("urf.uw.max.balanced.norm");
+                results_table.add_data_column<double>("urf.uw.max.balanced.scaled");
             }
             TreePatternCollectionType tree_patterns;
             TreePatternMaxDistances tree_pattern_max_unweighted_pairwise_tip_profile_distances;
@@ -314,19 +314,19 @@ int main(int argc, const char * argv[]) {
 
                 d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.unbalanced"]);
                 results_table_row.set("y.uw.max.unbalanced", d);
-                results_table_row.set("y.uw.max.unbalanced.norm", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.unbalanced"]);
+                results_table_row.set("y.uw.max.unbalanced.scaled", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.unbalanced"]);
 
                 d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.balanced"]);
                 results_table_row.set("y.uw.max.balanced", d);
-                results_table_row.set("y.uw.max.balanced.norm", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.balanced"]);
+                results_table_row.set("y.uw.max.balanced.scaled", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.balanced"]);
 
                 if (calculate_symmetric_diff) {
                     d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]);
                     results_table_row.set("urf.uw.max.unbalanced", d);
-                    results_table_row.set("urf.uw.max.unbalanced.norm", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.unbalanced"]);
+                    results_table_row.set("urf.uw.max.unbalanced.scaled", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.unbalanced"]);
                     d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]);
                     results_table_row.set("urf.uw.max.balanced", d);
-                    results_table_row.set("urf.uw.max.balanced.norm", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.balanced"]);
+                    results_table_row.set("urf.uw.max.balanced.scaled", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.balanced"]);
                 }
 
                 comparison_tree_idx += 1;
