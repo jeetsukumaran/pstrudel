@@ -75,6 +75,7 @@ INCLUDE_DIRECTORIES(
 ## Prerequisite: NCL
 FIND_LIBRARY(NCL_LIBRARY "ncl")
 IF (NOT NCL_LIBRARY)
+    MESSAGE(STATUS "NCL not found: will build local copy")
     SET(NCL_LIBRARY "ncl")
     INCLUDE_DIRECTORIES("${PROJECT_SOURCE_DIR}/ncl")
     ADD_SUBDIRECTORY(ncl)

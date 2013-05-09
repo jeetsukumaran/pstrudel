@@ -4,6 +4,7 @@ INCLUDE_DIRECTORIES(
 
 IF(NOT DEFINED ${NCL_LIBRARY})
     SET(NCL_LIBRARY, "ncl")
+    MESSAGE(STATUS "Using '${NCL_LIBRARY}' for NCL library name")
 ENDIF()
 
 ADD_LIBRARY (${NCL_LIBRARY}
@@ -25,11 +26,11 @@ ADD_LIBRARY (${NCL_LIBRARY}
     ncl/nxstreesblock.cpp
     ncl/nxsunalignedblock.cpp
     )
-IF (DEFINED INSTALL_NCL)
-    INSTALL(TARGETS ${NCL_LIBRARY} DESTINATION lib)
-ENDIF()
 
-IF (DEFINED INSTALL_NCL)
+OPTION(INSTALL_NCL "INSTALL_NCL" OFF)
+IF (INSTALL_NCL)
+    MESSAGE(STATUS "On 'make install', NCL will be installed to: ${CMAKE_INSTALL_PREFIX}")
+    INSTALL(TARGETS ${NCL_LIBRARY} DESTINATION lib)
     SET(NCL_HEADERS
         ncl/ncl.h
         ncl/nxsallocatematrix.h
