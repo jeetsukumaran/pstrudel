@@ -12,6 +12,7 @@
 #include "distancetree.hpp"
 
 typedef std::map<unsigned long, std::map<std::string, pstrudel::DistanceTree>> TreePatternCollectionType;
+typedef std::map<unsigned long, std::map<std::string, double>> TreePatternMaxDistances;
 
 template <class TreeT>
 std::vector<typename TreeT::value_type> generate_leaves(unsigned long num_tips,
@@ -35,8 +36,10 @@ void build_tree_pattern(pstrudel::DistanceTree & tree, BuildFnT tree_building_fn
 }
 
 void build_canonical_tree_patterns(
-        TreePatternCollectionType & tree_patterns,
         unsigned long num_tips,
+        TreePatternCollectionType & tree_patterns,
+        TreePatternMaxDistances & tree_pattern_max_unweighted_pairwise_tip_profile_distances,
+        TreePatternMaxDistances & tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances,
         bool labeled) {
     build_tree_pattern(
             tree_patterns[num_tips]["max.unbalanced"],
@@ -52,6 +55,12 @@ void build_canonical_tree_patterns(
                 std::vector<pstrudel::DistanceNodeValue>::iterator i2){ platypus::build_maximally_balanced_tree(tree, i1, i2);},
             num_tips,
             labeled);
+    double max_dist1 = tree_patterns[num_tips]["max.unbalanced"].get_unweighted_pairwise_tip_profile_distance(tree_patterns[num_tips]["max.balanced"]);
+    tree_pattern_max_unweighted_pairwise_tip_profile_distances[num_tips]["max.unbalanced"] = max_dist1;
+    tree_pattern_max_unweighted_pairwise_tip_profile_distances[num_tips]["max.balanced"] = max_dist1;
+    double max_dist2 = tree_patterns[num_tips]["max.unbalanced"].get_unlabeled_symmetric_difference(tree_patterns[num_tips]["max.balanced"]);
+    tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[num_tips]["max.unbalanced"] = max_dist2;
+    tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[num_tips]["max.balanced"] = max_dist2;
     // auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
     // auto ub_leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
     // platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
@@ -261,12 +270,18 @@ int main(int argc, const char * argv[]) {
         } else {
             // canonical ref trees
             results_table.add_data_column<double>("y.uw.max.unbalanced");
+            results_table.add_data_column<double>("y.uw.max.unbalanced.norm");
             results_table.add_data_column<double>("y.uw.max.balanced");
+            results_table.add_data_column<double>("y.uw.max.balanced.norm");
             if (calculate_symmetric_diff) {
                 results_table.add_data_column<double>("urf.uw.max.unbalanced");
+                results_table.add_data_column<double>("urf.uw.max.unbalanced.norm");
                 results_table.add_data_column<double>("urf.uw.max.balanced");
+                results_table.add_data_column<double>("urf.uw.max.balanced.norm");
             }
             TreePatternCollectionType tree_patterns;
+            TreePatternMaxDistances tree_pattern_max_unweighted_pairwise_tip_profile_distances;
+            TreePatternMaxDistances tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances;
             if (log_frequency == 0) {
                 log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
             }
@@ -279,23 +294,37 @@ int main(int argc, const char * argv[]) {
                 auto comparison_tree_size = comparison_tree.get_num_tips();
                 if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                     logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
-                    build_canonical_tree_patterns(tree_patterns, comparison_tree_size, true);
+                    build_canonical_tree_patterns(
+                            comparison_tree_size,
+                            tree_patterns,
+                            tree_pattern_max_unweighted_pairwise_tip_profile_distances,
+                            tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances,
+                            true);
                 }
 
                 results_table_row.set("tree.idx", comparison_tree_idx);
                 if (add_tree_source_key) {
                     results_table_row.set("source.filepath", comparison_tree_sources.at(comparison_tree_idx));
                 }
-                // results_table_row.set("y.uw.max.unbalanced", comparison_tree_size);
-                // results_table_row.set("y.uw.max.balanced", comparison_tree_size);
-                // if (calculate_symmetric_diff) {
-                //     results_table_row.set("urf.uw.max.unbalanced",
-                //             comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]));
-                //     results_table_row.set("urf.uw.max.balanced",
-                //             comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]));
-                // }
 
+                double d = 0.0;
 
+                d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.unbalanced"]);
+                results_table_row.set("y.uw.max.unbalanced", d);
+                results_table_row.set("y.uw.max.unbalanced.norm", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.unbalanced"]);
+
+                d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.balanced"]);
+                results_table_row.set("y.uw.max.balanced", d);
+                results_table_row.set("y.uw.max.balanced.norm", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.balanced"]);
+
+                if (calculate_symmetric_diff) {
+                    d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]);
+                    results_table_row.set("urf.uw.max.unbalanced", d);
+                    results_table_row.set("urf.uw.max.unbalanced.norm", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.unbalanced"]);
+                    d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]);
+                    results_table_row.set("urf.uw.max.balanced", d);
+                    results_table_row.set("urf.uw.max.balanced.norm", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.balanced"]);
+                }
 
                 comparison_tree_idx += 1;
             } // tree comparison
@@ -315,8 +344,19 @@ int main(int argc, const char * argv[]) {
                 }
             }
 
+            // output primary results
+            {
+                auto & out_fpath = output_filepaths["reference-distances"];
+                std::ofstream out(out_fpath);
+                results_table.write(out);
+            }
+
         } // canonical ref trees
-    }
+    } // reference distances
+
+    if (calculate_pairwise_distances) {
+        colugo::console::abort("Pairwise comparisons not yet implemented");
+    } // pairwise distances
 }
 
 
