@@ -1,11 +1,12 @@
+********
 PSTRUDEL
-========
+********
 
 Calculates distances between unlabeled phylogenetic trees and alignments of
 different sizes.
 
 Dependencies
-------------
+============
 
 This project has the following internal dependencies:
 
@@ -23,7 +24,7 @@ you will have to initialize and checkout the dependencies as submodules:
     $ git submodule update
 
 Building
---------
+========
 
 Standard System-Wide Install
 ----------------------------
@@ -34,17 +35,35 @@ Standard System-Wide Install
     $ make
     $ sudo make install
 
-Development Testing and Install
--------------------------------
+Testing
+-------
 
-    $ mkdir -p build/debug
-    $ cd build/debug
-    $ cmake .. -DCMAKE_INSTALL_PREFIX="$(PWD)/install"
+    $ mkdir build
+    $ cd build
+    $ cmake ..
     $ make check
-    $ make install
+
+Options
+-------
+
+The following options can be passed to the invocation of `cmake`:
+
+    -DCMAKE_INSTALL_PREFIX="</path/to/install/dir>"
+
+        Sets the prefix (top directory) for the installation.
+
+    -DNCL_PREFIX="</path/to/NCL/installation>"
+
+        Use the NCL (NEXUS Class Library) installation available at the
+        specified path instead of building and using the bundled version.
+
+    -DNCL_DEFAULT="yes"
+
+        Use the default system NCL (NEXUS Class Library) installation instead
+        of building and using the bundled version.
 
 Copyright and License
----------------------
+=====================
 
    Copyright 2013 Jeet Sukumaran.
    All rights reserved.
