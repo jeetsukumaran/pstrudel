@@ -62,6 +62,12 @@ The following options can be passed to the invocation of `cmake`:
         Use the default system NCL (NEXUS Class Library) installation instead
         of building and using the bundled version.
 
+    -DINSTALL_NCL="yes"
+
+        Install the locally-built NCL to ${CMAKE_INSTALL_PREFIX} (not needed
+        run any PSTRUDEL products: this is only if you want the NCL library
+        available for your own use).
+
 Copyright and License
 =====================
 

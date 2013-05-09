@@ -65,7 +65,7 @@ SET(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wcast-align -W
 ## Prerequisites
 
 SET(NCL_PREFIX "" CACHE PATH "Set path to NCL installation to use" )
-OPTION(NCL_DEFAULT "NCL_DEFAULT" OFF)
+OPTION(NCL_DEFAULT "Use default system NCL" OFF)
 IF (NCL_PREFIX)
     INCLUDE_DIRECTORIES("${NCL_PREFIX}/include")
     LINK_DIRECTORIES(${NCL_PREFIX})
