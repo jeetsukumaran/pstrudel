@@ -256,6 +256,8 @@ int main(int argc, const char * argv[]) {
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
 
+    platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(16)};
+
     // reference distances
     if (calculate_reference_distances) {
         // set up table
@@ -265,21 +267,21 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("source.filepath");
         }
         results_table.add_key_column<unsigned long>("num.tips");
-        results_table.add_key_column<double>("tree.length");
+        results_table.add_key_column<double>("tree.length", col_formatting);
         if (!reference_trees_filepath.empty()) {
             // user-supplied ref trees
             colugo::console::abort("User-specified reference trees not yet implemented");
         } else {
             // canonical ref trees
-            results_table.add_data_column<double>("y.uw.max.unbalanced");
-            results_table.add_data_column<double>("y.uw.max.unbalanced.scaled");
-            results_table.add_data_column<double>("y.uw.max.balanced");
-            results_table.add_data_column<double>("y.uw.max.balanced.scaled");
+            results_table.add_data_column<double>("y.uw.max.unbalanced", col_formatting);
+            results_table.add_data_column<double>("y.uw.max.unbalanced.scaled", col_formatting);
+            results_table.add_data_column<double>("y.uw.max.balanced", col_formatting);
+            results_table.add_data_column<double>("y.uw.max.balanced.scaled", col_formatting);
             if (calculate_symmetric_diff) {
-                results_table.add_data_column<double>("urf.uw.max.unbalanced");
-                results_table.add_data_column<double>("urf.uw.max.unbalanced.scaled");
-                results_table.add_data_column<double>("urf.uw.max.balanced");
-                results_table.add_data_column<double>("urf.uw.max.balanced.scaled");
+                results_table.add_data_column<unsigned long>("urf.uw.max.unbalanced");
+                results_table.add_data_column<double>("urf.uw.max.unbalanced.scaled", col_formatting);
+                results_table.add_data_column<unsigned long>("urf.uw.max.balanced");
+                results_table.add_data_column<double>("urf.uw.max.balanced.scaled", col_formatting);
             }
             TreePatternCollectionType tree_patterns;
             TreePatternMaxDistances tree_pattern_max_unweighted_pairwise_tip_profile_distances;
@@ -375,20 +377,20 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("tree1.source.filepath");
         }
         results_table.add_key_column<unsigned long>("tree1.num.tips");
-        results_table.add_key_column<double>("tree1.length");
+        results_table.add_key_column<double>("tree1.length", col_formatting);
         results_table.add_key_column<unsigned long>("tree2.idx");
         if (add_tree_source_key) {
             results_table.add_key_column<std::string>("tree2.source.filepath");
         }
         results_table.add_key_column<unsigned long>("tree2.num.tips");
-        results_table.add_key_column<double>("tree2.length");
+        results_table.add_key_column<double>("tree2.length", col_formatting);
 
-        results_table.add_data_column<double>("y.uw");
-        results_table.add_data_column<double>("y.uw.norm");
-        results_table.add_data_column<double>("y.wt");
-        results_table.add_data_column<double>("y.wt.norm");
+        results_table.add_data_column<double>("y.uw", col_formatting);
+        results_table.add_data_column<double>("y.uw.norm", col_formatting);
+        results_table.add_data_column<double>("y.wt", col_formatting);
+        results_table.add_data_column<double>("y.wt.norm", col_formatting);
         results_table.add_data_column<double>("urf.uw");
-        results_table.add_data_column<double>("urf.uw.norm");
+        results_table.add_data_column<double>("urf.uw.norm", col_formatting);
         if (!calculate_symmetric_diff) {
             results_table.column("urf.uw").set_hidden(true);
             results_table.column("urf.uw.norm").set_hidden(true);
