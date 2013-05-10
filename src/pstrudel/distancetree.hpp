@@ -185,14 +185,10 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         // along the edges.
         template <typename T>
         void calc_pairwise_tip_distances(T store_pairwise_tip_dist_fn) {
-            this->total_tree_length_ = 0.0;
-            this->number_of_tips_ = 0;
             // std::multiset<unsigned long> unweighted_distances;
             // std::multiset<double> weighted_distances;
             for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
-                this->total_tree_length_ += ndi->get_edge_length();
                 if (ndi.is_leaf()) {
-                    ++this->number_of_tips_;
                     ndi->set_desc_path_len(*ndi, 0.0, 0);
                 } else {
                     for (auto chi1 = this->children_begin(ndi) ; chi1 != this->children_end(ndi) ; ++chi1) {

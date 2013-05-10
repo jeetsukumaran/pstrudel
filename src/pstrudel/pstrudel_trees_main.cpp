@@ -287,7 +287,7 @@ int main(int argc, const char * argv[]) {
                 log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
             }
 
-            logger.info("Begining calculating profile distances between comparison trees and canonical tree patterns");
+            logger.info("Begining calculating distances between comparison trees and canonical tree patterns");
             unsigned long comparison_tree_idx = 0;
             for (auto & comparison_tree : comparison_trees) {
                 auto & results_table_row = results_table.add_row();
@@ -347,7 +347,7 @@ int main(int argc, const char * argv[]) {
                 }
             }
 
-            logger.info("Completed calculating profile distances between comparison trees and canoncial tree patterns");
+            logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
 
             // output primary results
             {
@@ -391,25 +391,37 @@ int main(int argc, const char * argv[]) {
             results_table.add_data_column<double>("urf.uw");
             results_table.add_data_column<double>("urf.uw.scaled");
         }
-        logger.info("Begining calculating profile distances between all distinct pairs of trees");
+        logger.info("Begining calculating distances between all distinct pairs of trees");
         unsigned long num_trees = comparison_trees.size();
+        unsigned long total_comparisons = num_trees * (num_trees - 1) / 2;
+        unsigned long comparison_count = 0;
         for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
             auto & tree1 = comparison_trees[tree_idx1];
-            for (unsigned long tree_idx2 = tree_idx1+1; tree_idx1 < num_trees; ++tree_idx2) {
+            for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
+                ++comparison_count;
+                if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
+                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Tree ", tree_idx1 + 1, " vs. tree ", tree_idx2 + 1);
+                }
                 auto & tree2 = comparison_trees[tree_idx2];
                 auto & results_table_row = results_table.add_row();
+
+                // tree 1 key
                 results_table_row.set("tree1.idx", tree_idx1 + 1);
                 if (add_tree_source_key) {
                     results_table_row.set("tree1.source.filepath", comparison_tree_sources.at(tree_idx1));
                 }
                 results_table_row.set("tree1.num.tips", tree1.get_num_tips());
                 results_table_row.set("tree1.length", tree1.get_total_tree_length());
-                results_table_row.set("tree2.idx", tree_idx1 + 1);
+
+                // tree 2 key
+                results_table_row.set("tree2.idx", tree_idx2 + 1);
                 if (add_tree_source_key) {
-                    results_table_row.set("tree2.source.filepath", comparison_tree_sources.at(tree_idx1));
+                    results_table_row.set("tree2.source.filepath", comparison_tree_sources.at(tree_idx2));
                 }
                 results_table_row.set("tree2.num.tips", tree2.get_num_tips());
                 results_table_row.set("tree2.length", tree2.get_total_tree_length());
+
+                // data
                 results_table_row.set("y.uw",
                         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
                 // results_table_row.set("y.uw.scaled",
