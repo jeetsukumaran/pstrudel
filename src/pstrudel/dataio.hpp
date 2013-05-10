@@ -135,7 +135,7 @@ int read_from_stream(std::vector<TreeT>& trees,
     platypus::bind_standard_interface(reader);
     reader.set_tree_postprocess_fn(postprocess_tree<TreeT>);
     std::function<TreeT& ()> get_new_tree_reference = [&trees] () -> TreeT& { trees.emplace_back(); return trees.back(); };
-    return reader.read(src, get_new_tree_reference);
+    return reader.read(src, get_new_tree_reference, format);
 }
 
 template <class TreeT>
@@ -144,7 +144,7 @@ int read_from_filepath(std::vector<TreeT>& trees,
         const std::string& format) {
     std::ifstream f(filepath);
     if (!f.good()) {
-        throw platypus::ReaderException(__FILE__, __LINE__, "platypus::BaseTreeReader::read_from_filepath(): Error opening file for input");
+        throw platypus::ReaderException(__FILE__, __LINE__, "Error opening file for input");
     }
     return read_from_stream(trees, f, format);
 }
