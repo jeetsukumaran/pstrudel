@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <colugo/filesys.hpp>
 #include <colugo/cmdopt.hpp>
@@ -363,7 +364,6 @@ int main(int argc, const char * argv[]) {
                 results_table.write_stacked(out,
                         "dist.type", "dist");
             }
-
         } // canonical ref trees
     } // reference distances
 
@@ -384,12 +384,14 @@ int main(int argc, const char * argv[]) {
         results_table.add_key_column<double>("tree2.length");
 
         results_table.add_data_column<double>("y.uw");
-        results_table.add_data_column<double>("y.uw.scaled");
+        results_table.add_data_column<double>("y.uw.norm");
         results_table.add_data_column<double>("y.wt");
-        results_table.add_data_column<double>("y.wt.scaled");
-        if (calculate_symmetric_diff) {
-            results_table.add_data_column<double>("urf.uw");
-            results_table.add_data_column<double>("urf.uw.scaled");
+        results_table.add_data_column<double>("y.wt.norm");
+        results_table.add_data_column<double>("urf.uw");
+        results_table.add_data_column<double>("urf.uw.norm");
+        if (!calculate_symmetric_diff) {
+            results_table.column("urf.uw").set_hidden(true);
+            results_table.column("urf.uw.norm").set_hidden(true);
         }
         logger.info("Begining calculating distances between all distinct pairs of trees");
         unsigned long num_trees = comparison_trees.size();
@@ -424,20 +426,26 @@ int main(int argc, const char * argv[]) {
                 // data
                 results_table_row.set("y.uw",
                         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
-                // results_table_row.set("y.uw.scaled",
-                //         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
                 results_table_row.set("y.wt",
                         tree1.get_weighted_pairwise_tip_profile_distance(tree2));
-                // results_table_row.set("y.wt.scaled",
-                //         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
-                if (calculate_symmetric_diff) {
-                    results_table_row.set("urf.uw",
-                            tree1.get_unlabeled_symmetric_difference(tree2));
-                    // results_table_row.set("urf.uw.scaled",
-                    //         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
-                }
+                results_table_row.set("urf.uw",
+                        tree1.get_unlabeled_symmetric_difference(tree2));
             }
         } // pairwise tree comparison
+
+        logger.info("Calculating normalized distances");
+        auto y_uw_col = results_table.get_column<double>("y.uw");
+        auto y_wt_col = results_table.get_column<double>("y.wt");
+        auto urf_uw_col = results_table.get_column<double>("urf.uw");
+        auto max_y_uw = *(std::max_element(y_uw_col.begin(), y_uw_col.end()));
+        auto max_y_wt = *(std::max_element(y_wt_col.begin(), y_wt_col.end()));
+        auto max_urf_uw = *(std::max_element(urf_uw_col.begin(), urf_uw_col.end()));
+        for (auto & row : results_table) {
+            row.set("y.uw.norm", row.get<double>("y.uw") / max_y_uw);
+            row.set("y.wt.norm", row.get<double>("y.wt") / max_y_wt);
+            row.set("urf.uw", row.get<double>("urf.uw") / max_urf_uw);
+        }
+        logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
 
         // output primary results
         {
