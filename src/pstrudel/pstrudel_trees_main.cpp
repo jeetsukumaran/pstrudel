@@ -443,7 +443,7 @@ int main(int argc, const char * argv[]) {
         for (auto & row : results_table) {
             row.set("y.uw.norm", row.get<double>("y.uw") / max_y_uw);
             row.set("y.wt.norm", row.get<double>("y.wt") / max_y_wt);
-            row.set("urf.uw", row.get<double>("urf.uw") / max_urf_uw);
+            row.set("urf.uw.norm", row.get<double>("urf.uw") / max_urf_uw);
         }
         logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
 
