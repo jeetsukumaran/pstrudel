@@ -63,8 +63,8 @@ ENDIF()
 
 # SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}  -O0 -ggdb3 -fPIC -fno-inline -femit-class-debug-always -fno-eliminate-unused-debug-types -F dwarf")
 SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -DNDEBUG")
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g3")
+SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 
 ##############################################################################
 ## Prerequisites
