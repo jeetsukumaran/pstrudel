@@ -50,21 +50,22 @@ IF(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
    SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 ENDIF()
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-SET(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wcast-align -Wcast-qual
--Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op
--Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast
--Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo
--Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror
--Wno-unused")
-IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+IF (${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" OR ${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    SET(CMAKE_CXX_FLAGS, "${CMAKE_CXX_FLAGS} -pedantic -Wall -Wextra -Wcast-align -Wcast-qual
+            -Wctor-dtor-privacy -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op
+            -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast
+            -Woverloaded-virtual -Wredundant-decls -Wshadow -Wsign-conversion -Wsign-promo
+            -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Werror
+            -Wno-unused")
+    IF ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+    ENDIF()
+    # SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}  -O0 -ggdb3 -fPIC -fno-inline -femit-class-debug-always -fno-eliminate-unused-debug-types -F dwarf")
+    SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
+    SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 ENDIF()
-
-# SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS}  -O0 -ggdb3 -fPIC -fno-inline -femit-class-debug-always -fno-eliminate-unused-debug-types -F dwarf")
-SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g3")
-SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
-SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELEASE} -g")
 
 ##############################################################################
 ## Prerequisites
