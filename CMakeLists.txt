@@ -69,9 +69,11 @@ ENDIF()
 
 ##############################################################################
 ## Prerequisites
+
+LIST(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary/cmake/Modules")
 FIND_PACKAGE(NCL)
 IF (NOT NCL_FOUND)
-    ADD_SUBDIRECTORY(ncl)
+    ADD_SUBDIRECTORY("${PROJECT_SOURCE_DIR}/src/platypus-phyloinformary/ncl")
 ENDIF()
 INCLUDE_DIRECTORIES(${NCL_INCLUDE_DIRS})
 
