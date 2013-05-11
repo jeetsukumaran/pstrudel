@@ -1,31 +1,33 @@
-INCLUDE_DIRECTORIES(
-  "${CMAKE_CURRENT_LIST_DIR}"
-)
-
-IF(NOT DEFINED ${NCL_LIBRARY})
-    SET(NCL_LIBRARY, "ncl")
-    MESSAGE(STATUS "Using '${NCL_LIBRARY}' for NCL library name")
+IF(DEFINED ${NCL_LIBRARY_NAME})
+    SET(NCL_LIBRARY ${NCL_LIBRARY_NAME})
+ELSE()
+    SET(NCL_LIBRARY "ncl")
 ENDIF()
 
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_LIST_DIR})
+
 ADD_LIBRARY (${NCL_LIBRARY}
-    ncl/nxsassumptionsblock.cpp
-    ncl/nxsblock.cpp
-    ncl/nxscharactersblock.cpp
-    ncl/nxscxxdiscretematrix.cpp
-    ncl/nxsdatablock.cpp
-    ncl/nxsdistancesblock.cpp
-    ncl/nxsexception.cpp
-    ncl/nxsmultiformat.cpp
-    ncl/nxspublicblocks.cpp
-    ncl/nxsreader.cpp
-    ncl/nxssetreader.cpp
-    ncl/nxsstring.cpp
-    ncl/nxstaxablock.cpp
-    ncl/nxstaxaassociationblock.cpp
-    ncl/nxstoken.cpp
-    ncl/nxstreesblock.cpp
-    ncl/nxsunalignedblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsassumptionsblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxscharactersblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxscxxdiscretematrix.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdatablock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdistancesblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsexception.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsmultiformat.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxspublicblocks.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsreader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxssetreader.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsstring.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstaxablock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstaxaassociationblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstoken.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstreesblock.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsunalignedblock.cpp
     )
+
+SET(NCL_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}" PARENT_SCOPE)
+SET(NCL_LIBRARIES "${NCL_LIBRARY}" PARENT_SCOPE)
 
 OPTION(INSTALL_NCL "Install NCL" OFF)
 # SET(INSTALL_NCL_TARGET "install.ncl")
@@ -36,32 +38,32 @@ OPTION(INSTALL_NCL "Install NCL" OFF)
 IF (INSTALL_NCL)
     INSTALL(TARGETS ${NCL_LIBRARY} DESTINATION lib/ncl COMPONENT ncl)
     SET(NCL_HEADERS
-        ncl/ncl.h
-        ncl/nxsallocatematrix.h
-        ncl/nxsassumptionsblock.h
-        ncl/nxsblock.cpp
-        ncl/nxsblock.h
-        ncl/nxscharactersblock.h
-        ncl/nxscdiscretematrix.h
-        ncl/nxscxxdiscretematrix.h
-        ncl/nxsdatablock.h
-        ncl/nxsdefs.h
-        ncl/nxsdiscretedatum.h
-        ncl/nxsdistancedatum.h
-        ncl/nxsdistancesblock.h
-        ncl/nxsexception.h
-        ncl/nxsmultiformat.h
-        ncl/nxspublicblocks.h
-        ncl/nxsreader.h
-        ncl/nxssetreader.h
-        ncl/nxsstring.h
-        ncl/nxstaxablock.h
-        ncl/nxstaxaassociationblock.h
-        ncl/nxstoken.h
-        ncl/nxstreesblock.h
-        ncl/nxsunalignedblock.h
-        ncl/nxsutilcopy.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/ncl.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsallocatematrix.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsassumptionsblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsblock.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxscharactersblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxscdiscretematrix.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxscxxdiscretematrix.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdatablock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdefs.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdiscretedatum.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdistancedatum.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsdistancesblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsexception.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsmultiformat.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxspublicblocks.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsreader.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxssetreader.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsstring.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstaxablock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstaxaassociationblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstoken.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxstreesblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsunalignedblock.h
+        ${CMAKE_CURRENT_LIST_DIR}/ncl/nxsutilcopy.h
         )
-    INSTALL(FILES ${NCL_HEADERS} DESTINATION include/ncl COMPONENT ncl)
+    INSTALL(FILES ${NCL_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include/ncl COMPONENT ncl)
     UNSET(INSTALL_NCL CACHE)
 ENDIF()

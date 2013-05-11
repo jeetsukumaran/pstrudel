@@ -9,7 +9,6 @@
 #include <vector>
 #include <functional>
 #include <map>
-#include <ncl/nxsmultiformat.h>
 #include <colugo/console.hpp>
 #include <platypus/parse/nclreader.hpp>
 #include <platypus/model/standardinterface.hpp>

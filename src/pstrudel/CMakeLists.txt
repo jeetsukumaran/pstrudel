@@ -16,7 +16,7 @@ FOREACH(main_prog_source ${PSTRUDEL_MAIN_PROG_SOURCES})
         ${main_prog_source}
         ${PSTRUDEL_MAIN_LIB_SOURCES}
         )
-    TARGET_LINK_LIBRARIES(${progname} ${NCL_LIBRARY})
+    TARGET_LINK_LIBRARIES(${progname} ${NCL_LIBRARIES})
     INSTALL(TARGETS ${progname}
             DESTINATION bin
             )

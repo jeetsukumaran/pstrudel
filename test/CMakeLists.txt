@@ -182,7 +182,7 @@ FOREACH(test_src_file ${TEST_TARGET_SOURCES})
         ${test_src_file}
         )
     TARGET_LINK_LIBRARIES(${basename}
-        ${NCL_LIBRARY}
+        ${NCL_LIBRARIES}
         pstrudelmain
         pstrudeltesting)
     ADD_DEPENDENCIES(check ${basename})

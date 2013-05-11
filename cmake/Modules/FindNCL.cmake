@@ -1,0 +1,24 @@
+# This module defines
+# NCL_LIBRARY
+# NCL_FOUND
+# NCL_INCLUDE_DIR
+
+SET(NCL_PREFIX "/usr/local" CACHE PATH "Set path to NCL installation to use" )
+FIND_PATH(NCL_INCLUDE_DIR
+            "ncl.h"
+            PATHS ${NCL_PREFIX}/include
+            PATH_SUFFIXES "ncl")
+FIND_LIBRARY(NCL_LIBRARY
+            NAMES "ncl"
+            PATHS ${NCL_PREFIX}/lib
+            PATH_SUFFIXES "ncl"
+            REQUIRED)
+IF (NCL_INCLUDE_DIR AND NCL_LIBRARY AND EXISTS "${NCL_LIBRARY}")
+    SET(NCL_FOUND TRUE)
+    SET(NCL_INCLUDE_DIRS "${NCL_INCLUDE_DIR}")
+    SET(NCL_LIBRARIES "${NCL_LIBRARY}")
+ELSE()
+    SET(NCL_FOUND FALSE)
+    SET(NCL_INCLUDE_DIRS "NOTFOUND")
+    SET(NCL_LIBRARIES "NOTFOUND")
+ENDIF()
