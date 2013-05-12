@@ -15,6 +15,7 @@ int main(int argc, const char * argv[]) {
 
     std::map<unsigned long, std::map<unsigned long, double>> uwt_dists;
     std::map<unsigned long, std::map<unsigned long, double>> wt_dists;
+    std::map<unsigned long, std::map<unsigned long, double>> swt_dists;
     std::set<std::pair<unsigned long, unsigned long>> comparisons;
     for (unsigned tidx1 = 0; tidx1 < trees.size(); ++tidx1) {
         for (unsigned tidx2 = 0; tidx2 < trees.size(); ++tidx2) {
@@ -22,6 +23,7 @@ int main(int argc, const char * argv[]) {
             auto & tree2 = trees[tidx2];
             uwt_dists[tidx1][tidx2] = tree1.get_unweighted_pairwise_tip_profile_distance(tree2);
             wt_dists[tidx1][tidx2] = tree1.get_weighted_pairwise_tip_profile_distance(tree2);
+            swt_dists[tidx1][tidx2] = tree1.get_scaled_weighted_pairwise_tip_profile_distance(tree2);
             comparisons.insert(std::make_pair(tidx1, tidx2));
         }
     }
@@ -34,11 +36,13 @@ int main(int argc, const char * argv[]) {
     unsigned long tidx2 = 0;
     double exp_uwt_d = 0.0;
     double exp_wt_d = 0.0;
+    double exp_swt_d = 0.0;
     while (src.good()) {
         src >> tidx1;
         src >> tidx2;
         src >> exp_uwt_d;
         src >> exp_wt_d;
+        src >> exp_swt_d;
         // std::cerr << tidx1 << "\t" << tidx2 << "\t" << exp_uwt_d << "\t" << exp_wt_d << std::endl;
         fails += platypus::testing::compare_equal(
                 exp_uwt_d,
@@ -52,6 +56,12 @@ int main(int argc, const char * argv[]) {
                 __FILE__,
                 __LINE__,
                 "Incorrect weighted pairwise tip profile distance for tree ", tidx1, " and tree ", tidx2);
+        fails += platypus::testing::compare_equal(
+                exp_swt_d,
+                swt_dists[tidx1][tidx2],
+                __FILE__,
+                __LINE__,
+                "Incorrect scaled weighted pairwise tip profile distance for tree ", tidx1, " and tree ", tidx2);
         comparisons.erase(std::make_pair(tidx1, tidx2));
     }
     fails += platypus::testing::compare_equal(

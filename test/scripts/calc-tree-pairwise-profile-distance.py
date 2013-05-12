@@ -22,14 +22,21 @@ def main():
             for txidx2 in range(txidx1+1, len(tree.taxon_set)):
                 tree.uwt_profile.append(pdm.path_edge_count(tree.taxon_set[txidx1], tree.taxon_set[txidx2]))
         tree.uwt_profile = sorted(tree.uwt_profile)
+        tree_length  = tree.length()
+        if tree_length > 0:
+            tree.swt_profile = [float(x)/tree_length for x in tree.wt_profile]
+        else:
+            tree.swt_profile = [0.0 for x in tree.wt_profile]
 
     for tidx1 in range(len(trees)):
         for tidx2 in range(len(trees)):
-            sys.stdout.write("{}\t{}\t{:.22f}\t{:.22f}\n".format(
+            sys.stdout.write("{}\t{}\t{:.22f}\t{:.22f}\t{:.22f}\n".format(
                 tidx1,
                 tidx2,
                 euclidean_distance(trees[tidx1].uwt_profile, trees[tidx2].uwt_profile),
-                euclidean_distance(trees[tidx1].wt_profile, trees[tidx2].wt_profile)))
+                euclidean_distance(trees[tidx1].wt_profile, trees[tidx2].wt_profile),
+                euclidean_distance(trees[tidx1].swt_profile, trees[tidx2].swt_profile)
+                ))
 
 if __name__ == "__main__":
     main()

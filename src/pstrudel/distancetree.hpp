@@ -167,6 +167,10 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         double get_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
+        double get_scaled_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
+            return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        }
+
 
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
