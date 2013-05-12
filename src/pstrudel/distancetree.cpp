@@ -12,15 +12,19 @@ PairwiseTipDistanceProfileCalculator & PairwiseTipDistanceProfileCalculator::ope
 }
 
 void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles() {
-    std::multiset<unsigned long> unweighted_distances;
-    std::multiset<double> weighted_distances;
+    std::vector<unsigned long> unweighted_distances;
+    std::vector<double> weighted_distances;
     std::vector<double> scaled_weighted_distances;
+    unsigned long nc = (this->tree_.get_num_tips() * (this->tree_.get_num_tips() - 1))/2;
+    weighted_distances.reserve(nc);
+    unweighted_distances.reserve(nc);
+    scaled_weighted_distances.reserve(nc);
     auto f = [&unweighted_distances, &weighted_distances] (DistanceNodeValue &,
             DistanceNodeValue &,
             unsigned long u,
             double w) {
-        unweighted_distances.insert(u);
-        weighted_distances.insert(w);
+        unweighted_distances.push_back(u);
+        weighted_distances.push_back(w);
     };
     this->tree_.calc_pairwise_tip_distances(f);
     this->unweighted_pairwise_tip_distance_profile_.set_data(unweighted_distances.begin(),
@@ -29,7 +33,6 @@ void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles(
             weighted_distances.end());
     double tree_length = this->tree_.get_total_tree_length();
     if (tree_length > 0) {
-        scaled_weighted_distances.reserve(weighted_distances.size());
         for (auto & wd : weighted_distances) {
             scaled_weighted_distances.push_back(wd / tree_length);
         }
