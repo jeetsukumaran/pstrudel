@@ -85,6 +85,7 @@ class PairwiseTipDistanceProfileCalculator {
         PairwiseTipDistanceProfileCalculator & operator=(const PairwiseTipDistanceProfileCalculator & other);
         double get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other);
         double get_weighted_distance(PairwiseTipDistanceProfileCalculator & other);
+        double get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other);
 
     private:
         void build_pairwise_tip_distance_profiles();
@@ -93,6 +94,7 @@ class PairwiseTipDistanceProfileCalculator {
         DistanceTree &    tree_;
         Profile           unweighted_pairwise_tip_distance_profile_;
         Profile           weighted_pairwise_tip_distance_profile_;
+        Profile           scaled_weighted_pairwise_tip_distance_profile_;
 
 }; // PairwiseTipDistanceProfileCalculator
 
@@ -185,11 +187,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         // along the edges.
         template <typename T>
         void calc_pairwise_tip_distances(T store_pairwise_tip_dist_fn) {
-            // std::multiset<unsigned long> unweighted_distances;
-            // std::multiset<double> weighted_distances;
+            this->number_of_tips_ = 0;
+            this->total_tree_length_ = 0.0;
             for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
+                this->total_tree_length_ += ndi->get_edge_length();
                 if (ndi.is_leaf()) {
                     ndi->set_desc_path_len(*ndi, 0.0, 0);
+                    ++this->number_of_tips_;
                 } else {
                     for (auto chi1 = this->children_begin(ndi) ; chi1 != this->children_end(ndi) ; ++chi1) {
                         for (auto & desc1 : chi1->get_desc_paths()) {
@@ -205,10 +209,6 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                                     auto weight = ndi->get_desc_path_weight(desc1_nd) + desc2_weight + chi2->get_edge_length();
                                     auto steps = ndi->get_desc_path_count(desc1_nd) + desc2_steps + 1;
                                     store_pairwise_tip_dist_fn(*desc1_nd, *desc2_nd, steps, weight);
-                                    // this->weighted_pairwise_tip_distance_[std::make_pair(&(*desc1_nd), &(*desc2_nd))] = weight;
-                                    // this->unweighted_pairwise_tip_distance_[std::make_pair(&(*desc1_nd), &(*desc2_nd))] = steps;
-                                    // unweighted_distances.insert(steps);
-                                    // weighted_distances.insert(weight);
                                 }
                             }
                         }

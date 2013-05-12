@@ -14,6 +14,7 @@ PairwiseTipDistanceProfileCalculator & PairwiseTipDistanceProfileCalculator::ope
 void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles() {
     std::multiset<unsigned long> unweighted_distances;
     std::multiset<double> weighted_distances;
+    std::vector<double> scaled_weighted_distances;
     auto f = [&unweighted_distances, &weighted_distances] (DistanceNodeValue &,
             DistanceNodeValue &,
             unsigned long u,
@@ -26,6 +27,17 @@ void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles(
             unweighted_distances.end());
     this->weighted_pairwise_tip_distance_profile_.set_data(weighted_distances.begin(),
             weighted_distances.end());
+    double tree_length = this->tree_.get_total_tree_length();
+    if (tree_length > 0) {
+        scaled_weighted_distances.reserve(weighted_distances.size());
+        for (auto & wd : weighted_distances) {
+            scaled_weighted_distances.push_back(wd / tree_length);
+        }
+    } else {
+        scaled_weighted_distances.insert(scaled_weighted_distances.end(), weighted_distances.size(), 0.0);
+    }
+    this->scaled_weighted_pairwise_tip_distance_profile_.set_data(scaled_weighted_distances.begin(),
+            scaled_weighted_distances.end());
 }
 
 double PairwiseTipDistanceProfileCalculator::get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other) {
@@ -46,6 +58,16 @@ double PairwiseTipDistanceProfileCalculator::get_weighted_distance(PairwiseTipDi
         other.build_pairwise_tip_distance_profiles();
     }
     return this->weighted_pairwise_tip_distance_profile_.get_distance(other.weighted_pairwise_tip_distance_profile_);
+}
+
+double PairwiseTipDistanceProfileCalculator::get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+    if (this->scaled_weighted_pairwise_tip_distance_profile_.empty()) {
+        this->build_pairwise_tip_distance_profiles();
+    }
+    if (other.scaled_weighted_pairwise_tip_distance_profile_.empty()) {
+        other.build_pairwise_tip_distance_profiles();
+    }
+    return this->scaled_weighted_pairwise_tip_distance_profile_.get_distance(other.scaled_weighted_pairwise_tip_distance_profile_);
 }
 
 //////////////////////////////////////////////////////////////////////////////
