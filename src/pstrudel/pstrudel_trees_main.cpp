@@ -78,7 +78,8 @@ class CanonicalTreePatterns {
         typedef typename pstrudel::DistanceTree::value_type    value_type;
         CanonicalTreePatterns()
                 : num_tips_(0)
-                  , is_labeled_(true) {
+                  , is_labeled_(true)
+                  , calculate_symmetric_diff_(true) {
         }
         std::vector<value_type> generate_leaves() {
             std::vector<value_type> leaves;
@@ -92,12 +93,13 @@ class CanonicalTreePatterns {
             }
             return leaves;
         }
-        void generate(unsigned long num_tips, bool is_labled=true) {
+        void generate(unsigned long num_tips, bool is_labled=true, bool calculate_symmetric_diff=true) {
             this->num_tips_ = num_tips;
+            this->calculate_symmetric_diff_ = calculate_symmetric_diff;
             auto leaves = this->generate_leaves();
-            auto & t1 = this->tree_patterns_["max.unbalanced"];
-            auto & t2 = this->tree_patterns_["max.balanced"];
+            auto & t1 = this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[0]];
             platypus::build_maximally_unbalanced_tree(t1, leaves.begin(), leaves.end());
+            auto & t2 = this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[1]];
             platypus::build_maximally_balanced_tree(t2, leaves.begin(), leaves.end());
 
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
@@ -105,7 +107,7 @@ class CanonicalTreePatterns {
                 this->tree_pattern_cross_distances_.add_data_column<double>("y.uw." + tpi1.first);
                 this->tree_pattern_cross_distances_.add_data_column<double>("y.wt." + tpi1.first);
                 this->tree_pattern_cross_distances_.add_data_column<double>("y.swt." + tpi1.first);
-                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("y.urf." + tpi1.first);
+                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("urf.uw." + tpi1.first);
             }
 
             for (auto & tpi1 : this->tree_patterns_) {
@@ -115,7 +117,7 @@ class CanonicalTreePatterns {
                     row.set ("y.uw." + tpi2.first, tpi2.second.get_unweighted_pairwise_tip_profile_distance(tpi1.second));
                     row.set ("y.wt." + tpi2.first, tpi2.second.get_weighted_pairwise_tip_profile_distance(tpi1.second));
                     row.set("y.swt." + tpi2.first, tpi2.second.get_scaled_weighted_pairwise_tip_profile_distance(tpi1.second));
-                    row.set("y.urf." + tpi2.first, tpi2.second.get_unlabeled_symmetric_difference(tpi1.second));
+                    row.set("urf.uw." + tpi2.first, tpi2.second.get_unlabeled_symmetric_difference(tpi1.second));
                 }
             }
 
@@ -124,15 +126,12 @@ class CanonicalTreePatterns {
                 this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.uw." + tree_pattern_name).max<double>();
                 this->max_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.wt." + tree_pattern_name).max<double>();
                 this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.swt." + tree_pattern_name).max<double>();
-                this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.urf." + tree_pattern_name).max<double>();
+                this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("urf.uw." + tree_pattern_name).max<double>();
             }
 
         }
         template <class T, class R>
-        void score(
-                T & other_tree,
-                R & row,
-                bool calculate_symmetric_diff=false) {
+        void score(T & other_tree, R & row) {
             double d = 0.0;
             for (auto & tpi : this->tree_patterns_) {
                 auto & tree_pattern_name = tpi.first;
@@ -149,10 +148,25 @@ class CanonicalTreePatterns {
                 row.set("y.swt." + tree_pattern_name, d);
                 row.set("y.swt." + tree_pattern_name + ".scaled", d/this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
-                if (calculate_symmetric_diff) {
+                if (this->calculate_symmetric_diff_) {
                     d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
                     row.set("urf.uw." + tree_pattern_name, d);
                     row.set("urf.uw." + tree_pattern_name + ".scaled", d/this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name]);
+                }
+            }
+        }
+    public:
+        static void add_results_data_columns(platypus::DataTable & table,
+                platypus::stream::OutputStreamFormatters & col_formatters,
+                bool calculate_symmetric_diff) {
+            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
+                for (auto & y_distance_name : CanonicalTreePatterns::tree_pattern_y_distance_names_) {
+                    table.add_data_column<double>(y_distance_name + "." + tree_pattern_name, col_formatters);
+                    table.add_data_column<double>(y_distance_name + "." + tree_pattern_name + ".scaled", col_formatters);
+                }
+                if (calculate_symmetric_diff) {
+                    table.add_data_column<unsigned long>("urf.uw." + tree_pattern_name, col_formatters);
+                    table.add_data_column<double>("urf.uw." + tree_pattern_name + ".scaled", col_formatters);
                 }
             }
         }
@@ -160,14 +174,26 @@ class CanonicalTreePatterns {
     private:
         unsigned long                                    num_tips_;
         bool                                             is_labeled_;
+        bool                                             calculate_symmetric_diff_;
         std::map<std::string, pstrudel::DistanceTree>    tree_patterns_;
         platypus::DataTable                              tree_pattern_cross_distances_;
         std::map<std::string, double>                    max_unweighted_pairwise_tip_profile_distance_;
         std::map<std::string, double>                    max_weighted_pairwise_tip_profile_distance_;
         std::map<std::string, double>                    max_scaled_weighted_pairwise_tip_profile_distance_;
         std::map<std::string, double>                    max_unlabeled_symmetric_difference_distance_;
+        static const std::vector<std::string>            tree_pattern_names_;
+        static const std::vector<std::string>            tree_pattern_y_distance_names_;
 
 }; // CanonicalTreePatterns
+const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
+        "max.unbalanced",
+        "max.balanced",
+}; // static cons ttree_pattern_names_
+const std::vector<std::string> CanonicalTreePatterns::tree_pattern_y_distance_names_{
+        "y.uw",
+        "y.wt",
+        "y.swt",
+}; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////
 // main
@@ -366,29 +392,12 @@ int main(int argc, const char * argv[]) {
             colugo::console::abort("User-specified reference trees not yet implemented");
         } else {
             // canonical ref trees
-            results_table.add_data_column<double>("y.uw.max.unbalanced", col_formatting);
-            results_table.add_data_column<double>("y.uw.max.unbalanced.scaled", col_formatting);
-            results_table.add_data_column<double>("y.wt.max.unbalanced", col_formatting);
-            results_table.add_data_column<double>("y.wt.max.unbalanced.scaled", col_formatting);
-            results_table.add_data_column<double>("y.swt.max.unbalanced", col_formatting);
-            results_table.add_data_column<double>("y.swt.max.unbalanced.scaled", col_formatting);
-            results_table.add_data_column<double>("y.uw.max.balanced", col_formatting);
-            results_table.add_data_column<double>("y.uw.max.balanced.scaled", col_formatting);
-            results_table.add_data_column<double>("y.wt.max.balanced", col_formatting);
-            results_table.add_data_column<double>("y.wt.max.balanced.scaled", col_formatting);
-            results_table.add_data_column<double>("y.swt.max.balanced", col_formatting);
-            results_table.add_data_column<double>("y.swt.max.balanced.scaled", col_formatting);
-            if (calculate_symmetric_diff) {
-                results_table.add_data_column<unsigned long>("urf.uw.max.unbalanced");
-                results_table.add_data_column<double>("urf.uw.max.unbalanced.scaled", col_formatting);
-                results_table.add_data_column<unsigned long>("urf.uw.max.balanced");
-                results_table.add_data_column<double>("urf.uw.max.balanced.scaled", col_formatting);
-            }
             if (log_frequency == 0) {
                 log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
             }
-            logger.info("Begining calculating distances between comparison trees and canonical tree patterns");
+            logger.info("Beginning calculating distances between comparison trees and canonical tree patterns");
             std::map<unsigned long, CanonicalTreePatterns> tree_patterns;
+            CanonicalTreePatterns::add_results_data_columns(results_table, col_formatting, calculate_symmetric_diff);
             unsigned long comparison_tree_idx = 0;
             for (auto & comparison_tree : comparison_trees) {
                 auto comparison_tree_size = comparison_tree.get_num_tips();
@@ -403,9 +412,9 @@ int main(int argc, const char * argv[]) {
 
                 if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                     logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
-                    tree_patterns[comparison_tree_size].generate(comparison_tree_size, true);
+                    tree_patterns[comparison_tree_size].generate(comparison_tree_size, true, calculate_symmetric_diff);
                 }
-                tree_patterns[comparison_tree_size].score(comparison_tree, results_table_row, calculate_symmetric_diff);
+                tree_patterns[comparison_tree_size].score(comparison_tree, results_table_row);
 
                 comparison_tree_idx += 1;
             } // tree comparison
@@ -472,7 +481,7 @@ int main(int argc, const char * argv[]) {
             results_table.column("urf.uw").set_hidden(true);
             results_table.column("urf.uw.norm").set_hidden(true);
         }
-        logger.info("Begining calculating distances between all distinct pairs of trees");
+        logger.info("Beginning calculating distances between all distinct pairs of trees");
         unsigned long num_trees = comparison_trees.size();
         unsigned long total_comparisons = num_trees * (num_trees - 1) / 2;
         unsigned long comparison_count = 0;
