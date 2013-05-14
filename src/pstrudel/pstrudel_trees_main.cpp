@@ -78,11 +78,7 @@ class CanonicalTreePatterns {
         typedef typename pstrudel::DistanceTree::value_type    value_type;
         CanonicalTreePatterns()
                 : num_tips_(0)
-                  , is_labeled_(true)
-                  , pattern_unweighted_pairwise_tip_profile_distance_(0.0)
-                  , pattern_weighted_pairwise_tip_profile_distance_(0.0)
-                  , pattern_scaled_weighted_pairwise_tip_profile_distance_(0.0)
-                  , pattern_unlabeled_symmetric_difference_distance_(0.0) {
+                  , is_labeled_(true) {
         }
         std::vector<value_type> generate_leaves() {
             std::vector<value_type> leaves;
@@ -103,10 +99,34 @@ class CanonicalTreePatterns {
             auto & t2 = this->tree_patterns_["max.balanced"];
             platypus::build_maximally_unbalanced_tree(t1, leaves.begin(), leaves.end());
             platypus::build_maximally_balanced_tree(t2, leaves.begin(), leaves.end());
-            this->pattern_unweighted_pairwise_tip_profile_distance_ = t1.get_unweighted_pairwise_tip_profile_distance(t2);
-            this->pattern_weighted_pairwise_tip_profile_distance_ = t1.get_weighted_pairwise_tip_profile_distance(t2);
-            this->pattern_scaled_weighted_pairwise_tip_profile_distance_ = t1.get_scaled_weighted_pairwise_tip_profile_distance(t2);
-            this->pattern_unlabeled_symmetric_difference_distance_ = t1.get_unlabeled_symmetric_difference(t2);
+
+            this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
+            for (auto & tpi1 : this->tree_patterns_) {
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.uw." + tpi1.first);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.wt." + tpi1.first);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.swt." + tpi1.first);
+                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("y.urf." + tpi1.first);
+            }
+
+            for (auto & tpi1 : this->tree_patterns_) {
+                auto & row = this->tree_pattern_cross_distances_.add_row();
+                row.set("pattern", tpi1.first);
+                for (auto & tpi2 : this->tree_patterns_) {
+                    row.set ("y.uw." + tpi2.first, tpi2.second.get_unweighted_pairwise_tip_profile_distance(tpi1.second));
+                    row.set ("y.wt." + tpi2.first, tpi2.second.get_weighted_pairwise_tip_profile_distance(tpi1.second));
+                    row.set("y.swt." + tpi2.first, tpi2.second.get_scaled_weighted_pairwise_tip_profile_distance(tpi1.second));
+                    row.set("y.urf." + tpi2.first, tpi2.second.get_unlabeled_symmetric_difference(tpi1.second));
+                }
+            }
+
+            for (auto & tpi : this->tree_patterns_) {
+                auto & tree_pattern_name = tpi.first;
+                this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.uw." + tree_pattern_name).max<double>();
+                this->max_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.wt." + tree_pattern_name).max<double>();
+                this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.swt." + tree_pattern_name).max<double>();
+                this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.urf." + tree_pattern_name).max<double>();
+            }
+
         }
         template <class T, class R>
         void score(
@@ -115,24 +135,24 @@ class CanonicalTreePatterns {
                 bool calculate_symmetric_diff=false) {
             double d = 0.0;
             for (auto & tpi : this->tree_patterns_) {
-                auto & label = tpi.first;
+                auto & tree_pattern_name = tpi.first;
                 auto & tree_pattern = tpi.second;
                 d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
-                row.set("y.uw." + label, d);
-                row.set("y.uw." + label + ".scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
+                row.set("y.uw." + tree_pattern_name, d);
+                row.set("y.uw." + tree_pattern_name + ".scaled", d/this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
                 d = tree_pattern.get_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("y.wt." + label, d);
-                row.set("y.wt." + label +".scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
+                row.set("y.wt." + tree_pattern_name, d);
+                row.set("y.wt." + tree_pattern_name +".scaled", d/this->max_weighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
                 d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("y.swt." + label, d);
-                row.set("y.swt." + label + ".scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
+                row.set("y.swt." + tree_pattern_name, d);
+                row.set("y.swt." + tree_pattern_name + ".scaled", d/this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
                 if (calculate_symmetric_diff) {
                     d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
-                    row.set("urf.uw." + label, d);
-                    row.set("urf.uw." + label + ".scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
+                    row.set("urf.uw." + tree_pattern_name, d);
+                    row.set("urf.uw." + tree_pattern_name + ".scaled", d/this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name]);
                 }
             }
         }
@@ -141,10 +161,11 @@ class CanonicalTreePatterns {
         unsigned long                                    num_tips_;
         bool                                             is_labeled_;
         std::map<std::string, pstrudel::DistanceTree>    tree_patterns_;
-        double                                           pattern_unweighted_pairwise_tip_profile_distance_;
-        double                                           pattern_weighted_pairwise_tip_profile_distance_;
-        double                                           pattern_scaled_weighted_pairwise_tip_profile_distance_;
-        double                                           pattern_unlabeled_symmetric_difference_distance_;
+        platypus::DataTable                              tree_pattern_cross_distances_;
+        std::map<std::string, double>                    max_unweighted_pairwise_tip_profile_distance_;
+        std::map<std::string, double>                    max_weighted_pairwise_tip_profile_distance_;
+        std::map<std::string, double>                    max_scaled_weighted_pairwise_tip_profile_distance_;
+        std::map<std::string, double>                    max_unlabeled_symmetric_difference_distance_;
 
 }; // CanonicalTreePatterns
 
