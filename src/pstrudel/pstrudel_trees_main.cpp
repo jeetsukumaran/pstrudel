@@ -72,67 +72,96 @@ int get_trees(std::vector<TreeT>& trees,
 //////////////////////////////////////////////////////////////////////////////
 // TreePatternManager
 
-typedef std::map<unsigned long, std::map<std::string, pstrudel::DistanceTree>> TreePatternCollectionType;
-typedef std::map<unsigned long, std::map<std::string, double>> TreePatternMaxDistances;
-
-template <class TreeT>
-std::vector<typename TreeT::value_type> generate_leaves(unsigned long num_tips,
-        bool labeled) {
-    std::vector<typename TreeT::value_type> leaves;
-    leaves.reserve(num_tips);
-    for (unsigned long i = 0; i < num_tips; ++i) {
-        leaves.emplace_back();
-        if (labeled) {
-            auto & leaf = leaves.back();
-            leaf.set_label("t" + std::to_string(i+1));
+class CanonicalTreePatterns {
+    public:
+        typedef pstrudel::DistanceTree                         tree_type;
+        typedef typename pstrudel::DistanceTree::value_type    value_type;
+        CanonicalTreePatterns()
+                : num_tips_(0)
+                  , is_labeled_(true)
+                  , pattern_unweighted_pairwise_tip_profile_distance_(0.0)
+                  , pattern_weighted_pairwise_tip_profile_distance_(0.0)
+                  , pattern_scaled_weighted_pairwise_tip_profile_distance_(0.0)
+                  , pattern_unlabeled_symmetric_difference_distance_(0.0) {
         }
-    }
-    return leaves;
-}
+        std::vector<value_type> generate_leaves() {
+            std::vector<value_type> leaves;
+            leaves.reserve(this->num_tips_);
+            for (unsigned long i = 0; i < this->num_tips_; ++i) {
+                leaves.emplace_back();
+                if (this->is_labeled_) {
+                    auto & leaf = leaves.back();
+                    leaf.set_label("t" + std::to_string(i+1));
+                }
+            }
+            return leaves;
+        }
+        void generate(unsigned long num_tips, bool is_labled=true) {
+            this->num_tips_ = num_tips;
+            auto leaves = this->generate_leaves();
+            auto & t1 = this->tree_patterns_["max.unbalanced"];
+            auto & t2 = this->tree_patterns_["max.balanced"];
+            platypus::build_maximally_unbalanced_tree(t1, leaves.begin(), leaves.end());
+            platypus::build_maximally_balanced_tree(t2, leaves.begin(), leaves.end());
+            this->pattern_unweighted_pairwise_tip_profile_distance_ = t1.get_unweighted_pairwise_tip_profile_distance(t2);
+            this->pattern_weighted_pairwise_tip_profile_distance_ = t1.get_weighted_pairwise_tip_profile_distance(t2);
+            this->pattern_scaled_weighted_pairwise_tip_profile_distance_ = t1.get_scaled_weighted_pairwise_tip_profile_distance(t2);
+            this->pattern_unlabeled_symmetric_difference_distance_ = t1.get_unlabeled_symmetric_difference(t2);
+        }
+        template <class T, class R>
+        void score(
+                T & other_tree,
+                R & row,
+                bool calculate_symmetric_diff=false) {
+            double d = 0.0;
 
-template <typename BuildFnT>
-void build_tree_pattern(pstrudel::DistanceTree & tree, BuildFnT tree_building_fn, unsigned long num_tips, bool labeled) {
-    auto leaves = generate_leaves<pstrudel::DistanceTree>(num_tips, labeled);
-    tree_building_fn(tree, leaves.begin(), leaves.end());
-}
+            d = this->tree_patterns_["max.unbalanced"].get_unweighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.uw.max.unbalanced", d);
+            row.set("y.uw.max.unbalanced.scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
 
-void build_canonical_tree_patterns(
-        unsigned long num_tips,
-        TreePatternCollectionType & tree_patterns,
-        TreePatternMaxDistances & tree_pattern_max_unweighted_pairwise_tip_profile_distances,
-        TreePatternMaxDistances & tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances,
-        bool labeled) {
-    build_tree_pattern(
-            tree_patterns[num_tips]["max.unbalanced"],
-            [](pstrudel::DistanceTree & tree,
-                std::vector<pstrudel::DistanceNodeValue>::iterator i1,
-                std::vector<pstrudel::DistanceNodeValue>::iterator i2){ platypus::build_maximally_unbalanced_tree(tree, i1, i2);},
-            num_tips,
-            labeled);
-    build_tree_pattern(
-            tree_patterns[num_tips]["max.balanced"],
-            [](pstrudel::DistanceTree & tree,
-                std::vector<pstrudel::DistanceNodeValue>::iterator i1,
-                std::vector<pstrudel::DistanceNodeValue>::iterator i2){ platypus::build_maximally_balanced_tree(tree, i1, i2);},
-            num_tips,
-            labeled);
-    double max_dist1 = tree_patterns[num_tips]["max.unbalanced"].get_unweighted_pairwise_tip_profile_distance(tree_patterns[num_tips]["max.balanced"]);
-    tree_pattern_max_unweighted_pairwise_tip_profile_distances[num_tips]["max.unbalanced"] = max_dist1;
-    tree_pattern_max_unweighted_pairwise_tip_profile_distances[num_tips]["max.balanced"] = max_dist1;
-    double max_dist2 = tree_patterns[num_tips]["max.unbalanced"].get_unlabeled_symmetric_difference(tree_patterns[num_tips]["max.balanced"]);
-    tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[num_tips]["max.unbalanced"] = max_dist2;
-    tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[num_tips]["max.balanced"] = max_dist2;
-    // auto & ub_tree = tree_patterns[num_tips]["max.unbalanced"];
-    // auto ub_leaves = generate_leaves<WorkingTree>(num_tips, labeled);
-    // platypus::build_maximally_unbalanced_tree(ub_tree, ub_leaves.begin(), ub_leaves.end());
-    // ub_tree.build_pairwise_tip_distance_profiles();
-    // ub_tree.calc_subtree_sizes();
-    // auto & bal_tree = tree_patterns[num_tips]["max.balanced"];
-    // auto bal_leaves = generate_leaves<WorkingTree>(num_tips, labeled);
-    // platypus::build_maximally_balanced_tree(bal_tree, bal_leaves.begin(), bal_leaves.end());
-    // bal_tree.build_pairwise_tip_distance_profiles();
-    // bal_tree.calc_subtree_sizes();
-}
+            d = this->tree_patterns_["max.unbalanced"].get_weighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.wt.max.unbalanced", d);
+            row.set("y.wt.max.unbalanced.scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
+
+            d = this->tree_patterns_["max.unbalanced"].get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.swt.max.unbalanced", d);
+            row.set("y.swt.max.unbalanced.scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
+
+            if (calculate_symmetric_diff) {
+                d = this->tree_patterns_["max.unbalanced"].get_unlabeled_symmetric_difference(other_tree);
+                row.set("urf.uw.max.unbalanced", d);
+                row.set("urf.uw.max.unbalanced.scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
+            }
+
+            d = this->tree_patterns_["max.balanced"].get_unweighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.uw.max.balanced", d);
+            row.set("y.uw.max.balanced.scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
+
+            d = this->tree_patterns_["max.balanced"].get_weighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.wt.max.balanced", d);
+            row.set("y.wt.max.balanced.scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
+
+            d = this->tree_patterns_["max.balanced"].get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.swt.max.balanced", d);
+            row.set("y.swt.max.balanced.scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
+
+            if (calculate_symmetric_diff) {
+                d = this->tree_patterns_["max.balanced"].get_unlabeled_symmetric_difference(other_tree);
+                row.set("urf.uw.max.balanced", d);
+                row.set("urf.uw.max.balanced.scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
+            }
+        }
+
+    private:
+        unsigned long                                    num_tips_;
+        bool                                             is_labeled_;
+        std::map<std::string, pstrudel::DistanceTree>    tree_patterns_;
+        double                                           pattern_unweighted_pairwise_tip_profile_distance_;
+        double                                           pattern_weighted_pairwise_tip_profile_distance_;
+        double                                           pattern_scaled_weighted_pairwise_tip_profile_distance_;
+        double                                           pattern_unlabeled_symmetric_difference_distance_;
+
+}; // CanonicalTreePatterns
 
 //////////////////////////////////////////////////////////////////////////////
 // main
@@ -333,37 +362,31 @@ int main(int argc, const char * argv[]) {
             // canonical ref trees
             results_table.add_data_column<double>("y.uw.max.unbalanced", col_formatting);
             results_table.add_data_column<double>("y.uw.max.unbalanced.scaled", col_formatting);
+            results_table.add_data_column<double>("y.wt.max.unbalanced", col_formatting);
+            results_table.add_data_column<double>("y.wt.max.unbalanced.scaled", col_formatting);
+            results_table.add_data_column<double>("y.swt.max.unbalanced", col_formatting);
+            results_table.add_data_column<double>("y.swt.max.unbalanced.scaled", col_formatting);
             results_table.add_data_column<double>("y.uw.max.balanced", col_formatting);
             results_table.add_data_column<double>("y.uw.max.balanced.scaled", col_formatting);
+            results_table.add_data_column<double>("y.wt.max.balanced", col_formatting);
+            results_table.add_data_column<double>("y.wt.max.balanced.scaled", col_formatting);
+            results_table.add_data_column<double>("y.swt.max.balanced", col_formatting);
+            results_table.add_data_column<double>("y.swt.max.balanced.scaled", col_formatting);
             if (calculate_symmetric_diff) {
                 results_table.add_data_column<unsigned long>("urf.uw.max.unbalanced");
                 results_table.add_data_column<double>("urf.uw.max.unbalanced.scaled", col_formatting);
                 results_table.add_data_column<unsigned long>("urf.uw.max.balanced");
                 results_table.add_data_column<double>("urf.uw.max.balanced.scaled", col_formatting);
             }
-            TreePatternCollectionType tree_patterns;
-            TreePatternMaxDistances tree_pattern_max_unweighted_pairwise_tip_profile_distances;
-            TreePatternMaxDistances tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances;
             if (log_frequency == 0) {
                 log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
             }
-
             logger.info("Begining calculating distances between comparison trees and canonical tree patterns");
+            std::map<unsigned long, CanonicalTreePatterns> tree_patterns;
             unsigned long comparison_tree_idx = 0;
             for (auto & comparison_tree : comparison_trees) {
-                auto & results_table_row = results_table.add_row();
-
                 auto comparison_tree_size = comparison_tree.get_num_tips();
-                if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
-                    logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
-                    build_canonical_tree_patterns(
-                            comparison_tree_size,
-                            tree_patterns,
-                            tree_pattern_max_unweighted_pairwise_tip_profile_distances,
-                            tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances,
-                            true);
-                }
-
+                auto & results_table_row = results_table.add_row();
                 results_table_row.set("tree.idx", comparison_tree_idx + 1);
                 if (add_tree_source_key) {
                     results_table_row.set("source.filepath", comparison_tree.get_filepath());
@@ -372,41 +395,28 @@ int main(int argc, const char * argv[]) {
                 results_table_row.set("num.tips", comparison_tree_size);
                 results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
 
-                double d = 0.0;
-
-                d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.unbalanced"]);
-                results_table_row.set("y.uw.max.unbalanced", d);
-                results_table_row.set("y.uw.max.unbalanced.scaled", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.unbalanced"]);
-
-                d = comparison_tree.get_unweighted_pairwise_tip_profile_distance(tree_patterns[comparison_tree_size]["max.balanced"]);
-                results_table_row.set("y.uw.max.balanced", d);
-                results_table_row.set("y.uw.max.balanced.scaled", d/tree_pattern_max_unweighted_pairwise_tip_profile_distances[comparison_tree_size]["max.balanced"]);
-
-                if (calculate_symmetric_diff) {
-                    d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.unbalanced"]);
-                    results_table_row.set("urf.uw.max.unbalanced", d);
-                    results_table_row.set("urf.uw.max.unbalanced.scaled", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.unbalanced"]);
-                    d = comparison_tree.get_unlabeled_symmetric_difference(tree_patterns[comparison_tree_size]["max.balanced"]);
-                    results_table_row.set("urf.uw.max.balanced", d);
-                    results_table_row.set("urf.uw.max.balanced.scaled", d/tree_pattern_max_unweighted_unlabeled_symmetric_difference_distances[comparison_tree_size]["max.balanced"]);
+                if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
+                    logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
+                    tree_patterns[comparison_tree_size].generate(comparison_tree_size, true);
                 }
+                tree_patterns[comparison_tree_size].score(comparison_tree, results_table_row, calculate_symmetric_diff);
 
                 comparison_tree_idx += 1;
             } // tree comparison
 
             // output canonical reference trees
             {
-                auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
-                platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
-                ref_tree_writer.set_suppress_edge_lengths(true);
-                platypus::bind_standard_interface(ref_tree_writer);
-                std::ofstream ref_trees_out(ref_trees_output_fpath);
-                for (auto & tp_by_size : tree_patterns) {
-                    for (auto & tp_by_type : tp_by_size.second) {
-                        ref_tree_writer.write(ref_trees_out, tp_by_type.second);
-                        ref_trees_out << std::endl;
-                    }
-                }
+                // auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
+                // platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
+                // ref_tree_writer.set_suppress_edge_lengths(true);
+                // platypus::bind_standard_interface(ref_tree_writer);
+                // std::ofstream ref_trees_out(ref_trees_output_fpath);
+                // for (auto & tp_by_size : tree_patterns) {
+                //     for (auto & tp_by_type : tp_by_size.second) {
+                //         ref_tree_writer.write(ref_trees_out, tp_by_type.second);
+                //         ref_trees_out << std::endl;
+                //     }
+                // }
             }
 
             logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
