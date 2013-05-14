@@ -114,41 +114,26 @@ class CanonicalTreePatterns {
                 R & row,
                 bool calculate_symmetric_diff=false) {
             double d = 0.0;
+            for (auto & tpi : this->tree_patterns_) {
+                auto & label = tpi.first;
+                auto & tree_pattern = tpi.second;
+                d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
+                row.set("y.uw." + label, d);
+                row.set("y.uw." + label + ".scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
 
-            d = this->tree_patterns_["max.unbalanced"].get_unweighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.uw.max.unbalanced", d);
-            row.set("y.uw.max.unbalanced.scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
+                d = tree_pattern.get_weighted_pairwise_tip_profile_distance(other_tree);
+                row.set("y.wt." + label, d);
+                row.set("y.wt." + label +".scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
 
-            d = this->tree_patterns_["max.unbalanced"].get_weighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.wt.max.unbalanced", d);
-            row.set("y.wt.max.unbalanced.scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
+                d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
+                row.set("y.swt." + label, d);
+                row.set("y.swt." + label + ".scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
 
-            d = this->tree_patterns_["max.unbalanced"].get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.swt.max.unbalanced", d);
-            row.set("y.swt.max.unbalanced.scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
-
-            if (calculate_symmetric_diff) {
-                d = this->tree_patterns_["max.unbalanced"].get_unlabeled_symmetric_difference(other_tree);
-                row.set("urf.uw.max.unbalanced", d);
-                row.set("urf.uw.max.unbalanced.scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
-            }
-
-            d = this->tree_patterns_["max.balanced"].get_unweighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.uw.max.balanced", d);
-            row.set("y.uw.max.balanced.scaled", d/this->pattern_unweighted_pairwise_tip_profile_distance_);
-
-            d = this->tree_patterns_["max.balanced"].get_weighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.wt.max.balanced", d);
-            row.set("y.wt.max.balanced.scaled", d/this->pattern_weighted_pairwise_tip_profile_distance_);
-
-            d = this->tree_patterns_["max.balanced"].get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-            row.set("y.swt.max.balanced", d);
-            row.set("y.swt.max.balanced.scaled", d/this->pattern_scaled_weighted_pairwise_tip_profile_distance_);
-
-            if (calculate_symmetric_diff) {
-                d = this->tree_patterns_["max.balanced"].get_unlabeled_symmetric_difference(other_tree);
-                row.set("urf.uw.max.balanced", d);
-                row.set("urf.uw.max.balanced.scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
+                if (calculate_symmetric_diff) {
+                    d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
+                    row.set("urf.uw." + label, d);
+                    row.set("urf.uw." + label + ".scaled", d/this->pattern_unlabeled_symmetric_difference_distance_);
+                }
             }
         }
 
