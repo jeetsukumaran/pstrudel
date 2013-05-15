@@ -155,6 +155,13 @@ class CanonicalTreePatterns {
                 }
             }
         }
+        template <class W>
+        void write_trees(W & writer, std::ostream & out) {
+            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
+                writer.write(out, this->tree_patterns_[tree_pattern_name]);
+                out << "\n";
+            }
+        }
     public:
         static void add_results_data_columns(platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
@@ -302,7 +309,6 @@ int main(int argc, const char * argv[]) {
         output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
     }
     if (calculate_reference_distances) {
-        output_filepaths["reference-trees"] = output_prefix + "reference.trees";
         output_filepaths["reference-distances"] = output_prefix + "reference.distances.txt";
         output_filepaths["reference-distances-stacked"] = output_prefix + "reference.distances.stacked.txt";
     }
@@ -418,23 +424,19 @@ int main(int argc, const char * argv[]) {
 
                 comparison_tree_idx += 1;
             } // tree comparison
+            logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
 
             // output canonical reference trees
             {
-                // auto & ref_trees_output_fpath = output_filepaths["reference-trees"];
-                // platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
-                // ref_tree_writer.set_suppress_edge_lengths(true);
-                // platypus::bind_standard_interface(ref_tree_writer);
-                // std::ofstream ref_trees_out(ref_trees_output_fpath);
-                // for (auto & tp_by_size : tree_patterns) {
-                //     for (auto & tp_by_type : tp_by_size.second) {
-                //         ref_tree_writer.write(ref_trees_out, tp_by_type.second);
-                //         ref_trees_out << std::endl;
-                //     }
-                // }
+                platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
+                ref_tree_writer.set_suppress_edge_lengths(true);
+                platypus::bind_standard_interface(ref_tree_writer);
+                for (auto & tpi : tree_patterns) {
+                    std::string out_fpath = output_prefix + "canon.n" + std::to_string(tpi.first) + ".trees";
+                    std::ofstream out(out_fpath);
+                    tpi.second.write_trees(ref_tree_writer, out);
+                }
             }
-
-            logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
 
             // output primary results
             {
