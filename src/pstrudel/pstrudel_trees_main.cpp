@@ -103,26 +103,27 @@ class CanonicalTreePatterns {
             platypus::build_maximally_balanced_tree(t2, leaves.begin(), leaves.end());
 
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
-            for (auto & tpi1 : this->tree_patterns_) {
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.uw." + tpi1.first);
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.wt." + tpi1.first);
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.swt." + tpi1.first);
-                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("urf.uw." + tpi1.first);
+            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.uw." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.wt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.swt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("urf.uw." + tree_pattern_name);
             }
 
-            for (auto & tpi1 : this->tree_patterns_) {
+            for (auto & tree_pattern_name1 : CanonicalTreePatterns::tree_pattern_names_) {
                 auto & row = this->tree_pattern_cross_distances_.add_row();
-                row.set("pattern", tpi1.first);
-                for (auto & tpi2 : this->tree_patterns_) {
-                    row.set ("y.uw." + tpi2.first, tpi2.second.get_unweighted_pairwise_tip_profile_distance(tpi1.second));
-                    row.set ("y.wt." + tpi2.first, tpi2.second.get_weighted_pairwise_tip_profile_distance(tpi1.second));
-                    row.set("y.swt." + tpi2.first, tpi2.second.get_scaled_weighted_pairwise_tip_profile_distance(tpi1.second));
-                    row.set("urf.uw." + tpi2.first, tpi2.second.get_unlabeled_symmetric_difference(tpi1.second));
+                row.set("pattern", tree_pattern_name1);
+                auto & tree1 = this->tree_patterns_[tree_pattern_name1];
+                for (auto & tree_pattern_name2 : CanonicalTreePatterns::tree_pattern_names_) {
+                    auto & tree2 = this->tree_patterns_[tree_pattern_name2];
+                    row.set ("y.uw." + tree_pattern_name2, tree2.get_unweighted_pairwise_tip_profile_distance(tree1));
+                    row.set ("y.wt." + tree_pattern_name2, tree2.get_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("y.swt." + tree_pattern_name2, tree2.get_scaled_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("urf.uw." + tree_pattern_name2, tree2.get_unlabeled_symmetric_difference(tree1));
                 }
             }
 
-            for (auto & tpi : this->tree_patterns_) {
-                auto & tree_pattern_name = tpi.first;
+            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
                 this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.uw." + tree_pattern_name).max<double>();
                 this->max_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.wt." + tree_pattern_name).max<double>();
                 this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name] = this->tree_pattern_cross_distances_.column("y.swt." + tree_pattern_name).max<double>();
@@ -161,6 +162,9 @@ class CanonicalTreePatterns {
                 writer.write(out, this->tree_patterns_[tree_pattern_name]);
                 out << "\n";
             }
+        }
+        void write_cross_distance_table(std::ostream & out) {
+            this->tree_pattern_cross_distances_.write(out);
         }
     public:
         static void add_results_data_columns(platypus::DataTable & table,
@@ -426,15 +430,17 @@ int main(int argc, const char * argv[]) {
             } // tree comparison
             logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
 
-            // output canonical reference trees
+            // output canonical info
             {
                 platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
                 ref_tree_writer.set_suppress_edge_lengths(true);
                 platypus::bind_standard_interface(ref_tree_writer);
                 for (auto & tpi : tree_patterns) {
-                    std::string out_fpath = output_prefix + "canon.n" + std::to_string(tpi.first) + ".trees";
-                    std::ofstream out(out_fpath);
-                    tpi.second.write_trees(ref_tree_writer, out);
+                    std::string prefix = output_prefix + "canonical.n" + std::to_string(tpi.first) + ".";
+                    std::ofstream trees_out(prefix + "trees");
+                    tpi.second.write_trees(ref_tree_writer, trees_out);
+                    std::ofstream table_out(prefix + "distances.txt");
+                    tpi.second.write_cross_distance_table(table_out);
                 }
             }
 
