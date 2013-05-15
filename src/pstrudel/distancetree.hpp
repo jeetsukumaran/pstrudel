@@ -132,6 +132,10 @@ class SymmetricDifferenceCalculator {
 class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
 
     public:
+        typedef DistanceNodeValue value_type;
+        typedef typename StandardTree<DistanceNodeValue>::node_type node_type;
+
+    public:
 
         /////////////////////////////////////////////////////////////////////////
         // Lifecycle and assignment
@@ -159,6 +163,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
 
         /////////////////////////////////////////////////////////////////////////
+        // Manipulators
+
+        // type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
+        void add_coalescent_edge_lengths(int regime=0);
+
+        /////////////////////////////////////////////////////////////////////////
         // Calculators
 
         double get_unweighted_pairwise_tip_profile_distance(DistanceTree & other) {
@@ -170,7 +180,6 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         double get_scaled_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
-
 
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
@@ -221,7 +230,8 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             }
         }
 
-    public:
+    private:
+        std::vector<DistanceTree::node_type *> get_nodes_in_level_order();
 
     private:
         unsigned long                           number_of_tips_;

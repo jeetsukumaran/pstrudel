@@ -1,3 +1,5 @@
+#include <map>
+#include <platypus/model/coalescent.hpp>
 #include "distancetree.hpp"
 
 namespace pstrudel {
@@ -191,6 +193,68 @@ DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     return *this;
+}
+
+std::vector<DistanceTree::node_type *> DistanceTree::get_nodes_in_level_order() {
+    std::vector<DistanceTree::node_type *> nodes_in_level_order;
+    std::map<DistanceTree::node_type *, unsigned long> steps_from_root;
+    for (auto ndi = this->preorder_begin(); ndi != this->preorder_end(); ++ndi) {
+        DistanceTree::node_type * nptr = ndi.node();
+        if (ndi.parent_node() == nullptr) {
+            steps_from_root[nptr] = 0;
+        } else {
+            steps_from_root[nptr] = steps_from_root[ndi.parent_node()] + 1;
+        }
+    }
+    std::multimap<unsigned long, DistanceTree::node_type *> steps_from_root_inv;
+    for (auto & si : steps_from_root) {
+        steps_from_root_inv.insert(std::make_pair(si.second, si.first));
+    }
+    nodes_in_level_order.reserve(steps_from_root_inv.size());
+    for (auto & si : steps_from_root_inv) {
+        nodes_in_level_order.push_back(si.second);
+    }
+    return nodes_in_level_order;
+}
+
+// type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
+void DistanceTree::add_coalescent_edge_lengths(int regime) {
+    auto nodes_in_level_order = this->get_nodes_in_level_order();
+    if (this->number_of_tips_ == 0) {
+        for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi, ++this->number_of_tips_) {
+        }
+    }
+    std::map<DistanceTree::node_type *, double> node_ages;
+    unsigned long num_lineages = nodes_in_level_order.size();
+    unsigned long total_lineages = nodes_in_level_order.size();
+    double prev_age = 0.0;
+    for (auto ndi = nodes_in_level_order.rbegin(); ndi != nodes_in_level_order.rend(); ++ndi) {
+        if ((*ndi)->is_leaf()) {
+            node_ages[*ndi] = 0.0;
+        } else {
+            double wt;
+            if (regime == 0) {
+                wt = platypus::coalescent::expected_time_to_coalescence(num_lineages, 1.0, 2);
+            } else if (regime == 1) {
+                throw std::runtime_error("Not yet implemented");
+            } else if (regime == 2) {
+                wt = 1.0;
+            } else if (regime == 3) {
+                wt = platypus::coalescent::expected_time_to_coalescence(total_lineages - num_lineages, 1.0, 2);
+            } else {
+                throw std::runtime_error("Unsupported regime");
+            }
+            node_ages[*ndi] = prev_age + wt;
+            --num_lineages;
+        }
+    }
+    for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
+        if (ndi.parent_node() != nullptr) {
+            ndi->set_edge_length(node_ages[ndi.parent_node()] - node_ages[ndi.node()]);
+        } else {
+            ndi->set_edge_length(0.0);
+        }
+    }
 }
 
 } // namespace pstrudel
