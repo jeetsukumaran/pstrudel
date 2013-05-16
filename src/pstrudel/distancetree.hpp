@@ -166,7 +166,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         // Manipulators
 
         // type: 0 = mean coalescent, 1 = converse-coalescent, 2 = uniform
-        void add_coalescent_edge_lengths(int regime=0);
+        void add_edge_lengths(int regime=0);
 
         /////////////////////////////////////////////////////////////////////////
         // Calculators

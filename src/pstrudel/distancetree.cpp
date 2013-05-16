@@ -218,7 +218,7 @@ std::vector<DistanceTree::node_type *> DistanceTree::get_nodes_in_level_order() 
 }
 
 // type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
-void DistanceTree::add_coalescent_edge_lengths(int regime) {
+void DistanceTree::add_edge_lengths(int regime) {
     auto nodes_in_level_order = this->get_nodes_in_level_order();
     if (this->number_of_tips_ == 0) {
         for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi, ++this->number_of_tips_) {
