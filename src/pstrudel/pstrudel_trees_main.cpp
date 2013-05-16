@@ -97,10 +97,10 @@ class CanonicalTreePatterns {
             this->num_tips_ = num_tips;
             this->calculate_symmetric_diff_ = calculate_symmetric_diff;
             auto leaves = this->generate_leaves();
-            auto & t1 = this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[0]];
-            platypus::build_maximally_unbalanced_tree(t1, leaves.begin(), leaves.end());
-            auto & t2 = this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[1]];
-            platypus::build_maximally_balanced_tree(t2, leaves.begin(), leaves.end());
+            platypus::build_maximally_unbalanced_tree(this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[0]],
+                    leaves.begin(), leaves.end());
+            platypus::build_maximally_balanced_tree(this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[1]],
+                    leaves.begin(), leaves.end());
 
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
             for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {

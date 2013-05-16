@@ -45,7 +45,7 @@ def main():
             dest="regime",
             type=str,
             default="mean",
-            choices=["mean", "uniform", "anti-coalescent"],
+            choices=["mean-coalescent", "converse-coalescent", "uniform"],
             help="expected regime under which the coalescent intervals were generated (default='%(default)s')")
     parser.add_argument("-p", "--precision",
             type=float,
@@ -79,12 +79,14 @@ def main():
         num_lineages = sorted(wf.keys())
         for n in num_lineages:
             wt = wf[n]
-            if args.regime == "mean":
+            if args.regime == "mean-coalescent":
                 exp_wt = coalescent.expected_tmrca(n)
+            elif args.regime == "converse-coalescent":
+                exp_wt = coalescent.expected_tmrca(num_tips - n + 2)
             elif args.regime == "uniform":
                 exp_wt = 1.0
-            elif args.regime == "anti-coalescent":
-                exp_wt = coalescent.expected_tmrca(num_tips - n + 2)
+            else:
+                raise RuntimeError("Unsupported regime: '{}'".format(args.regime))
             if abs(exp_wt - wt) > args.precision:
                 sys.stderr.write("{} Tree {}: Waiting time for coalescence event with {} lineages: expecting {} but found {}\n".format(
                         args.label, tidx+1, n, exp_wt, wt))

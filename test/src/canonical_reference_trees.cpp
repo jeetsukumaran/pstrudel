@@ -28,13 +28,11 @@ pstrudel::DistanceTree generate_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_
 int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & label) {
     std::string regime_arg;
     if (regime == 0) {
-        regime_arg = "mean";
+        regime_arg = "mean-coalescent";
     } else if (regime == 1) {
-        regime_arg = "random";
+        regime_arg = "converse-coalescent";
     } else if (regime == 2) {
         regime_arg = "uniform";
-    } else if (regime == 3) {
-        regime_arg = "anti-coalescent";
     } else {
         throw std::runtime_error("Unsupported coalescent age regime");
     }
@@ -54,23 +52,22 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
     }
 }
 
-int test_anti_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
+int test_mean_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
-    tree.add_coalescent_edge_lengths(3);
-    std::cout << std::endl;
-    return check_tree(tree, 3, "[UNBALANCED, ANTI]");
+    tree.add_coalescent_edge_lengths(0);
+    return check_tree(tree, 0, "[UNBALANCED, MEAN-COAL]");
+}
+
+int test_converse_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
+    auto tree = generate_unbalanced_tree(ntips);
+    tree.add_coalescent_edge_lengths(1);
+    return check_tree(tree, 1, "[UNBALANCED, CONVERSE-COAL]");
 }
 
 int test_uniform_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
     tree.add_coalescent_edge_lengths(2);
     return check_tree(tree, 2, "[UNBALANCED, UNIFORM]");
-}
-
-int test_mean_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
-    auto tree = generate_unbalanced_tree(ntips);
-    tree.add_coalescent_edge_lengths(0);
-    return check_tree(tree, 0, "[UNBALANCED, MEAN]");
 }
 
 int main(int, const char * argv[]) {
@@ -80,7 +77,7 @@ int main(int, const char * argv[]) {
     int fails = 0;
     fails += test_mean_coalescent_ages_on_unbalanced_tree();
     fails += test_uniform_coalescent_ages_on_unbalanced_tree();
-    fails += test_anti_coalescent_ages_on_unbalanced_tree();
+    fails += test_converse_coalescent_ages_on_unbalanced_tree();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {
