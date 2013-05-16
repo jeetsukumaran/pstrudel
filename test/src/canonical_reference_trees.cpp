@@ -25,7 +25,7 @@ pstrudel::DistanceTree generate_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_
     return tree;
 }
 
-int check_tree(pstrudel::DistanceTree & tree, int regime) {
+int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & label) {
     std::string regime_arg;
     if (regime == 0) {
         regime_arg = "mean";
@@ -40,7 +40,7 @@ int check_tree(pstrudel::DistanceTree & tree, int regime) {
     }
     std::ostringstream o;
     TREE_WRITER.write(o, tree);
-    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick"});
+    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
     auto result = ps.communicate(o.str());
     // std::cout << ps.returncode() << std::endl;
     if (ps.returncode() != 0) {
@@ -56,7 +56,7 @@ int check_tree(pstrudel::DistanceTree & tree, int regime) {
 int test_mean_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
     tree.add_coalescent_edge_lengths(0);
-    return check_tree(tree, 0);
+    return check_tree(tree, 0, "[UNBALANCED, MEAN]");
 }
 
 int main(int, const char * argv[]) {
