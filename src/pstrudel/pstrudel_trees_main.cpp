@@ -151,16 +151,16 @@ class CanonicalTreePatterns {
                 auto & tree_pattern = tpi.second;
                 d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
                 row.set("y.uw." + tree_pattern_name, d);
-                row.set("y.uw." + tree_pattern_name + ".scaled", d/this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name]);
+                // row.set("y.uw." + tree_pattern_name + ".scaled", d/this->max_unweighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
                 d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
                 row.set("y.wt." + tree_pattern_name, d);
-                row.set("y.wt." + tree_pattern_name + ".scaled", d/this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name]);
+                // row.set("y.wt." + tree_pattern_name + ".scaled", d/this->max_scaled_weighted_pairwise_tip_profile_distance_[tree_pattern_name]);
 
                 if (this->calculate_symmetric_diff_) {
                     d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
                     row.set("urf.uw." + tree_pattern_name, d);
-                    row.set("urf.uw." + tree_pattern_name + ".scaled", d/this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name]);
+                    // row.set("urf.uw." + tree_pattern_name + ".scaled", d/this->max_unlabeled_symmetric_difference_distance_[tree_pattern_name]);
                 }
             }
         }
@@ -181,11 +181,11 @@ class CanonicalTreePatterns {
             for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
                 for (auto & y_distance_name : CanonicalTreePatterns::tree_pattern_y_distance_names_) {
                     table.add_data_column<double>(y_distance_name + "." + tree_pattern_name, col_formatters);
-                    table.add_data_column<double>(y_distance_name + "." + tree_pattern_name + ".scaled", col_formatters);
+                    // table.add_data_column<double>(y_distance_name + "." + tree_pattern_name + ".scaled", col_formatters);
                 }
                 if (calculate_symmetric_diff) {
                     table.add_data_column<unsigned long>("urf.uw." + tree_pattern_name, col_formatters);
-                    table.add_data_column<double>("urf.uw." + tree_pattern_name + ".scaled", col_formatters);
+                    // table.add_data_column<double>("urf.uw." + tree_pattern_name + ".scaled", col_formatters);
                 }
             }
         }
