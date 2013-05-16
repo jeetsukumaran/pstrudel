@@ -45,7 +45,7 @@ def main():
             dest="regime",
             type=str,
             default="mean",
-            choices=["mean-coalescent", "converse-coalescent", "uniform"],
+            choices=["mean-coalescent", "converse-coalescent", "uniform-coalescent"],
             help="expected regime under which the coalescent intervals were generated (default='%(default)s')")
     parser.add_argument("-p", "--precision",
             type=float,
@@ -83,7 +83,7 @@ def main():
                 exp_wt = coalescent.expected_tmrca(n)
             elif args.regime == "converse-coalescent":
                 exp_wt = coalescent.expected_tmrca(num_tips - n + 2)
-            elif args.regime == "uniform":
+            elif args.regime == "uniform-coalescent":
                 exp_wt = 1.0
             else:
                 raise RuntimeError("Unsupported regime: '{}'".format(args.regime))

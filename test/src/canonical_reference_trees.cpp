@@ -32,7 +32,7 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
     } else if (regime == 1) {
         regime_arg = "converse-coalescent";
     } else if (regime == 2) {
-        regime_arg = "uniform";
+        regime_arg = "uniform-coalescent";
     } else {
         throw std::runtime_error("Unsupported coalescent age regime");
     }

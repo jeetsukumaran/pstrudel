@@ -97,9 +97,24 @@ class CanonicalTreePatterns {
             this->num_tips_ = num_tips;
             this->calculate_symmetric_diff_ = calculate_symmetric_diff;
             auto leaves = this->generate_leaves();
-            platypus::build_maximally_unbalanced_tree(this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[0]],
+
+            // unbalanced tree, mean coalescent
+            platypus::build_maximally_unbalanced_tree(this->tree_patterns_["max.unbalanced.mean.coal"],
                     leaves.begin(), leaves.end());
-            platypus::build_maximally_balanced_tree(this->tree_patterns_[CanonicalTreePatterns::tree_pattern_names_[1]],
+            this->tree_patterns_["max.unbalanced.mean.coal"].add_edge_lengths(0); // mean
+
+            // unbalanced tree, converse coalescent
+            platypus::build_maximally_unbalanced_tree(this->tree_patterns_["max.unbalanced.converse.coal"],
+                    leaves.begin(), leaves.end());
+            this->tree_patterns_["max.unbalanced.converse.coal"].add_edge_lengths(1); // converse
+
+            // unbalanced tree, uniform coalescent
+            platypus::build_maximally_unbalanced_tree(this->tree_patterns_["max.unbalanced.uniform.coal"],
+                    leaves.begin(), leaves.end());
+            this->tree_patterns_["max.unbalanced.uniform.coal"].add_edge_lengths(2); // mean
+
+            // balanced tree
+            platypus::build_maximally_balanced_tree(this->tree_patterns_["max.balanced"],
                     leaves.begin(), leaves.end());
 
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
@@ -190,7 +205,9 @@ class CanonicalTreePatterns {
 
 }; // CanonicalTreePatterns
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
-        "max.unbalanced",
+        "max.unbalanced.mean.coal",
+        "max.unbalanced.converse.coal",
+        "max.unbalanced.uniform.coal",
         "max.balanced",
 }; // static cons ttree_pattern_names_
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_y_distance_names_{
