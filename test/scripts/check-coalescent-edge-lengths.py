@@ -84,7 +84,7 @@ def main():
             elif args.regime == "uniform":
                 exp_wt = 1.0
             elif args.regime == "anti-coalescent":
-                exp_wt = coalescent.expected_tmrca(num_tips - n)
+                exp_wt = coalescent.expected_tmrca(num_tips - n + 2)
             if abs(exp_wt - wt) > args.precision:
                 sys.stderr.write("{} Tree {}: Waiting time for coalescence event with {} lineages: expecting {} but found {}\n".format(
                         args.label, tidx+1, n, exp_wt, wt))

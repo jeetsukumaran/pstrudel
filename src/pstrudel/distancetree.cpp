@@ -241,7 +241,7 @@ void DistanceTree::add_coalescent_edge_lengths(int regime) {
             } else if (regime == 2) {
                 wt = 1.0;
             } else if (regime == 3) {
-                wt = platypus::coalescent::expected_time_to_coalescence(total_lineages - num_lineages, 1.0, 2);
+                wt = platypus::coalescent::expected_time_to_coalescence(total_lineages - num_lineages + 2, 1.0, 2);
             } else {
                 throw std::runtime_error("Unsupported regime");
             }

@@ -42,9 +42,7 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
     TREE_WRITER.write(o, tree);
     colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label, "-r", regime_arg});
     auto result = ps.communicate(o.str());
-    // std::cout << ps.returncode() << std::endl;
     if (ps.returncode() != 0) {
-    // if (true) {
         std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
         TREE_WRITER.write(std::cerr, tree);
         std::cerr << std::endl;
@@ -59,6 +57,8 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
 int test_anti_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
     tree.add_coalescent_edge_lengths(3);
+    TREE_WRITER.write(std::cout, tree);
+    std::cout << std::endl;
     return check_tree(tree, 3, "[UNBALANCED, ANTI]");
 }
 
@@ -81,7 +81,7 @@ int main(int, const char * argv[]) {
     int fails = 0;
     fails += test_mean_coalescent_ages_on_unbalanced_tree();
     fails += test_uniform_coalescent_ages_on_unbalanced_tree();
-    // fails += test_anti_coalescent_ages_on_unbalanced_tree();
+    fails += test_anti_coalescent_ages_on_unbalanced_tree();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {
