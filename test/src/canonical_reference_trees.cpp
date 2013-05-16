@@ -45,9 +45,10 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
     // std::cout << ps.returncode() << std::endl;
     if (ps.returncode() != 0) {
     // if (true) {
+        std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
         std::cerr << result.first;
         std::cerr << result.second;
-        return ps.returncode();
+        return 1;
     } else {
         return 0;
     }

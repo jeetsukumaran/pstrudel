@@ -225,8 +225,8 @@ void DistanceTree::add_coalescent_edge_lengths(int regime) {
         }
     }
     std::map<DistanceTree::node_type *, double> node_ages;
-    unsigned long num_lineages = nodes_in_level_order.size();
-    unsigned long total_lineages = nodes_in_level_order.size();
+    unsigned long num_lineages = this->number_of_tips_;
+    unsigned long total_lineages = num_lineages;
     double prev_age = 0.0;
     for (auto ndi = nodes_in_level_order.rbegin(); ndi != nodes_in_level_order.rend(); ++ndi) {
         if ((*ndi)->is_leaf()) {
@@ -235,6 +235,7 @@ void DistanceTree::add_coalescent_edge_lengths(int regime) {
             double wt;
             if (regime == 0) {
                 wt = platypus::coalescent::expected_time_to_coalescence(num_lineages, 1.0, 2);
+                // std::cerr << num_lineages << ", " << wt << std::endl;
             } else if (regime == 1) {
                 throw std::runtime_error("Not yet implemented");
             } else if (regime == 2) {
@@ -245,6 +246,7 @@ void DistanceTree::add_coalescent_edge_lengths(int regime) {
                 throw std::runtime_error("Unsupported regime");
             }
             node_ages[*ndi] = prev_age + wt;
+            prev_age = node_ages[*ndi];
             --num_lineages;
         }
     }

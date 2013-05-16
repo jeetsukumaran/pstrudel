@@ -57,10 +57,12 @@ def main():
     trees = dendropy.TreeList.get_from_stream(sys.stdin, schema=args.schema)
     for tidx, tree in enumerate(trees):
 
+        tree_fails = 0
+
         # check structure
         if not tree._debug_tree_is_valid():
-            sys.stderr.write("{} Tree {}: structure is invalid:\n{}".format(args.label, tidx+1, tree.compose_newick()))
-            fails += 1
+            sys.stderr.write("{} Tree {}: structure is invalid".format(args.label, tidx+1))
+            tree_fails += 1
 
         # ensure parent ages > child ages
         tree.calc_node_ages(check_prec=args.precision)
@@ -69,7 +71,7 @@ def main():
                 if nd.age > nd.parent_node.age:
                     sys.stderr.write("{} Tree {}: Node '{}': age ({}) is greater than parent age ({})".format(
                         args.label, tidx+1, nd.label, nd.age, nd.parent_node.age))
-                    fails += 1
+                    tree_fails += 1
 
         # check waiting times
         num_tips = len(tree.leaf_nodes())
@@ -86,8 +88,10 @@ def main():
             if abs(exp_wt - wt) > args.precision:
                 sys.stderr.write("{} Tree {}: Waiting time for coalescence event with {} lineages: expecting {} but found {}\n".format(
                         args.label, tidx+1, n, exp_wt, wt))
-                fails += 1
-    sys.exit(1)
+                tree_fails += 1
+        if tree_fails > 0:
+            sys.stderr.write("{} Tree {}: {}\n".format(args.label, tidx+1, tree.compose_newick()))
+        fails += tree_fails
     if fails > 0:
         sys.exit(1)
     else:
