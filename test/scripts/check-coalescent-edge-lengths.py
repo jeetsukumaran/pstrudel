@@ -90,7 +90,7 @@ def main():
                         args.label, tidx+1, n, exp_wt, wt))
                 tree_fails += 1
         if tree_fails > 0:
-            sys.stderr.write("{} Tree {}: {}\n".format(args.label, tidx+1, tree.compose_newick()))
+            sys.stderr.write("{} Tree {} failed: {}\n".format(args.label, tidx+1, tree.compose_newick()))
         fails += tree_fails
     if fails > 0:
         sys.exit(1)

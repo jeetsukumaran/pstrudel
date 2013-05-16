@@ -40,18 +40,32 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
     }
     std::ostringstream o;
     TREE_WRITER.write(o, tree);
-    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
+    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label, "-r", regime_arg});
     auto result = ps.communicate(o.str());
     // std::cout << ps.returncode() << std::endl;
     if (ps.returncode() != 0) {
     // if (true) {
         std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
+        TREE_WRITER.write(std::cerr, tree);
+        std::cerr << std::endl;
         std::cerr << result.first;
         std::cerr << result.second;
         return 1;
     } else {
         return 0;
     }
+}
+
+int test_anti_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
+    auto tree = generate_unbalanced_tree(ntips);
+    tree.add_coalescent_edge_lengths(3);
+    return check_tree(tree, 3, "[UNBALANCED, ANTI]");
+}
+
+int test_uniform_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
+    auto tree = generate_unbalanced_tree(ntips);
+    tree.add_coalescent_edge_lengths(2);
+    return check_tree(tree, 2, "[UNBALANCED, UNIFORM]");
 }
 
 int test_mean_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
@@ -66,6 +80,8 @@ int main(int, const char * argv[]) {
     platypus::bind_standard_interface(TREE_WRITER);
     int fails = 0;
     fails += test_mean_coalescent_ages_on_unbalanced_tree();
+    fails += test_uniform_coalescent_ages_on_unbalanced_tree();
+    // fails += test_anti_coalescent_ages_on_unbalanced_tree();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {
