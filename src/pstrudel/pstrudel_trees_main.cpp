@@ -442,7 +442,7 @@ int main(int argc, const char * argv[]) {
             // output canonical info
             {
                 platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
-                ref_tree_writer.set_suppress_edge_lengths(true);
+                ref_tree_writer.set_suppress_edge_lengths(false);
                 platypus::bind_standard_interface(ref_tree_writer);
                 for (auto & tpi : tree_patterns) {
                     std::string prefix = output_prefix + "canonical.n" + std::to_string(tpi.first) + ".";
