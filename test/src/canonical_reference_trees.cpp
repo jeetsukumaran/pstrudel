@@ -57,7 +57,6 @@ int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & la
 int test_anti_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
     tree.add_coalescent_edge_lengths(3);
-    TREE_WRITER.write(std::cout, tree);
     std::cout << std::endl;
     return check_tree(tree, 3, "[UNBALANCED, ANTI]");
 }
