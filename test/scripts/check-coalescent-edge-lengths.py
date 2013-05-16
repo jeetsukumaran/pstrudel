@@ -55,7 +55,7 @@ def main():
 
         # check structure
         if not tree._debug_tree_is_valid():
-            sys.stdout.write("Tree {}: structure is invalid:\n{}".format(tidx+1, tree.compose_newick()))
+            sys.stderr.write("Tree {}: structure is invalid:\n{}".format(tidx+1, tree.compose_newick()))
             fails += 1
 
         # ensure parent ages > child ages
@@ -63,7 +63,7 @@ def main():
         for nd in tree.postorder_node_iter():
             if nd.parent_node is not None:
                 if nd.age > nd.parent_node.age:
-                    sys.stdout.write("Tree {}: Node '{}': age ({}) is greater than parent age ({})".format(
+                    sys.stderr.write("Tree {}: Node '{}': age ({}) is greater than parent age ({})".format(
                         tidx+1, nd.label, nd.age, nd.parent_node.age))
                     fails += 1
 
@@ -80,9 +80,10 @@ def main():
             elif args.regime == "anti-coalescent":
                 exp_wt = coalescent.expected_tmrca(num_tips - n)
             if abs(exp_wt - wt) > args.precision:
-                sys.stdout.write("Tree {}: Waiting time for coalescence event with {} lineages: expecting {} but found {}\n".format(
+                sys.stderr.write("Tree {}: Waiting time for coalescence event with {} lineages: expecting {} but found {}\n".format(
                         tidx+1, n, exp_wt, wt))
                 fails += 1
+    sys.exit(1)
     if fails > 0:
         sys.exit(1)
     else:
