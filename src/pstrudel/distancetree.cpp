@@ -156,6 +156,88 @@ unsigned long SymmetricDifferenceCalculator::calc_set_symmetric_difference(
 }
 
 //////////////////////////////////////////////////////////////////////////////
+// LineageThroughTimeProfileCalculator
+
+LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::operator=(const LineageThroughTimeProfileCalculator & other) {
+    this->lineage_through_time_profile_ = other.lineage_through_time_profile_;
+    this->max_leaf_distance_ = other.max_leaf_distance_;
+    return *this;
+}
+
+void LineageThroughTimeProfileCalculator::clear() {
+    this->max_leaf_distance_ = 0.0;
+    this->lineage_through_time_profile_.clear();
+}
+
+unsigned long LineageThroughTimeProfileCalculator::get_default_num_transects() {
+    if (this->tree_.get_num_tips() == 0) {
+        this->tree_.calc_num_tips();
+    }
+    return (this->tree_.get_num_tips() - 1) * 10;
+}
+
+void LineageThroughTimeProfileCalculator::calc_node_root_distances() {
+    this->max_leaf_distance_ = 0.0;
+    double distance = 0.0;
+    for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
+        if (ndi.parent_node() == nullptr) {
+            distance = 0.0;
+        } else {
+            distance = ndi.parent().get_root_distance() + ndi->get_edge_length();
+        }
+        ndi->set_root_distance(distance);
+        if (distance > this->max_leaf_distance_) {
+            this->max_leaf_distance_ = distance;
+        }
+    }
+}
+
+std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(unsigned long num_transects) {
+    std::vector<double> transect_offsets;
+    if (this->max_leaf_distance_ == 0) {
+        this->calc_node_root_distances();
+    }
+    double transect_step = (static_cast<double>(this->max_leaf_distance_) / num_transects);
+    // for (double t = transect_step; t < this->max_leaf_distance_; t += transect_step) {
+    double offset = transect_step;
+    for (unsigned int i; i <= num_transects; ++i) {
+        transect_offsets.push_back(offset);
+        offset += transect_step;
+    }
+    return transect_offsets;
+}
+
+const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_profile(const std::vector<double> & transect_offsets) {
+    this->lineage_through_time_profile_.clear();
+    if (this->max_leaf_distance_ == 0) {
+        this->calc_node_root_distances();
+    }
+    this->calc_node_root_distances();
+    std::vector<double> num_lineages(transect_offsets.size(), 0.0);
+    for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
+        if (ndi.parent_node() != nullptr) {
+            auto transect_offsets_begin = transect_offsets.begin();
+            for (auto toi = transect_offsets_begin ; toi != transect_offsets.end(); ++toi) {
+                if (ndi->get_root_distance() >= *toi && ndi.parent().get_root_distance() < *toi) {
+                    auto idx = toi - transect_offsets_begin;
+                    num_lineages[idx] += 1.0;
+                }
+            }
+        }
+    }
+    this->lineage_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
+    return this->lineage_through_time_profile_;
+}
+
+const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_profile(unsigned long num_transects) {
+    if (num_transects == 0) {
+        num_transects = this->get_default_num_transects();
+    }
+    auto transect_offsets = this->build_transect_offsets(num_transects);
+    return this->build_lineage_through_time_profile(transect_offsets);
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // DistanceTree
 
 DistanceTree::DistanceTree(bool is_rooted)

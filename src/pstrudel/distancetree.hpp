@@ -20,28 +20,33 @@ namespace pstrudel {
 class DistanceNodeValue : public platypus::StandardNodeValue<double> {
     public:
         DistanceNodeValue()
-            : num_leaves_(0) {
+            : num_leaves_(0)
+            , root_distance_(0.0) {
         }
         DistanceNodeValue(DistanceNodeValue&& other)
             : platypus::StandardNodeValue<double>(std::move(other))
             , desc_path_lens_(std::move(other.desc_path_lens_))
-            , num_leaves_(other.num_leaves_) {
+            , num_leaves_(other.num_leaves_)
+            , root_distance_(other.root_distance_) {
         }
         DistanceNodeValue(const DistanceNodeValue& other)
             : platypus::StandardNodeValue<double>(other)
             , desc_path_lens_(other.desc_path_lens_)
-            , num_leaves_(other.num_leaves_) {
+            , num_leaves_(other.num_leaves_)
+            , root_distance_(other.root_distance_) {
         }
         DistanceNodeValue& operator=(const DistanceNodeValue& other) {
             platypus::StandardNodeValue<double>::operator=(other);
             this->desc_path_lens_ = other.desc_path_lens_;
             this->num_leaves_ = other.num_leaves_;
+            this->root_distance_ = other.root_distance_;
             return *this;
         }
         void clear() override {
             platypus::StandardNodeValue<double>::clear();
             this->desc_path_lens_.clear();
             this->num_leaves_ = 0;
+            this->root_distance_ = 0;
         }
         void set_desc_path_len(DistanceNodeValue & nd, double len, unsigned long step_count) {
             this->desc_path_lens_[&nd] = std::make_pair(len, step_count);
@@ -64,9 +69,16 @@ class DistanceNodeValue : public platypus::StandardNodeValue<double> {
         void set_num_leaves(unsigned long num_leaves) {
             this->num_leaves_ = num_leaves;
         }
+        void set_root_distance(double d) {
+            this->root_distance_ = d;
+        }
+        double get_root_distance() const {
+            return this->root_distance_;
+        }
     private:
-        std::map<DistanceNodeValue *, std::pair<double, unsigned long>>   desc_path_lens_;
-        unsigned long                                                     num_leaves_;
+        std::map<DistanceNodeValue *, std::pair<double, unsigned long>>    desc_path_lens_;
+        unsigned long                                                      num_leaves_;
+        double                                                             root_distance_;
 }; // DistanceNodeValue
 
 //////////////////////////////////////////////////////////////////////////////
@@ -126,6 +138,37 @@ class SymmetricDifferenceCalculator {
         SizesSetType      subtree_leaf_set_sizes_;
 }; // SymmetricDifferenceCalculator
 
+//////////////////////////////////////////////////////////////////////////////
+// LineageThroughTimeProfileCalculator
+
+class LineageThroughTimeProfileCalculator {
+
+    public:
+        LineageThroughTimeProfileCalculator(DistanceTree & tree)
+            : tree_(tree)
+            , max_leaf_distance_(0.0) { }
+        LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
+        double get_distance(LineageThroughTimeProfileCalculator & other);
+
+    public:
+        void clear();
+
+    public:
+        // internal, but exposed publically for testing
+        void calc_node_root_distances();
+        unsigned long get_default_num_transects();
+        std::vector<double> build_transect_offsets(unsigned long num_transects=0);
+        const Profile & build_lineage_through_time_profile(const std::vector<double> & transect_offsets);
+        const Profile & build_lineage_through_time_profile(unsigned long num_transects=0);
+
+    protected:
+        DistanceTree &    tree_;
+        Profile           lineage_through_time_profile_;
+        double            max_leaf_distance_;
+
+}; // LineageThroughTimeProfileCalculator
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // DistanceTree
 
@@ -153,6 +196,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             this->number_of_tips_ = n;
         }
         unsigned long get_num_tips() const {
+            return this->number_of_tips_;
+        }
+        unsigned long calc_num_tips() {
+            this->number_of_tips_ = 0;
+            for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi) {
+                ++this->number_of_tips_;
+            }
             return this->number_of_tips_;
         }
         void set_total_tree_length(double v) {

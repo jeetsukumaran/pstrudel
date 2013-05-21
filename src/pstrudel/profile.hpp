@@ -66,6 +66,12 @@ class Profile {
         unsigned long data_size() const {
             return this->raw_data_.size();
         }
+        const ProfileMetricVectorType & raw_data() const {
+            return this->raw_data_;
+        }
+        ProfileMetricValueType raw_data(unsigned long idx) const {
+            return this->raw_data_[idx];
+        }
         ProfileMetricVectorType & get_profile(unsigned long profile_size=0);
         ProfileMetricValueType get_distance(Profile & other, bool normalize_by_profile_size=false);
         void fix_size(unsigned long size) {
