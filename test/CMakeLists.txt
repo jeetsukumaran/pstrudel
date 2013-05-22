@@ -113,6 +113,7 @@ INSTALL(PROGRAMS scripts/calc-tree-pairwise-profile-distance.py DESTINATION ${TE
 INSTALL(PROGRAMS scripts/calc-tree-unlabeled-symmetric-difference.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(PROGRAMS scripts/check-coalescent-edge-lengths.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 INSTALL(PROGRAMS scripts/check-lineage-through-time.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
+INSTALL(PROGRAMS scripts/check-lineage-spltting-times.py DESTINATION ${TEST_DIR} COMPONENT testsuite)
 
 INSTALL(DIRECTORY data/ DESTINATION ${TEST_DIR}/data COMPONENT testsuite)
 
@@ -173,6 +174,7 @@ SET(TEST_TARGET_SOURCES
     src/symmetric_difference_of_multisets.cpp
     src/subtree_leaf_set_sizes.cpp
     src/lineage_through_time.cpp
+    src/lineage_splitting_through_time.cpp
     src/tree_pairwise_profile_distance.cpp
     src/tree_unlabeled_symmetric_difference_distance.cpp
     src/canonical_reference_trees.cpp

@@ -22,23 +22,17 @@ int test_file(const std::string & test_data_filepath,
     for (auto & tree : trees) {
         std::string label = label_prefix + ":" + std::to_string(tree_idx + 1);
         pstrudel::LineageThroughTimeProfileCalculator ltt_calc(tree);
-        auto num_transects = ltt_calc.get_default_num_transects();
-        auto transect_offsets = ltt_calc.build_transect_offsets(num_transects);
-        assert(transect_offsets.size() > 0);
-        auto ltt_profile = ltt_calc.build_lineage_count_through_time_profile(transect_offsets);
+        auto lst_profile = ltt_calc.build_lineage_splitting_time_profile();
         if (verify) {
             std::ostringstream o;
             TREE_WRITER.write(o, tree);
             o << "\n";
-            for (unsigned long idx = 0; idx < transect_offsets.size(); ++idx) {
-                o << idx << "\t";
-                o << std::fixed << std::setprecision(22) << transect_offsets[idx] << "\t";
-                o << std::fixed << std::setprecision(22) << ltt_profile.raw_data(idx);
+            auto rds = lst_profile.data_size();
+            for (unsigned long idx = 0; idx < rds; ++idx) {
+                o << std::fixed << std::setprecision(22) << lst_profile.raw_data(idx);
                 o << "\n";
             }
-            // std::cerr << label << " >>>" << "\n";
-            // std::cerr << o.str() << std::endl;
-            colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-c", std::to_string(num_transects), "-l", label});
+            colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
             try {
                 auto result = ps.communicate(o.str(), 4, true, true);
                 if (ps.returncode() != 0) {
@@ -53,16 +47,6 @@ int test_file(const std::string & test_data_filepath,
                 }
             } catch (const colugo::SubprocessTimeOutException & e) {
                 std::cerr << "(test '" << label << "' timed out)\n";
-                // std::string out;
-                // std::string err;
-                // ps.read_pipes(out, err);
-                // std::cerr << out;
-                // std::cerr << err;
-                // std::cerr << "---" << std::endl;
-                // std::cout << o.str() << std::endl;
-                // std::cerr << "---" << std::endl;
-                // std::cerr << "-f newick -c " << std::to_string(num_transects) << std::endl;
-                // std::cerr << "---" << std::endl;
                 exit(1);
             }
         } else {
@@ -85,7 +69,7 @@ int test_ltt2() {
     std::string file_basename =  "apternodus.tre";
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", file_basename);
     std::string label_prefix = file_basename;
-    return test_file(test_data_filepath, label_prefix, false);
+    return test_file(test_data_filepath, label_prefix, true);
 }
 
 int test_ltt3() {
@@ -97,7 +81,7 @@ int test_ltt3() {
 
 int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
-    CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-through-time.py");
+    CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-spltting-times.py");
     platypus::bind_standard_interface(TREE_WRITER);
     TREE_WRITER.set_edge_length_precision(22);
     int fails = 0;

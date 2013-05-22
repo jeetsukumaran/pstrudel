@@ -146,6 +146,8 @@ class LineageThroughTimeProfileCalculator {
     public:
         LineageThroughTimeProfileCalculator(DistanceTree & tree)
             : tree_(tree)
+            , lineage_count_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
+            , lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , max_leaf_distance_(0.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
         double get_distance(LineageThroughTimeProfileCalculator & other);
@@ -158,12 +160,14 @@ class LineageThroughTimeProfileCalculator {
         void calc_node_root_distances();
         unsigned long get_default_num_transects();
         std::vector<double> build_transect_offsets(unsigned long num_transects=0);
-        const Profile & build_lineage_through_time_profile(const std::vector<double> & transect_offsets);
-        const Profile & build_lineage_through_time_profile(unsigned long num_transects=0);
+        const Profile & build_lineage_count_through_time_profile(const std::vector<double> & transect_offsets);
+        const Profile & build_lineage_count_through_time_profile(unsigned long num_transects=0);
+        const Profile & build_lineage_splitting_time_profile();
 
     protected:
         DistanceTree &    tree_;
-        Profile           lineage_through_time_profile_;
+        Profile           lineage_count_through_time_profile_;
+        Profile           lineage_splitting_time_profile_;
         double            max_leaf_distance_;
 
 }; // LineageThroughTimeProfileCalculator

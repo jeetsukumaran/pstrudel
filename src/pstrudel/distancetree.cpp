@@ -159,14 +159,16 @@ unsigned long SymmetricDifferenceCalculator::calc_set_symmetric_difference(
 // LineageThroughTimeProfileCalculator
 
 LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::operator=(const LineageThroughTimeProfileCalculator & other) {
-    this->lineage_through_time_profile_ = other.lineage_through_time_profile_;
+    this->lineage_count_through_time_profile_ = other.lineage_count_through_time_profile_;
+    this->lineage_splitting_time_profile_ = other.lineage_splitting_time_profile_;
     this->max_leaf_distance_ = other.max_leaf_distance_;
     return *this;
 }
 
 void LineageThroughTimeProfileCalculator::clear() {
     this->max_leaf_distance_ = 0.0;
-    this->lineage_through_time_profile_.clear();
+    this->lineage_count_through_time_profile_.clear();
+    this->lineage_splitting_time_profile_.clear();
 }
 
 unsigned long LineageThroughTimeProfileCalculator::get_default_num_transects() {
@@ -211,8 +213,8 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
     return transect_offsets;
 }
 
-const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_profile(const std::vector<double> & transect_offsets) {
-    this->lineage_through_time_profile_.clear();
+const Profile & LineageThroughTimeProfileCalculator::build_lineage_count_through_time_profile(const std::vector<double> & transect_offsets) {
+    this->lineage_count_through_time_profile_.clear();
     if (this->tree_.get_num_tips() == 0) {
         this->tree_.calc_num_tips();
     }
@@ -233,16 +235,36 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_
             }
         }
     }
-    this->lineage_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
-    return this->lineage_through_time_profile_;
+    this->lineage_count_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
+    return this->lineage_count_through_time_profile_;
 }
 
-const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_profile(unsigned long num_transects) {
+const Profile & LineageThroughTimeProfileCalculator::build_lineage_count_through_time_profile(unsigned long num_transects) {
     if (num_transects == 0) {
         num_transects = this->get_default_num_transects();
     }
     auto transect_offsets = this->build_transect_offsets(num_transects);
-    return this->build_lineage_through_time_profile(transect_offsets);
+    return this->build_lineage_count_through_time_profile(transect_offsets);
+}
+
+const Profile & LineageThroughTimeProfileCalculator::build_lineage_splitting_time_profile() {
+    this->lineage_splitting_time_profile_.clear();
+    if (this->max_leaf_distance_ == 0) {
+        this->calc_node_root_distances();
+    }
+    double num_tips = this->tree_.get_num_tips();
+    if (this->max_leaf_distance_ == 0) {
+        this->calc_node_root_distances();
+    }
+    std::vector<double> splitting_times;
+    splitting_times.reserve(num_tips);
+    for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
+        if (!ndi.is_leaf()) {
+            splitting_times.push_back(ndi->get_root_distance());
+        }
+    }
+    this->lineage_splitting_time_profile_.set_data(splitting_times.begin(), splitting_times.end(), true);
+    return this->lineage_splitting_time_profile_;
 }
 
 //////////////////////////////////////////////////////////////////////////////
