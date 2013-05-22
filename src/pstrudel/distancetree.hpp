@@ -148,6 +148,7 @@ class LineageThroughTimeProfileCalculator {
             : tree_(tree)
             , lineage_count_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
+            , scaled_lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , max_leaf_distance_(0.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
         double get_distance(LineageThroughTimeProfileCalculator & other);
@@ -162,12 +163,13 @@ class LineageThroughTimeProfileCalculator {
         std::vector<double> build_transect_offsets(unsigned long num_transects=0);
         const Profile & build_lineage_count_through_time_profile(const std::vector<double> & transect_offsets);
         const Profile & build_lineage_count_through_time_profile(unsigned long num_transects=0);
-        const Profile & build_lineage_splitting_time_profile();
+        std::pair<const Profile &, const Profile &> build_lineage_splitting_time_profile();
 
     protected:
         DistanceTree &    tree_;
         Profile           lineage_count_through_time_profile_;
         Profile           lineage_splitting_time_profile_;
+        Profile           scaled_lineage_splitting_time_profile_;
         double            max_leaf_distance_;
 
 }; // LineageThroughTimeProfileCalculator
@@ -214,6 +216,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
         double get_total_tree_length() const {
             return this->total_tree_length_;
+        }
+        double calc_total_tree_length() {
+            this->total_tree_length_ = 0.0;
+            for (auto ndi = this->postorder_begin(); ndi != this->postorder_end(); ++ndi) {
+                this->total_tree_length_ += ndi->get_edge_length();
+            }
         }
 
         /////////////////////////////////////////////////////////////////////////

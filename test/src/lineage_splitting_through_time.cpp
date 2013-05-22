@@ -13,8 +13,7 @@ static const unsigned long DEFAULT_NUM_TIPS = 50;
 platypus::NewickWriter<pstrudel::DistanceTree> TREE_WRITER;
 
 int test_file(const std::string & test_data_filepath,
-        const std::string & label_prefix,
-        bool verify=true) {
+        const std::string & label_prefix) {
     int fails = 0;
     std::vector<pstrudel::DistanceTree>  trees;
     pstrudel::treeio::read_from_filepath(trees, test_data_filepath, "nexus");
@@ -22,36 +21,35 @@ int test_file(const std::string & test_data_filepath,
     for (auto & tree : trees) {
         std::string label = label_prefix + ":" + std::to_string(tree_idx + 1);
         pstrudel::LineageThroughTimeProfileCalculator ltt_calc(tree);
-        auto lst_profile = ltt_calc.build_lineage_splitting_time_profile();
-        if (verify) {
-            std::ostringstream o;
-            TREE_WRITER.write(o, tree);
+        auto profiles = ltt_calc.build_lineage_splitting_time_profile();
+        auto lst_profile = profiles.first;
+        auto scaled_lst_profile = profiles.second;
+        std::ostringstream o;
+        TREE_WRITER.write(o, tree);
+        o << "\n";
+        assert(lst_profile.data_size() == scaled_lst_profile.data_size());
+        auto rds = lst_profile.data_size();
+        for (unsigned long idx = 0; idx < rds; ++idx) {
+            o << std::fixed << std::setprecision(22) << lst_profile.raw_data(idx);
+            o << "\t" << std::fixed << std::setprecision(22) << scaled_lst_profile.raw_data(idx);
             o << "\n";
-            auto rds = lst_profile.data_size();
-            for (unsigned long idx = 0; idx < rds; ++idx) {
-                o << std::fixed << std::setprecision(22) << lst_profile.raw_data(idx);
-                o << "\n";
+        }
+        colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
+        try {
+            auto result = ps.communicate(o.str(), 4, true, true);
+            if (ps.returncode() != 0) {
+                std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
+                // TREE_WRITER.write(std::cerr, tree);
+                // std::cerr << std::endl;
+                std::cerr << result.first;
+                std::cerr << result.second;
+                fails += 1;
+            // } else {
+            //     std::cerr << result.second;
             }
-            colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
-            try {
-                auto result = ps.communicate(o.str(), 4, true, true);
-                if (ps.returncode() != 0) {
-                    std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
-                    // TREE_WRITER.write(std::cerr, tree);
-                    // std::cerr << std::endl;
-                    std::cerr << result.first;
-                    std::cerr << result.second;
-                    fails += 1;
-                // } else {
-                //     std::cerr << result.second;
-                }
-            } catch (const colugo::SubprocessTimeOutException & e) {
-                std::cerr << "(test '" << label << "' timed out)\n";
-                exit(1);
-            }
-        } else {
-            // don't verify: called when we are testing tree w/o branch lengths
-            // just to make sure that the calculations proceed OK
+        } catch (const colugo::SubprocessTimeOutException & e) {
+            std::cerr << "(test '" << label << "' timed out)\n";
+            exit(1);
         }
         ++tree_idx;
     }
@@ -62,21 +60,21 @@ int test_ltt1() {
     std::string file_basename =  "pythonidae.reference-trees.nexus";
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", file_basename);
     std::string label_prefix = file_basename;
-    return test_file(test_data_filepath, label_prefix, true);
+    return test_file(test_data_filepath, label_prefix);
 }
 
 int test_ltt2() {
     std::string file_basename =  "apternodus.tre";
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", file_basename);
     std::string label_prefix = file_basename;
-    return test_file(test_data_filepath, label_prefix, true);
+    return test_file(test_data_filepath, label_prefix);
 }
 
 int test_ltt3() {
     std::string file_basename =  "pythonidae.mb.run1.t";
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", file_basename);
     std::string label_prefix = file_basename;
-    return test_file(test_data_filepath, label_prefix, false);
+    return test_file(test_data_filepath, label_prefix);
 }
 
 int main(int, const char * argv[]) {

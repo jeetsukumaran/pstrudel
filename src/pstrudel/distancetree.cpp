@@ -161,6 +161,7 @@ unsigned long SymmetricDifferenceCalculator::calc_set_symmetric_difference(
 LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::operator=(const LineageThroughTimeProfileCalculator & other) {
     this->lineage_count_through_time_profile_ = other.lineage_count_through_time_profile_;
     this->lineage_splitting_time_profile_ = other.lineage_splitting_time_profile_;
+    this->scaled_lineage_splitting_time_profile_ = other.scaled_lineage_splitting_time_profile_;
     this->max_leaf_distance_ = other.max_leaf_distance_;
     return *this;
 }
@@ -169,6 +170,7 @@ void LineageThroughTimeProfileCalculator::clear() {
     this->max_leaf_distance_ = 0.0;
     this->lineage_count_through_time_profile_.clear();
     this->lineage_splitting_time_profile_.clear();
+    this->scaled_lineage_splitting_time_profile_.clear();
 }
 
 unsigned long LineageThroughTimeProfileCalculator::get_default_num_transects() {
@@ -247,24 +249,40 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_count_through
     return this->build_lineage_count_through_time_profile(transect_offsets);
 }
 
-const Profile & LineageThroughTimeProfileCalculator::build_lineage_splitting_time_profile() {
+std::pair<const Profile &, const Profile &> LineageThroughTimeProfileCalculator::build_lineage_splitting_time_profile() {
+    std::pair<const Profile &, const Profile &> ret_val(this->lineage_splitting_time_profile_, this->scaled_lineage_splitting_time_profile_);
     this->lineage_splitting_time_profile_.clear();
-    if (this->max_leaf_distance_ == 0) {
-        this->calc_node_root_distances();
+    if (this->tree_.get_num_tips() == 0) {
+        this->tree_.calc_num_tips();
     }
     double num_tips = this->tree_.get_num_tips();
     if (this->max_leaf_distance_ == 0) {
         this->calc_node_root_distances();
     }
+    if (this->tree_.get_total_tree_length() == 0) {
+        this->tree_.calc_total_tree_length();
+    }
     std::vector<double> splitting_times;
+    std::vector<double> scaled_splitting_times;
     splitting_times.reserve(num_tips);
-    for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
-        if (!ndi.is_leaf()) {
-            splitting_times.push_back(ndi->get_root_distance());
+    scaled_splitting_times.reserve(num_tips);
+    double tree_length = this->tree_.get_total_tree_length();
+    if (tree_length > 0.0) {
+        double dist = 0.0;
+        for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
+            if (!ndi.is_leaf()) {
+                dist = ndi->get_root_distance();
+                splitting_times.push_back(dist);
+                scaled_splitting_times.push_back(dist/tree_length);
+            }
         }
+    } else {
+        splitting_times.insert(splitting_times.end(), num_tips-1, 0);
+        scaled_splitting_times.insert(scaled_splitting_times.end(), num_tips-1, 0);
     }
     this->lineage_splitting_time_profile_.set_data(splitting_times.begin(), splitting_times.end(), true);
-    return this->lineage_splitting_time_profile_;
+    this->scaled_lineage_splitting_time_profile_.set_data(scaled_splitting_times.begin(), scaled_splitting_times.end(), true);
+    return ret_val;
 }
 
 //////////////////////////////////////////////////////////////////////////////
