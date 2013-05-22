@@ -92,6 +92,7 @@ int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-through-time.py");
     platypus::bind_standard_interface(TREE_WRITER);
+    TREE_WRITER.set_edge_length_precision(22);
     int fails = 0;
     fails += test_ltt1();
     fails += test_ltt2();

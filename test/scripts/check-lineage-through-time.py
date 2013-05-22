@@ -52,6 +52,7 @@ def main():
     args = parser.parse_args()
 
     fails = 0
+    message_prefix = "[{}]".format(args.label)
     stdin_lines = sys.stdin.read().split("\n")
     tree_str = stdin_lines[0]
     tree = dendropy.Tree.get_from_string(tree_str, schema=args.schema)
@@ -67,13 +68,13 @@ def main():
         num_lineages = int(cols[2])
         reported_offsets[idx] = offset
         reported_num_lineages[idx] = num_lineages
-    # sys.stderr.write("{}: reported values read\n".format(args.label))
+    # sys.stderr.write("{}: reported values read\n".format(message_prefix))
     if not reported_offsets:
-        sys.stderr.write("{}: No data on tree reported\n".format(args.label))
+        sys.stderr.write("{}: No data on tree reported\n".format(message_prefix))
         sys.exit(1)
     if args.check_offsets and len(reported_offsets) != args.check_offsets:
         sys.stderr.write("{}: Expecting {} transects but found {}:\n".format(
-            args.label,
+            message_prefix,
             args.check_offsets,
             len(reported_offsets),
         ))
@@ -89,17 +90,17 @@ def main():
         calculated_offset = offset_step * (idx + 1)
         if abs(offset - calculated_offset) > args.precision:
             sys.stderr.write("{} Offset distance for index {}: expecting distance of {} but found {}\n".format(
-                args.label, idx+1, calculated_offset, offset))
+                message_prefix, idx+1, calculated_offset, offset))
             fails += 1
         reported_num = reported_num_lineages[idx]
         calculated_num = tree.num_lineages_at(offset)
         if reported_num != calculated_num:
-            sys.stderr.write("{} Transect at index {}, distance offset from root {}: expecting {} lineages but found {}\n".format(
-                args.label, idx+1, offset, calculated_num, reported_num))
+            sys.stderr.write("{} Transect at index {} of {}, distance offset from root {}: expecting {} lineages but found {} (max distance from root = {})\n".format(
+                message_prefix, idx+1, len(reported_offsets), offset, calculated_num, reported_num, max_leaf_distance_from_root))
             fails += 1
     #     else:
     #         sys.stderr.write("{} Offset at index {}, distance from root {}: OK {} vs. {}\n".format(
-    #             args.label, idx+1, offset, calculated_num, reported_num))
+    #             message_prefix, idx+1, offset, calculated_num, reported_num))
     if fails > 0:
         sys.exit(1)
     else:
