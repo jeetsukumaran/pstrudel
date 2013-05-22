@@ -88,6 +88,13 @@ int test_ltt2() {
     return test_file(test_data_filepath, label_prefix, false);
 }
 
+int test_ltt3() {
+    std::string file_basename =  "pythonidae.mb.run1.t";
+    std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", file_basename);
+    std::string label_prefix = file_basename;
+    return test_file(test_data_filepath, label_prefix, false);
+}
+
 int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-through-time.py");
@@ -96,6 +103,7 @@ int main(int, const char * argv[]) {
     int fails = 0;
     fails += test_ltt1();
     fails += test_ltt2();
+    fails += test_ltt3();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {
