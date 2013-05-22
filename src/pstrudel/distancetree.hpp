@@ -151,7 +151,9 @@ class LineageThroughTimeProfileCalculator {
             , scaled_lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , max_leaf_distance_(0.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
-        double get_distance(LineageThroughTimeProfileCalculator & other);
+        double get_lineage_count_distance(LineageThroughTimeProfileCalculator & other);
+        double get_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
+        double get_scaled_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
 
     public:
         void clear();
@@ -243,6 +245,16 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
 
+        double get_lineage_count_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_lineage_count_distance(other.lineage_through_time_calculator_);
+        }
+        double get_lineage_splitting_time_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_lineage_splitting_time_distance(other.lineage_through_time_calculator_);
+        }
+        double get_scaled_lineage_splitting_time_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_distance(other.lineage_through_time_calculator_);
+        }
+
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
         }
@@ -300,6 +312,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         double                                  total_tree_length_;
         PairwiseTipDistanceProfileCalculator    pairwise_tip_distance_profile_calculator_;
         SymmetricDifferenceCalculator           symmetric_difference_calculator_;
+        LineageThroughTimeProfileCalculator     lineage_through_time_calculator_;
 
 }; // DistanceTree
 

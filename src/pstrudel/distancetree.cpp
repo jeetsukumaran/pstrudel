@@ -166,6 +166,36 @@ LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::opera
     return *this;
 }
 
+double LineageThroughTimeProfileCalculator::get_lineage_count_distance(LineageThroughTimeProfileCalculator & other) {
+    if (this->lineage_count_through_time_profile_.empty()) {
+        this->build_lineage_count_through_time_profile();
+    }
+    if (other.lineage_count_through_time_profile_.empty()) {
+        other.build_lineage_count_through_time_profile();
+    }
+    return this->lineage_count_through_time_profile_.get_distance(other.lineage_count_through_time_profile_);
+}
+
+double LineageThroughTimeProfileCalculator::get_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other) {
+    if (this->lineage_splitting_time_profile_.empty()) {
+        this->build_lineage_splitting_time_profile();
+    }
+    if (other.lineage_splitting_time_profile_.empty()) {
+        other.build_lineage_splitting_time_profile();
+    }
+    return this->lineage_splitting_time_profile_.get_distance(other.lineage_splitting_time_profile_);
+}
+
+double LineageThroughTimeProfileCalculator::get_scaled_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other) {
+    if (this->scaled_lineage_splitting_time_profile_.empty()) {
+        this->build_lineage_splitting_time_profile();
+    }
+    if (other.scaled_lineage_splitting_time_profile_.empty()) {
+        other.build_lineage_splitting_time_profile();
+    }
+    return this->scaled_lineage_splitting_time_profile_.get_distance(other.scaled_lineage_splitting_time_profile_);
+}
+
 void LineageThroughTimeProfileCalculator::clear() {
     this->max_leaf_distance_ = 0.0;
     this->lineage_count_through_time_profile_.clear();
@@ -293,27 +323,32 @@ DistanceTree::DistanceTree(bool is_rooted)
           , number_of_tips_(0)
           , total_tree_length_(0.0)
           , pairwise_tip_distance_profile_calculator_(*this)
-          , symmetric_difference_calculator_(*this) {
+          , symmetric_difference_calculator_(*this)
+          , lineage_through_time_calculator_(*this) {
 }
 
 DistanceTree::DistanceTree(DistanceTree && other)
         : platypus::StandardTree<DistanceNodeValue>(other)
-        , number_of_tips_(other.number_of_tips_)
-        , total_tree_length_(other.total_tree_length_)
-        , pairwise_tip_distance_profile_calculator_(*this)
-        , symmetric_difference_calculator_(*this) {
+         , number_of_tips_(other.number_of_tips_)
+         , total_tree_length_(other.total_tree_length_)
+         , pairwise_tip_distance_profile_calculator_(*this)
+         , symmetric_difference_calculator_(*this)
+         , lineage_through_time_calculator_(*this) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
+    this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
 }
 
 DistanceTree::DistanceTree(const DistanceTree & other)
         : platypus::StandardTree<DistanceNodeValue>(other)
-        , number_of_tips_(other.number_of_tips_)
-        , total_tree_length_(other.total_tree_length_)
-        , pairwise_tip_distance_profile_calculator_(*this)
-        , symmetric_difference_calculator_(*this) {
+         , number_of_tips_(other.number_of_tips_)
+         , total_tree_length_(other.total_tree_length_)
+         , pairwise_tip_distance_profile_calculator_(*this)
+         , symmetric_difference_calculator_(*this)
+         , lineage_through_time_calculator_(*this) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
+    this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
 }
 
 DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
@@ -322,6 +357,7 @@ DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
     this->total_tree_length_ = other.total_tree_length_;
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
+    this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
     return *this;
 }
 
