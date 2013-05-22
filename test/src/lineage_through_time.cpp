@@ -65,11 +65,11 @@ int test_file(const std::string & test_data_filepath,
                 // std::cerr << "---" << std::endl;
                 exit(1);
             }
-            ++tree_idx;
         } else {
             // don't verify: called when we are testing tree w/o branch lengths
             // just to make sure that the calculations proceed OK
         }
+        ++tree_idx;
     }
     return fails;
 }
