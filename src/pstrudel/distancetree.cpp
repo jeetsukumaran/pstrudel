@@ -201,6 +201,10 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
     // for (double t = transect_step; t < this->max_leaf_distance_; t += transect_step) {
     double offset = transect_step;
     for (unsigned int i; i <= num_transects; ++i) {
+        if (offset > this->max_leaf_distance_) {
+            transect_offsets.push_back(this->max_leaf_distance_);
+            break;
+        }
         transect_offsets.push_back(offset);
         offset += transect_step;
     }
