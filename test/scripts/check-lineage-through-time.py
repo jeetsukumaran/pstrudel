@@ -43,7 +43,7 @@ def main():
             help="check offsets, assuming NUM-TRANSECTS on tree (default=%(default)s)")
     parser.add_argument("-p", "--precision",
             type=float,
-            default=0.01,
+            default=1e-8,
             help="numerical precision (default=%(default)s)")
     parser.add_argument("-l", "--label",
             type=str,
@@ -65,7 +65,7 @@ def main():
         cols = line.split("\t")
         idx = int(cols[0])
         offset = float(cols[1])
-        num_lineages = int(cols[2])
+        num_lineages = float(cols[2])
         reported_offsets[idx] = offset
         reported_num_lineages[idx] = num_lineages
     # sys.stderr.write("{}: reported values read\n".format(message_prefix))
@@ -83,6 +83,7 @@ def main():
         sys.stderr.write("\n")
         sys.exit(1)
 
+    num_leaves = len(tree.leaf_nodes())
     max_leaf_distance_from_root = tree.minmax_leaf_distance_from_root()[1]
     offset_step = float(max_leaf_distance_from_root) / args.check_offsets
     for idx in sorted(reported_offsets.keys()):
@@ -93,8 +94,8 @@ def main():
                 message_prefix, idx+1, calculated_offset, offset))
             fails += 1
         reported_num = reported_num_lineages[idx]
-        calculated_num = tree.num_lineages_at(offset)
-        if reported_num != calculated_num:
+        calculated_num = float(tree.num_lineages_at(offset))/num_leaves
+        if abs(reported_num - calculated_num) > args.precision:
             sys.stderr.write("{} Transect at index {} of {}, distance offset from root {}: expecting {} lineages but found {} (max distance from root = {})\n".format(
                 message_prefix, idx+1, len(reported_offsets), offset, calculated_num, reported_num, max_leaf_distance_from_root))
             fails += 1

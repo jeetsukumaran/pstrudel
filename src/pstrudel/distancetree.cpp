@@ -213,6 +213,10 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
 
 const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_profile(const std::vector<double> & transect_offsets) {
     this->lineage_through_time_profile_.clear();
+    if (this->tree_.get_num_tips() == 0) {
+        this->tree_.calc_num_tips();
+    }
+    double num_tips = this->tree_.get_num_tips();
     if (this->max_leaf_distance_ == 0) {
         this->calc_node_root_distances();
     }
@@ -224,7 +228,7 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_through_time_
             for (auto toi = transect_offsets_begin ; toi != transect_offsets.end(); ++toi) {
                 if (ndi->get_root_distance() >= *toi && ndi.parent().get_root_distance() < *toi) {
                     auto idx = toi - transect_offsets_begin;
-                    num_lineages[idx] += 1.0;
+                    num_lineages[idx] += 1.0/num_tips;
                 }
             }
         }

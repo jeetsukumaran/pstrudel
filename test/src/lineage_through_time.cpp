@@ -33,7 +33,7 @@ int test_file(const std::string & test_data_filepath,
             for (unsigned long idx = 0; idx < transect_offsets.size(); ++idx) {
                 o << idx << "\t";
                 o << std::fixed << std::setprecision(22) << transect_offsets[idx] << "\t";
-                o << static_cast<unsigned long>(ltt_profile.raw_data(idx));
+                o << std::fixed << std::setprecision(22) << ltt_profile.raw_data(idx);
                 o << "\n";
             }
             // std::cerr << label << " >>>" << "\n";
