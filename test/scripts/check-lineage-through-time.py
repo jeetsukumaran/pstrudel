@@ -54,6 +54,8 @@ def main():
     fails = 0
     stdin_lines = sys.stdin.read().split("\n")
     tree_str = stdin_lines[0]
+    tree = dendropy.Tree.get_from_string(tree_str, schema=args.schema)
+    # sys.stderr.write("{}: tree read\n".format(args.label))
     reported_offsets = {}
     reported_num_lineages = {}
     for line in stdin_lines[1:]:
@@ -65,8 +67,7 @@ def main():
         num_lineages = int(cols[2])
         reported_offsets[idx] = offset
         reported_num_lineages[idx] = num_lineages
-    tree = dendropy.Tree.get_from_string(tree_str, schema=args.schema)
-    fails = 0
+    # sys.stderr.write("{}: reported values read\n".format(args.label))
     if not reported_offsets:
         sys.stderr.write("{}: No data on tree reported\n".format(args.label))
         sys.exit(1)
@@ -87,18 +88,18 @@ def main():
         offset = reported_offsets[idx]
         calculated_offset = offset_step * (idx + 1)
         if abs(offset - calculated_offset) > args.precision:
-            sys.stderr.write("{} Offset at index {}: expecting distance of {} but found {}\n".format(
+            sys.stderr.write("{} Offset distance for index {}: expecting distance of {} but found {}\n".format(
                 args.label, idx+1, calculated_offset, offset))
             fails += 1
         reported_num = reported_num_lineages[idx]
         calculated_num = tree.num_lineages_at(offset)
         if reported_num != calculated_num:
-            sys.stderr.write("{} Offset at index {}, distance from root {}: expecting {} but found {}\n".format(
+            sys.stderr.write("{} Transect at index {}, distance offset from root {}: expecting {} lineages but found {}\n".format(
                 args.label, idx+1, offset, calculated_num, reported_num))
             fails += 1
-        else:
-            sys.stderr.write("{} Offset at index {}, distance from root {}: OK {} vs. {}\n".format(
-                args.label, idx+1, offset, calculated_num, reported_num))
+    #     else:
+    #         sys.stderr.write("{} Offset at index {}, distance from root {}: OK {} vs. {}\n".format(
+    #             args.label, idx+1, offset, calculated_num, reported_num))
     if fails > 0:
         sys.exit(1)
     else:
