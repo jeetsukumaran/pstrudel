@@ -36,7 +36,7 @@ int test_file(const std::string & test_data_filepath,
         }
         colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
         try {
-            auto result = ps.communicate(o.str(), 4, true, true);
+            auto result = ps.communicate(o.str());
             if (ps.returncode() != 0) {
                 std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
                 // TREE_WRITER.write(std::cerr, tree);
