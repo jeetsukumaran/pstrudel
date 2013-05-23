@@ -9,11 +9,11 @@
 std::string TEST_DIR;
 std::string CHECK_SCRIPT;
 
-int test_file(const std::string & test_data_filename, const std::string label) {
+int test_file(const std::string & test_data_filename, const std::string & format, const std::string label) {
     typedef pstrudel::DistanceTree  TreeType;
     std::vector<TreeType>  trees;
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", test_data_filename);
-    pstrudel::treeio::read_from_filepath(trees, test_data_filepath, "nexus");
+    pstrudel::treeio::read_from_filepath(trees, test_data_filepath, format);
 
     std::map<unsigned long, std::map<unsigned long, double>> lc_dists;
     std::map<unsigned long, std::map<unsigned long, double>> lst_dists;
@@ -29,7 +29,8 @@ int test_file(const std::string & test_data_filename, const std::string label) {
             comparisons.insert(std::make_pair(tidx1, tidx2));
         }
     }
-    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "nexus", "-l", label, test_data_filepath});
+
+    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", format, "-l", label, test_data_filepath, "--verbosity", "10"});
     int retcode = ps.wait();
     auto ps_stdout = ps.get_stdout();
     auto ps_stderr = ps.get_stderr();
@@ -52,19 +53,19 @@ int test_file(const std::string & test_data_filename, const std::string label) {
         src >> exp_lc_d;
         src >> exp_lst_d;
         src >> exp_slst_d;
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_lc_d,
                 lc_dists[tidx1][tidx2],
                 __FILE__,
                 __LINE__,
                 "Incorrect lineage accumulation through time profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_lst_d,
                 lst_dists[tidx1][tidx2],
                 __FILE__,
                 __LINE__,
                 "Incorrect lineage splitting times profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_slst_d,
                 slst_dists[tidx1][tidx2],
                 __FILE__,
@@ -83,7 +84,10 @@ int test_file(const std::string & test_data_filename, const std::string label) {
 
 int test_dist1() {
     int fails = 0;
-    return test_file("pythonidae.reference-trees.nexus", "pythonidae.reference-trees.nexus");
+    std::string src_filepath = "n10-unbalanced.nexus.trees";
+    // std::string src_filepath = "n06-rooted-patterns.nex";
+    // std::string src_filepath = "pythonidae.reference-trees.nexus";
+    return test_file(src_filepath, "nexus", src_filepath);
 }
 
 int main(int, const char * argv[]) {

@@ -106,6 +106,11 @@ void Profile::build_interpolated_profile(unsigned long profile_size) {
     interpolated_profile.clear();
     unsigned long raw_data_size = this->raw_data_.size();
     COLUGO_ASSERT(raw_data_size > 1);
+    if (profile_size == raw_data_size) {
+        interpolated_profile.reserve(this->raw_data_.size());
+        interpolated_profile.insert(interpolated_profile.end(), this->raw_data_.begin(), this->raw_data_.end());
+        return;
+    }
     if (profile_size < raw_data_size) {
         colugo::console::abort("Error interpolating points in profile ",
                 ": Number of requested interpolated points (",

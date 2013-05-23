@@ -44,19 +44,19 @@ int main(int argc, const char * argv[]) {
         src >> exp_wt_d;
         src >> exp_swt_d;
         // std::cerr << tidx1 << "\t" << tidx2 << "\t" << exp_uwt_d << "\t" << exp_wt_d << std::endl;
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_uwt_d,
                 uwt_dists[tidx1][tidx2],
                 __FILE__,
                 __LINE__,
                 "Incorrect unweighted pairwise tip profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_wt_d,
                 wt_dists[tidx1][tidx2],
                 __FILE__,
                 __LINE__,
                 "Incorrect weighted pairwise tip profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_equal(
+        fails += platypus::testing::compare_almost_equal(
                 exp_swt_d,
                 swt_dists[tidx1][tidx2],
                 __FILE__,

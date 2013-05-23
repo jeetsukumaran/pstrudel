@@ -282,6 +282,7 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_count_through
 std::pair<const Profile &, const Profile &> LineageThroughTimeProfileCalculator::build_lineage_splitting_time_profile() {
     std::pair<const Profile &, const Profile &> ret_val(this->lineage_splitting_time_profile_, this->scaled_lineage_splitting_time_profile_);
     this->lineage_splitting_time_profile_.clear();
+    this->scaled_lineage_splitting_time_profile_.clear();
     if (this->tree_.get_num_tips() == 0) {
         this->tree_.calc_num_tips();
     }

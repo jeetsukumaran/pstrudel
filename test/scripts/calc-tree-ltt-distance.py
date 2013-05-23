@@ -29,17 +29,23 @@ def preprocess_trees(trees, num_transects=None):
             offset += offset_step
         tree.lineage_accumulation_through_time = []
         for tof in transect_offsets:
+            if tof > max_leaf_distance_from_root:
+                tof = max_leaf_distance_from_root
             n = float(tree.num_lineages_at(tof))/num_leaves
             tree.lineage_accumulation_through_time.append(n)
         tree.lineage_splitting_times = []
         tree.scaled_lineage_splitting_times = []
         for node in tree.postorder_node_iter():
+            if node.is_leaf():
+                continue
             if tree_length > 0:
                 tree.lineage_splitting_times.append(node.root_distance)
                 tree.scaled_lineage_splitting_times.append(float(node.root_distance)/tree_length)
             else:
                 tree.lineage_splitting_times.append(0.0)
                 tree.scaled_lineage_splitting_times.append(0.0)
+        tree.lineage_splitting_times.sort()
+        tree.scaled_lineage_splitting_times.sort()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -85,6 +91,10 @@ def main():
         sys.exit("Need to specify '-' option and pipe trees to standard input and/or specify paths to at least one tree file as argument")
     preprocess_trees(trees)
     for tidx1 in range(len(trees)):
+        if (args.verbosity > 1):
+            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_accumulation_through_time)))
+            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_splitting_times)))
+            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].scaled_lineage_splitting_times)))
         for tidx2 in range(len(trees)):
             sys.stdout.write("{}\t{}\t{:.22f}\t{:.22f}\t{:.22f}\n".format(
                 tidx1,

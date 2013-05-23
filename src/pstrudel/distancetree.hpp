@@ -154,6 +154,15 @@ class LineageThroughTimeProfileCalculator {
         double get_lineage_count_distance(LineageThroughTimeProfileCalculator & other);
         double get_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
         double get_scaled_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
+        const Profile & get_lineage_count_through_time_profile() const {
+            return this->lineage_count_through_time_profile_;
+        }
+        const Profile & get_lineage_splitting_time_profile() const {
+            return this->lineage_splitting_time_profile_;
+        }
+        const Profile & get_scaled_lineage_splitting_time_profile() const {
+            return this->scaled_lineage_splitting_time_profile_;
+        }
 
     public:
         void clear();
@@ -235,6 +244,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         /////////////////////////////////////////////////////////////////////////
         // Calculators
 
+        // pairwise tup profile
         double get_unweighted_pairwise_tip_profile_distance(DistanceTree & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_unweighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
@@ -245,6 +255,10 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
 
+        // lineage through time
+        LineageThroughTimeProfileCalculator & get_lineage_through_time_calculator() {
+            return this->lineage_through_time_calculator_;
+        }
         double get_lineage_count_distance(DistanceTree & other) {
             return this->lineage_through_time_calculator_.get_lineage_count_distance(other.lineage_through_time_calculator_);
         }
@@ -255,6 +269,8 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_distance(other.lineage_through_time_calculator_);
         }
 
+
+        // symmetric difference
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
         }
