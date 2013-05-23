@@ -146,16 +146,16 @@ class LineageThroughTimeProfileCalculator {
     public:
         LineageThroughTimeProfileCalculator(DistanceTree & tree)
             : tree_(tree)
-            , lineage_count_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
+            , lineage_accumulation_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , scaled_lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , max_leaf_distance_(0.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
-        double get_lineage_count_distance(LineageThroughTimeProfileCalculator & other);
-        double get_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
-        double get_scaled_lineage_splitting_time_distance(LineageThroughTimeProfileCalculator & other);
-        const Profile & get_lineage_count_through_time_profile() const {
-            return this->lineage_count_through_time_profile_;
+        double get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other);
+        double get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
+        double get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
+        const Profile & get_lineage_accumulation_through_time_profile() const {
+            return this->lineage_accumulation_through_time_profile_;
         }
         const Profile & get_lineage_splitting_time_profile() const {
             return this->lineage_splitting_time_profile_;
@@ -172,13 +172,13 @@ class LineageThroughTimeProfileCalculator {
         void calc_node_root_distances();
         unsigned long get_default_num_transects();
         std::vector<double> build_transect_offsets(unsigned long num_transects=0);
-        const Profile & build_lineage_count_through_time_profile(const std::vector<double> & transect_offsets);
-        const Profile & build_lineage_count_through_time_profile(unsigned long num_transects=0);
+        const Profile & build_lineage_accumulation_through_time_profile(const std::vector<double> & transect_offsets);
+        const Profile & build_lineage_accumulation_through_time_profile(unsigned long num_transects=0);
         std::pair<const Profile &, const Profile &> build_lineage_splitting_time_profile();
 
     protected:
         DistanceTree &    tree_;
-        Profile           lineage_count_through_time_profile_;
+        Profile           lineage_accumulation_through_time_profile_;
         Profile           lineage_splitting_time_profile_;
         Profile           scaled_lineage_splitting_time_profile_;
         double            max_leaf_distance_;
@@ -259,14 +259,14 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         LineageThroughTimeProfileCalculator & get_lineage_through_time_calculator() {
             return this->lineage_through_time_calculator_;
         }
-        double get_lineage_count_distance(DistanceTree & other) {
-            return this->lineage_through_time_calculator_.get_lineage_count_distance(other.lineage_through_time_calculator_);
+        double get_lineage_accumulation_profile_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_lineage_accumulation_profile_distance(other.lineage_through_time_calculator_);
         }
-        double get_lineage_splitting_time_distance(DistanceTree & other) {
-            return this->lineage_through_time_calculator_.get_lineage_splitting_time_distance(other.lineage_through_time_calculator_);
+        double get_lineage_splitting_time_profile_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
         }
-        double get_scaled_lineage_splitting_time_distance(DistanceTree & other) {
-            return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_distance(other.lineage_through_time_calculator_);
+        double get_scaled_lineage_splitting_time_profile_distance(DistanceTree & other) {
+            return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
         }
 
 

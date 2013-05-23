@@ -116,10 +116,13 @@ class CanonicalTreePatterns {
             // calculate inter-reference tree distances
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
             for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.uw." + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.wt." + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("y.swt." + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("urf.uw." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.ptd.uw." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.ptd.wt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.ptd.swt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.ltt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.lst." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("y.lst.s." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("usd.uw." + tree_pattern_name);
             }
             for (auto & tree_pattern_name1 : CanonicalTreePatterns::tree_pattern_names_) {
                 auto & row = this->tree_pattern_cross_distances_.add_row();
@@ -127,10 +130,13 @@ class CanonicalTreePatterns {
                 auto & tree1 = this->tree_patterns_[tree_pattern_name1];
                 for (auto & tree_pattern_name2 : CanonicalTreePatterns::tree_pattern_names_) {
                     auto & tree2 = this->tree_patterns_[tree_pattern_name2];
-                    row.set ("y.uw." + tree_pattern_name2, tree2.get_unweighted_pairwise_tip_profile_distance(tree1));
-                    row.set("y.wt." + tree_pattern_name2, tree2.get_scaled_weighted_pairwise_tip_profile_distance(tree1));
-                    row.set("y.swt." + tree_pattern_name2, tree2.get_weighted_pairwise_tip_profile_distance(tree1));
-                    row.set("urf.uw." + tree_pattern_name2, tree2.get_unlabeled_symmetric_difference(tree1));
+                    row.set("y.ptd.uw." + tree_pattern_name2, tree2.get_unweighted_pairwise_tip_profile_distance(tree1));
+                    row.set("y.ptd.wt." + tree_pattern_name2, tree2.get_scaled_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("y.ptd.swt." + tree_pattern_name2, tree2.get_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("y.ltt." + tree_pattern_name2, tree2.get_lineage_accumulation_profile_distance(tree1));
+                    row.set("y.lst." + tree_pattern_name2, tree2.get_lineage_splitting_time_profile_distance(tree1));
+                    row.set("y.lst.s." + tree_pattern_name2, tree2.get_scaled_lineage_splitting_time_profile_distance(tree1));
+                    row.set("usd.uw." + tree_pattern_name2, tree2.get_unlabeled_symmetric_difference(tree1));
                 }
             }
         }
@@ -141,17 +147,21 @@ class CanonicalTreePatterns {
                 auto & tree_pattern_name = tpi.first;
                 auto & tree_pattern = tpi.second;
                 d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
-                row.set("y.uw." + tree_pattern_name, d);
+                row.set("y.ptd.uw." + tree_pattern_name, d);
                 if (scale_by_tree_length) {
                     d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-                    row.set("y.wt." + tree_pattern_name, d);
+                    row.set("y.ptd.wt." + tree_pattern_name, d);
+                    d = tree_pattern.get_scaled_lineage_splitting_time_profile_distance(other_tree);
+                    row.set("y.lst." + tree_pattern_name, d);
                 } else {
                     d = tree_pattern.get_weighted_pairwise_tip_profile_distance(other_tree);
-                    row.set("y.wt." + tree_pattern_name, d);
+                    row.set("y.ptd.wt." + tree_pattern_name, d);
+                    d = tree_pattern.get_lineage_splitting_time_profile_distance(other_tree);
+                    row.set("y.lst." + tree_pattern_name, d);
                 }
                 if (calculate_symmetric_diff) {
                     d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
-                    row.set("urf.uw." + tree_pattern_name, d);
+                    row.set("usd.uw." + tree_pattern_name, d);
                 }
             }
         }
@@ -174,7 +184,7 @@ class CanonicalTreePatterns {
                     table.add_data_column<double>(y_distance_name + "." + tree_pattern_name, col_formatters);
                 }
                 if (calculate_symmetric_diff) {
-                    table.add_data_column<unsigned long>("urf.uw." + tree_pattern_name, col_formatters);
+                    table.add_data_column<unsigned long>("usd.uw." + tree_pattern_name, col_formatters);
                 }
             }
         }
@@ -197,8 +207,10 @@ const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
         "max.balanced",
 }; // static cons ttree_pattern_names_
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_y_distance_names_{
-        "y.uw",
-        "y.wt",
+        "y.ptd.uw",
+        "y.ptd.wt",
+        "y.ltt.",
+        "y.lst.",
 }; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////
@@ -490,15 +502,19 @@ int main(int argc, const char * argv[]) {
         results_table.add_key_column<unsigned long>("tree2.num.tips");
         results_table.add_key_column<double>("tree2.length", col_formatting);
 
-        results_table.add_data_column<double>("y.uw", col_formatting);
-        results_table.add_data_column<double>("y.uw.norm", col_formatting);
-        results_table.add_data_column<double>("y.wt", col_formatting);
-        results_table.add_data_column<double>("y.wt.norm", col_formatting);
-        results_table.add_data_column<double>("urf.uw");
-        results_table.add_data_column<double>("urf.uw.norm", col_formatting);
+        results_table.add_data_column<double>("y.ptd.uw", col_formatting);
+        results_table.add_data_column<double>("y.ptd.uw.norm", col_formatting);
+        results_table.add_data_column<double>("y.ptd.wt", col_formatting);
+        results_table.add_data_column<double>("y.ptd.wt.norm", col_formatting);
+        results_table.add_data_column<double>("y.ltt", col_formatting);
+        results_table.add_data_column<double>("y.ltt.norm", col_formatting);
+        results_table.add_data_column<double>("y.lst", col_formatting);
+        results_table.add_data_column<double>("y.lst.norm", col_formatting);
+        results_table.add_data_column<double>("usd.uw");
+        results_table.add_data_column<double>("usd.uw.norm", col_formatting);
         if (!calculate_symmetric_diff) {
-            results_table.column("urf.uw").set_hidden(true);
-            results_table.column("urf.uw.norm").set_hidden(true);
+            results_table.column("usd.uw").set_hidden(true);
+            results_table.column("usd.uw.norm").set_hidden(true);
         }
         logger.info("Beginning calculating distances between all distinct pairs of trees");
         if (scale_by_tree_length) {
@@ -538,31 +554,43 @@ int main(int argc, const char * argv[]) {
                 results_table_row.set("tree2.length", tree2.get_total_tree_length());
 
                 // data
-                results_table_row.set("y.uw",
+                results_table_row.set("y.ptd.uw",
+                        tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
+                results_table_row.set("y.ltt",
                         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
                 if (scale_by_tree_length) {
-                    results_table_row.set("y.wt",
+                    results_table_row.set("y.ptd.wt",
                             tree1.get_weighted_pairwise_tip_profile_distance(tree2));
+                    results_table_row.set("y.lst",
+                            tree1.get_scaled_lineage_splitting_time_profile_distance(tree2));
                 } else {
-                    results_table_row.set("y.wt",
+                    results_table_row.set("y.ptd.wt",
                             tree1.get_scaled_weighted_pairwise_tip_profile_distance(tree2));
+                    results_table_row.set("y.lst",
+                            tree1.get_lineage_splitting_time_profile_distance(tree2));
                 }
-                results_table_row.set("urf.uw",
+                results_table_row.set("usd.uw",
                         tree1.get_unlabeled_symmetric_difference(tree2));
             }
         } // pairwise tree comparison
 
         logger.info("Calculating normalized distances");
-        auto y_uw_col = results_table.get_column<double>("y.uw");
-        auto y_wt_col = results_table.get_column<double>("y.wt");
-        auto urf_uw_col = results_table.get_column<double>("urf.uw");
-        auto max_y_uw = *(std::max_element(y_uw_col.begin(), y_uw_col.end()));
-        auto max_y_wt = *(std::max_element(y_wt_col.begin(), y_wt_col.end()));
-        auto max_urf_uw = *(std::max_element(urf_uw_col.begin(), urf_uw_col.end()));
+        auto y_ptd_uw_col = results_table.get_column<double>("y.ptd.uw");
+        auto y_ptd_wt_col = results_table.get_column<double>("y.ptd.wt");
+        auto y_ltt_col = results_table.get_column<double>("y.ltt");
+        auto y_lst_col = results_table.get_column<double>("y.lst");
+        auto usd_uw_col = results_table.get_column<double>("usd.uw");
+        auto max_y_ptd_uw = *(std::max_element(y_ptd_uw_col.begin(), y_ptd_uw_col.end()));
+        auto max_y_ptd_wt = *(std::max_element(y_ptd_wt_col.begin(), y_ptd_wt_col.end()));
+        auto max_y_ltt = *(std::max_element(y_ltt_col.begin(), y_ltt_col.end()));
+        auto max_y_lst = *(std::max_element(y_lst_col.begin(), y_lst_col.end()));
+        auto max_usd_uw = *(std::max_element(usd_uw_col.begin(), usd_uw_col.end()));
         for (auto & row : results_table) {
-            row.set("y.uw.norm", row.get<double>("y.uw") / max_y_uw);
-            row.set("y.wt.norm", row.get<double>("y.wt") / max_y_wt);
-            row.set("urf.uw.norm", row.get<double>("urf.uw") / max_urf_uw);
+            row.set("y.ptd.uw.norm", row.get<double>("y.ptd.uw") / max_y_ptd_uw);
+            row.set("y.ptd.wt.norm", row.get<double>("y.ptd.wt") / max_y_ptd_wt);
+            row.set("y.ltt.norm", row.get<double>("y.ltt") / max_y_ltt);
+            row.set("y.lst.norm", row.get<double>("y.lst") / max_y_lst);
+            row.set("usd.uw.norm", row.get<double>("usd.uw") / max_usd_uw);
         }
         logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
 

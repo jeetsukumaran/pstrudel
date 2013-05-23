@@ -23,9 +23,9 @@ int test_file(const std::string & test_data_filename, const std::string & format
         for (unsigned tidx2 = 0; tidx2 < trees.size(); ++tidx2) {
             auto & tree1 = trees[tidx1];
             auto & tree2 = trees[tidx2];
-            lc_dists[tidx1][tidx2] = tree1.get_lineage_count_distance(tree2);
-            lst_dists[tidx1][tidx2] = tree1.get_lineage_splitting_time_distance(tree2);
-            slst_dists[tidx1][tidx2] = tree1.get_scaled_lineage_splitting_time_distance(tree2);
+            lc_dists[tidx1][tidx2] = tree1.get_lineage_accumulation_profile_distance(tree2);
+            lst_dists[tidx1][tidx2] = tree1.get_lineage_splitting_time_profile_distance(tree2);
+            slst_dists[tidx1][tidx2] = tree1.get_scaled_lineage_splitting_time_profile_distance(tree2);
             comparisons.insert(std::make_pair(tidx1, tidx2));
         }
     }

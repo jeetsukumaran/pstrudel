@@ -25,7 +25,7 @@ int test_file(const std::string & test_data_filepath,
         auto num_transects = ltt_calc.get_default_num_transects();
         auto transect_offsets = ltt_calc.build_transect_offsets(num_transects);
         assert(transect_offsets.size() > 0);
-        auto ltt_profile = ltt_calc.build_lineage_count_through_time_profile(transect_offsets);
+        auto ltt_profile = ltt_calc.build_lineage_accumulation_through_time_profile(transect_offsets);
         if (verify) {
             std::ostringstream o;
             TREE_WRITER.write(o, tree);
@@ -97,7 +97,7 @@ int test_ltt3() {
 
 int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
-    CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-counts-through-time.py");
+    CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "check-lineage-accumulation-through-time.py");
     platypus::bind_standard_interface(TREE_WRITER);
     TREE_WRITER.set_edge_length_precision(22);
     int fails = 0;
