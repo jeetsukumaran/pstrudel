@@ -265,16 +265,16 @@ int main(int argc, const char * argv[]) {
             "By default, all edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated;"
             " set this option to use unscaled (raw) edge lengths.",
             nullptr,
-            "Metric Options");
+            "Distance Options");
     parser.add_switch(&calculate_symmetric_diff,
             "-d",
             "--calculate-symmetric-difference",
             "In addition to `y` or profile distances, calculate the Robinson-Foulds or symmetric difference.",
             nullptr,
-            "Metric Options");
+            "Distance Options");
 
     parser.add_option<std::string>(&format, "-f", "--format",
-            "Format for tree sources, one of:'nexus' [default] or 'newick'.",
+            "Format for tree sources, one of: 'nexus' [default] or 'newick'.",
             "FORMAT",
             "Source Options");
     // parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
