@@ -209,8 +209,8 @@ const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_y_distance_names_{
         "y.ptd.uw",
         "y.ptd.wt",
-        "y.ltt.",
-        "y.lst.",
+        "y.ltt",
+        "y.lst",
 }; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////
