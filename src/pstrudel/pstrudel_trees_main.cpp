@@ -242,16 +242,16 @@ int main(int argc, const char * argv[]) {
             "Calculate structural distances between unlabeled phylogenetic trees of various sizes.",
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
 
-    parser.add_switch(&calculate_canonical_distances,
-            "-c",
-            "--canonical",
-            "Calculate distances from every tree in input set to canonical tree patterns.",
-            nullptr,
-            "Comparison Options");
     parser.add_switch(&calculate_pairwise_distances,
             "-p",
             "--pairwise",
             "Calculate distances from every tree to every other tree in input set.",
+            nullptr,
+            "Comparison Options");
+    parser.add_switch(&calculate_canonical_distances,
+            "-c",
+            "--canonical",
+            "Calculate distances from every tree in input set to canonical tree patterns.",
             nullptr,
             "Comparison Options");
     parser.add_option<std::string>(&reference_trees_filepath, "-r", "--reference-trees",
