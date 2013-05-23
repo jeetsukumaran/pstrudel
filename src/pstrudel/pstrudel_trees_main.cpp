@@ -224,11 +224,10 @@ int main(int argc, const char * argv[]) {
     std::string      format                                  = "nexus";
     unsigned         long num_interpolated_points            = 0;
     bool             calculate_canonical_distances           = false;
-    bool             calculate_reference_distances           = false;
     bool             calculate_pairwise_distances            = false;
+    std::string      reference_trees_filepath                = "";
     bool             no_scale_by_tree_length                 = false;
     bool             calculate_symmetric_diff                = false;
-    std::string      reference_trees_filepath                = "";
     std::string      default_output_filename_stem            = "pstrudel-trees";
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
@@ -242,34 +241,42 @@ int main(int argc, const char * argv[]) {
             prog_id.c_str(),
             "Calculate structural distances between unlabeled phylogenetic trees of various sizes.",
             "%prog [options] [TREE-FILE [TREE-FILE [...]]]");
+
     parser.add_switch(&calculate_canonical_distances,
             "-c",
             "--canonical",
-            "Calculate distances from every tree in input set to canonical tree patterns");
-    parser.add_switch(&calculate_reference_distances,
-            "-r",
-            "--reference",
-            "Calculate distances from every tree in input set to every tree in file given by '--reference-trees'");
+            "Calculate distances from every tree in input set to canonical tree patterns.",
+            nullptr,
+            "Comparison Options");
     parser.add_switch(&calculate_pairwise_distances,
             "-p",
             "--pairwise",
-            "Calculate distances from every tree to every other tree in input set.");
+            "Calculate distances from every tree to every other tree in input set.",
+            nullptr,
+            "Comparison Options");
+    parser.add_option<std::string>(&reference_trees_filepath, "-r", "--reference-trees",
+            "Calculate distances from every tree in input set to every tree in REFERENCE-TREE_FILEPATH.",
+            "REFERENCE-TREE-FILEPATH",
+            "Comparison Options");
+
     parser.add_switch(&no_scale_by_tree_length,
-            NULL,
+            nullptr,
             "--no-scale-by-tree-length",
             "By default, all edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated;"
-            " set this option to use unscaled (raw) edge lengths");
+            " set this option to use unscaled (raw) edge lengths.",
+            nullptr,
+            "Metric Options");
     parser.add_switch(&calculate_symmetric_diff,
             "-d",
             "--calculate-symmetric-difference",
-            "In addition to `y` or profile distances, calculate the Robinson-Foulds or symmetric difference");
-    parser.add_option<std::string>(&reference_trees_filepath, "-t", "--reference-trees",
-            "Tree(s) to use as benchmark(s) when calculating reference distances;"
-            " if not specified, canonical tree patterns will be used.",
-            "REFERENCE-TREE-FILEPATH");
+            "In addition to `y` or profile distances, calculate the Robinson-Foulds or symmetric difference.",
+            nullptr,
+            "Metric Options");
+
     parser.add_option<std::string>(&format, "-f", "--format",
             "Format for tree sources, one of:'nexus' [default] or 'newick'.",
-            "FORMAT");
+            "FORMAT",
+            "Source Options");
     // parser.add_option<unsigned long>(&num_interpolated_points, "-n", "--profile-size",
     //         "Number of interpolated points in profile metric; if specified."
     //         " This must be equal or greater to than the largest input data size."
@@ -278,22 +285,31 @@ int main(int argc, const char * argv[]) {
     parser.add_option<std::string>(&output_prefix, "-o", "--output-prefix",
             "Prefix (directory path and filename stem) for output file(s); if"
             " not specified, will default to '%default'.",
-            "PATH/TO/OUTPUT");
+            "PATH/TO/OUTPUT",
+            "Output Options");
     parser.add_switch(&replace_existing_output_files,
             "-x",
             "--replace-existing-output",
-            "Replace (overwrite) existing output files.");
-    parser.add_switch(&create_aggregated_comparison_trees_copy, NULL, "--save-comparison-trees",
-            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).");
-    parser.add_switch(&add_tree_source_key, NULL, "--add-tree-source-key",
-            "Add a column in the results identifying the filename of the source of the tree(s) being compared.");
-    parser.add_switch(&suppress_header_row, NULL, "--suppress-header-row",
-            "Do not write column/field name row in results.");
+            "Replace (overwrite) existing output files.",
+            nullptr,
+            "Output Options"
+            );
+    parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
+            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
+            nullptr, "Output Options");
+    parser.add_switch(&add_tree_source_key, nullptr, "--add-tree-source-key",
+            "Add a column in the results identifying the filename of the source of the tree(s) being compared.",
+            nullptr, "Output Options");
+    parser.add_switch(&suppress_header_row, nullptr, "--suppress-header-row",
+            "Do not write column/field name row in results.",
+            nullptr, "Output Options");
     parser.add_switch(&log_frequency,
-            NULL,
+            nullptr,
             "--log-frequency",
-            "Frequency with which to log tree processing progress.");
-    parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
+            "Frequency with which to log tree processing progress.",
+            nullptr, "Run Options");
+    parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.",
+            nullptr, "Run Options");
     parser.parse(argc, argv);
     bool scale_by_tree_length = !no_scale_by_tree_length;
 
@@ -311,8 +327,8 @@ int main(int argc, const char * argv[]) {
         colugo::console::out_ln(border);
     }
 
-    if (!calculate_canonical_distances && !calculate_reference_distances && !calculate_pairwise_distances) {
-        colugo::console::err_line("Need to specify at least one of '-c'/'--canonical', '-r'/'--reference', or '-p'/'--pairwise' options");
+    if (!calculate_canonical_distances && reference_trees_filepath.empty() && !calculate_pairwise_distances) {
+        colugo::console::err_line("Need to specify at least one of '-c'/'--canonical', '-r'/'--reference-trees', or '-p'/'--pairwise' options");
         exit(EXIT_FAILURE);
     }
 
@@ -332,7 +348,7 @@ int main(int argc, const char * argv[]) {
         output_filepaths["canonical-distances"] = output_prefix + "canonical.distances.txt";
         output_filepaths["canonical-distances-stacked"] = output_prefix + "canonical.distances.stacked.txt";
     }
-    if (calculate_reference_distances) {
+    if (!reference_trees_filepath.empty()) {
         output_filepaths["reference-distances"] = output_prefix + "reference.distances.txt";
         output_filepaths["reference-distances-stacked"] = output_prefix + "reference.distances.stacked.txt";
     }
@@ -407,7 +423,7 @@ int main(int argc, const char * argv[]) {
     platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(16)};
 
     // reference distances
-    if (calculate_reference_distances) {
+    if (!reference_trees_filepath.empty()) {
         logger.abort("User-specified reference trees not yet implemented");
     }
 
