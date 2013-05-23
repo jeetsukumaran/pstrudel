@@ -226,7 +226,7 @@ int main(int argc, const char * argv[]) {
     bool             calculate_canonical_distances           = false;
     bool             calculate_reference_distances           = false;
     bool             calculate_pairwise_distances            = false;
-    bool             scale_by_tree_length                    = false;
+    bool             no_scale_by_tree_length                 = false;
     bool             calculate_symmetric_diff                = false;
     std::string      reference_trees_filepath                = "";
     std::string      default_output_filename_stem            = "pstrudel-trees";
@@ -254,10 +254,11 @@ int main(int argc, const char * argv[]) {
             "-p",
             "--pairwise",
             "Calculate distances from every tree to every other tree in input set.");
-    parser.add_switch(&scale_by_tree_length,
-            "-s",
-            "--scale-by-tree-length",
-            "All edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated");
+    parser.add_switch(&no_scale_by_tree_length,
+            NULL,
+            "--no-scale-by-tree-length",
+            "By default, all edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated;"
+            " set this option to use unscaled (raw) edge lengths");
     parser.add_switch(&calculate_symmetric_diff,
             "-d",
             "--calculate-symmetric-difference",
@@ -294,6 +295,7 @@ int main(int argc, const char * argv[]) {
             "Frequency with which to log tree processing progress.");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.");
     parser.parse(argc, argv);
+    bool scale_by_tree_length = !no_scale_by_tree_length;
 
     if (!quiet) {
         // std::string border(prog_id.size(), '=');
