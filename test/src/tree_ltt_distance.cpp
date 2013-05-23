@@ -85,8 +85,12 @@ int test_file(const std::string & test_data_filename, const std::string & format
 int test_dist1() {
     int fails = 0;
     std::string src_filepath = "n10-unbalanced.nexus.trees";
-    // std::string src_filepath = "n06-rooted-patterns.nex";
-    // std::string src_filepath = "pythonidae.reference-trees.nexus";
+    return test_file(src_filepath, "nexus", src_filepath);
+}
+
+int test_dist2() {
+    int fails = 0;
+    std::string src_filepath = "pythonidae.reference-trees.nexus";
     return test_file(src_filepath, "nexus", src_filepath);
 }
 
@@ -95,6 +99,7 @@ int main(int, const char * argv[]) {
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "calc-tree-ltt-distance.py");
     int fails = 0;
     fails += test_dist1();
+    fails += test_dist2();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {
