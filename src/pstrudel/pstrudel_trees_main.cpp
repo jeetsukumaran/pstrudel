@@ -148,6 +148,8 @@ class CanonicalTreePatterns {
                 auto & tree_pattern = tpi.second;
                 d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
                 row.set("y.ptd.uw." + tree_pattern_name, d);
+                d = tree_pattern.get_lineage_accumulation_profile_distance(other_tree);
+                row.set("y.ltt." + tree_pattern_name, d);
                 if (scale_by_tree_length) {
                     d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
                     row.set("y.ptd.wt." + tree_pattern_name, d);
@@ -557,7 +559,7 @@ int main(int argc, const char * argv[]) {
                 results_table_row.set("y.ptd.uw",
                         tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
                 results_table_row.set("y.ltt",
-                        tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
+                        tree1.get_lineage_accumulation_profile_distance(tree2));
                 if (scale_by_tree_length) {
                     results_table_row.set("y.ptd.wt",
                             tree1.get_weighted_pairwise_tip_profile_distance(tree2));
