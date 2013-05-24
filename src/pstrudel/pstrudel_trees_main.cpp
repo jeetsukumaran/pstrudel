@@ -464,8 +464,8 @@ int main(int argc, const char * argv[]) {
         for (auto & ctree : comparison_trees) {
             auto & results_table_row = results_table.add_row();
             tt_idx = 0;
-            std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
             for (auto & ttree : target_trees) {
+                std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
                     logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", tt_idx + 1, " vs. tree ", comparison_tree_idx + 1);
                 }
