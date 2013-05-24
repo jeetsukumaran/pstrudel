@@ -643,25 +643,12 @@ int main(int argc, const char * argv[]) {
                 results_table_row.set("comp.class", std::to_string(tree1.get_file_index()+1) + ":" + std::to_string(tree2.get_file_index()+1));
 
                 // data
-                results_table_row.set("y.ptd.uw",
-                        tree1.get_unweighted_pairwise_tip_profile_distance(tree2));
-                results_table_row.set("y.ltt",
-                        tree1.get_lineage_accumulation_profile_distance(tree2));
-                if (scale_by_tree_length) {
-                    results_table_row.set("y.ptd.wt",
-                            tree1.get_weighted_pairwise_tip_profile_distance(tree2));
-                    results_table_row.set("y.lst",
-                            tree1.get_scaled_lineage_splitting_time_profile_distance(tree2));
-                } else {
-                    results_table_row.set("y.ptd.wt",
-                            tree1.get_scaled_weighted_pairwise_tip_profile_distance(tree2));
-                    results_table_row.set("y.lst",
-                            tree1.get_lineage_splitting_time_profile_distance(tree2));
-                }
-                if (calculate_symmetric_diff) {
-                    results_table_row.set("usd.uw",
-                            tree1.get_unlabeled_symmetric_difference(tree2));
-                }
+                tree1.tabulate_distances(
+                        "",
+                        tree2,
+                        results_table_row,
+                        scale_by_tree_length,
+                        calculate_symmetric_diff);
             }
         } // pairwise tree comparison
 
