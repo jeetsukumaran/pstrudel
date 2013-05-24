@@ -441,19 +441,12 @@ int main(int argc, const char * argv[]) {
         }
         unsigned long tt_idx = 0;
         for (auto & ttree : target_trees) {
-            std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
-            results_table.add_data_column<double>("y.ptd.uw" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.ptd.uw.norm" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.ptd.wt" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.ptd.wt.norm" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.ltt" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.ltt.norm" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.lst" + target_tree_label, col_formatting);
-            results_table.add_data_column<double>("y.lst.norm" + target_tree_label, col_formatting);
-            if (calculate_symmetric_diff) {
-                results_table.add_data_column<double>("usd.uw" + target_tree_label);
-                results_table.add_data_column<double>("usd.uw.norm" + target_tree_label, col_formatting);
-            }
+            std::string target_tree_label = "t" + std::to_string(tt_idx+1);
+            pstrudel::DistanceTree::add_results_data_columns(
+                    target_tree_label,
+                    results_table,
+                    col_formatting,
+                    calculate_symmetric_diff);
             ++tt_idx;
         }
 
