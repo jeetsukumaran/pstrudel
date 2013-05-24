@@ -38,11 +38,12 @@ class WorkingTree : public pstrudel::DistanceTree {
             this->file_tree_index_ = file_tree_index;
         }
 
+    public:
+
     private:
         const std::string      filepath_;
         unsigned long          file_index_;
         unsigned long          file_tree_index_;
-
 
 }; // WorkingTree
 
@@ -201,12 +202,11 @@ class CanonicalTreePatterns {
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff) {
             for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
-                for (auto & y_distance_name : CanonicalTreePatterns::tree_pattern_y_distance_names_) {
-                    table.add_data_column<double>(y_distance_name + "." + tree_pattern_name, col_formatters);
-                }
-                if (calculate_symmetric_diff) {
-                    table.add_data_column<unsigned long>("usd.uw." + tree_pattern_name, col_formatters);
-                }
+                pstrudel::DistanceTree::add_results_data_columns(
+                        tree_pattern_name,
+                        table,
+                        col_formatters,
+                        calculate_symmetric_diff);
             }
         }
 
@@ -218,7 +218,6 @@ class CanonicalTreePatterns {
         // std::map<std::string, double>                    max_weighted_pairwise_tip_profile_distance_;
         // std::map<std::string, double>                    max_unlabeled_symmetric_difference_distance_;
         static const std::vector<std::string>            tree_pattern_names_;
-        static const std::vector<std::string>            tree_pattern_y_distance_names_;
 
 }; // CanonicalTreePatterns
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
@@ -226,12 +225,6 @@ const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
         "max.unbalanced.converse.coal",
         "max.unbalanced.uniform.coal",
         "max.balanced",
-}; // static cons ttree_pattern_names_
-const std::vector<std::string> CanonicalTreePatterns::tree_pattern_y_distance_names_{
-        "y.ptd.uw",
-        "y.ptd.wt",
-        "y.ltt",
-        "y.lst",
 }; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////

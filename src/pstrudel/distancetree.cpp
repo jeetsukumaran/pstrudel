@@ -319,6 +319,13 @@ std::pair<const Profile &, const Profile &> LineageThroughTimeProfileCalculator:
 //////////////////////////////////////////////////////////////////////////////
 // DistanceTree
 
+const std::vector<std::string> DistanceTree::tree_pattern_y_distance_names_{
+        "y.ptd.uw",
+        "y.ptd.wt",
+        "y.ltt",
+        "y.lst",
+}; // static cons ttree_pattern_names_
+
 DistanceTree::DistanceTree(bool is_rooted)
         : platypus::StandardTree<DistanceNodeValue>(is_rooted)
           , number_of_tips_(0)

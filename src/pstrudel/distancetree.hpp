@@ -9,7 +9,9 @@
 #include <stack>
 #include <map>
 #include <set>
+#include <platypus/model/datatable.hpp>
 #include <platypus/model/standardinterface.hpp>
+#include <platypus/utility/stream.hpp>
 #include "profile.hpp"
 
 namespace pstrudel {
@@ -278,6 +280,20 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
+    public:
+        static void add_results_data_columns(
+                const std::string & target_tree_name,
+                platypus::DataTable & table,
+                platypus::stream::OutputStreamFormatters & col_formatters,
+                bool calculate_symmetric_diff) {
+            for (auto & y_distance_name : DistanceTree::tree_pattern_y_distance_names_) {
+                table.add_data_column<double>(y_distance_name + "." + target_tree_name, col_formatters);
+            }
+            if (calculate_symmetric_diff) {
+                table.add_data_column<unsigned long>("usd.uw." + target_tree_name, col_formatters);
+            }
+        }
+
         /////////////////////////////////////////////////////////////////////////
         // This calculates the distances, but does not actually store them.
         // Client code eshould pass in appropriate storage behavior by using a
@@ -324,11 +340,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         std::vector<DistanceTree::node_type *> get_nodes_in_level_order();
 
     private:
-        unsigned long                           number_of_tips_;
-        double                                  total_tree_length_;
-        PairwiseTipDistanceProfileCalculator    pairwise_tip_distance_profile_calculator_;
-        SymmetricDifferenceCalculator           symmetric_difference_calculator_;
-        LineageThroughTimeProfileCalculator     lineage_through_time_calculator_;
+        unsigned long                            number_of_tips_;
+        double                                   total_tree_length_;
+        PairwiseTipDistanceProfileCalculator     pairwise_tip_distance_profile_calculator_;
+        SymmetricDifferenceCalculator            symmetric_difference_calculator_;
+        LineageThroughTimeProfileCalculator      lineage_through_time_calculator_;
+        static const std::vector<std::string>    tree_pattern_y_distance_names_;
 
 }; // DistanceTree
 
