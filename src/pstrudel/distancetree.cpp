@@ -320,10 +320,10 @@ std::pair<const Profile &, const Profile &> LineageThroughTimeProfileCalculator:
 // DistanceTree
 
 const std::vector<std::string> DistanceTree::tree_pattern_y_distance_names_{
-        "y.ptd.uw",
-        "y.ptd.wt",
-        "y.ltt",
-        "y.lst",
+        "pwtd",
+        "pwtd.uw",
+        "ltt",
+        "lst",
 }; // static cons ttree_pattern_names_
 
 DistanceTree::DistanceTree(bool is_rooted)
