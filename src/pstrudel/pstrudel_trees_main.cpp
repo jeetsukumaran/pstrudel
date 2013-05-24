@@ -162,29 +162,15 @@ class CanonicalTreePatterns {
         }
         template <class T, class R>
         void score(T & other_tree, R & row, bool scale_by_tree_length, bool calculate_symmetric_diff) {
-            double d = 0.0;
             for (auto & tpi : this->tree_patterns_) {
                 auto & tree_pattern_name = tpi.first;
                 auto & tree_pattern = tpi.second;
-                d = tree_pattern.get_unweighted_pairwise_tip_profile_distance(other_tree);
-                row.set("y.ptd.uw." + tree_pattern_name, d);
-                d = tree_pattern.get_lineage_accumulation_profile_distance(other_tree);
-                row.set("y.ltt." + tree_pattern_name, d);
-                if (scale_by_tree_length) {
-                    d = tree_pattern.get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-                    row.set("y.ptd.wt." + tree_pattern_name, d);
-                    d = tree_pattern.get_scaled_lineage_splitting_time_profile_distance(other_tree);
-                    row.set("y.lst." + tree_pattern_name, d);
-                } else {
-                    d = tree_pattern.get_weighted_pairwise_tip_profile_distance(other_tree);
-                    row.set("y.ptd.wt." + tree_pattern_name, d);
-                    d = tree_pattern.get_lineage_splitting_time_profile_distance(other_tree);
-                    row.set("y.lst." + tree_pattern_name, d);
-                }
-                if (calculate_symmetric_diff) {
-                    d = tree_pattern.get_unlabeled_symmetric_difference(other_tree);
-                    row.set("usd.uw." + tree_pattern_name, d);
-                }
+                tree_pattern.tabulate_distances(
+                        tree_pattern_name,
+                        other_tree,
+                        row,
+                        scale_by_tree_length,
+                        calculate_symmetric_diff);
             }
         }
         template <class W>

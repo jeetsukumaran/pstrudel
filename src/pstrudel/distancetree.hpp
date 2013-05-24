@@ -280,6 +280,39 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
+        template <class T, class R>
+        void tabulate_distances(
+                const std::string & target_tree_name,
+                T & other_tree,
+                R & row,
+                bool scale_by_tree_length,
+                bool calculate_symmetric_diff) {
+            std::string label_ext = target_tree_name;
+            if (!label_ext.empty()) {
+                label_ext = "." + label_ext;
+            }
+            double d = 0.0;
+            d = this->get_unweighted_pairwise_tip_profile_distance(other_tree);
+            row.set("y.ptd.uw" + label_ext, d);
+            d = this->get_lineage_accumulation_profile_distance(other_tree);
+            row.set("y.ltt" + label_ext, d);
+            if (scale_by_tree_length) {
+                d = this->get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
+                row.set("y.ptd.wt" + label_ext, d);
+                d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree);
+                row.set("y.lst" + label_ext, d);
+            } else {
+                d = this->get_weighted_pairwise_tip_profile_distance(other_tree);
+                row.set("y.ptd.wt" + label_ext, d);
+                d = this->get_lineage_splitting_time_profile_distance(other_tree);
+                row.set("y.lst" + label_ext, d);
+            }
+            if (calculate_symmetric_diff) {
+                d = this->get_unlabeled_symmetric_difference(other_tree);
+                row.set("usd.uw" + label_ext, d);
+            }
+        }
+
     public:
         static void add_results_data_columns(
                 const std::string & target_tree_name,
