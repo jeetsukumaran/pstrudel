@@ -451,29 +451,16 @@ int main(int argc, const char * argv[]) {
             auto & results_table_row = results_table.add_row();
             tt_idx = 0;
             for (auto & ttree : target_trees) {
-                std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
+                std::string target_tree_label = "t" + std::to_string(tt_idx+1);
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
                     logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", tt_idx + 1, " vs. tree ", comparison_tree_idx + 1);
                 }
-                results_table_row.set("y.ptd.uw" + target_tree_label,
-                        ttree.get_unweighted_pairwise_tip_profile_distance(ctree));
-                results_table_row.set("y.ltt" + target_tree_label,
-                        ttree.get_lineage_accumulation_profile_distance(ctree));
-                if (scale_by_tree_length) {
-                    results_table_row.set("y.ptd.wt" + target_tree_label,
-                            ttree.get_weighted_pairwise_tip_profile_distance(ctree));
-                    results_table_row.set("y.lst" + target_tree_label,
-                            ttree.get_scaled_lineage_splitting_time_profile_distance(ctree));
-                } else {
-                    results_table_row.set("y.ptd.wt" + target_tree_label,
-                            ttree.get_scaled_weighted_pairwise_tip_profile_distance(ctree));
-                    results_table_row.set("y.lst" + target_tree_label,
-                            ttree.get_lineage_splitting_time_profile_distance(ctree));
-                }
-                if (calculate_symmetric_diff) {
-                    results_table_row.set("usd.uw" + target_tree_label,
-                            ttree.get_unlabeled_symmetric_difference(ctree));
-                }
+                ctree.tabulate_distances(
+                        target_tree_label,
+                        ttree,
+                        results_table_row,
+                        scale_by_tree_length,
+                        calculate_symmetric_diff);
                 ++tt_idx;
                 ++comparison_count;
             } // for each target tree
