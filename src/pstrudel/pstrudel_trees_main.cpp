@@ -612,18 +612,18 @@ int main(int argc, const char * argv[]) {
         results_table.add_key_column<std::string>("comp.type");
         results_table.add_key_column<std::string>("comp.class");
 
-        results_table.add_data_column<double>("y.ptd.uw", col_formatting);
-        results_table.add_data_column<double>("y.ptd.uw.norm", col_formatting);
-        results_table.add_data_column<double>("y.ptd.wt", col_formatting);
-        results_table.add_data_column<double>("y.ptd.wt.norm", col_formatting);
-        results_table.add_data_column<double>("y.ltt", col_formatting);
-        results_table.add_data_column<double>("y.ltt.norm", col_formatting);
-        results_table.add_data_column<double>("y.lst", col_formatting);
-        results_table.add_data_column<double>("y.lst.norm", col_formatting);
-        if (calculate_symmetric_diff) {
-            results_table.add_data_column<double>("usd.uw");
-            results_table.add_data_column<double>("usd.uw.norm", col_formatting);
-        }
+        pstrudel::DistanceTree::add_results_data_columns(
+                "",
+                results_table,
+                col_formatting,
+                calculate_symmetric_diff);
+
+        pstrudel::DistanceTree::add_results_data_columns(
+                "norm",
+                results_table,
+                col_formatting,
+                calculate_symmetric_diff);
+
         logger.info("Beginning calculating distances between all distinct pairs of trees");
         if (scale_by_tree_length) {
             logger.info("Edge lengths will be scaled to tree length");

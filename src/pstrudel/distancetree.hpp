@@ -286,8 +286,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff) {
+            std::string label_ext = target_tree_name;
+            if (!label_ext.empty()) {
+                label_ext = "." + label_ext;
+            }
             for (auto & y_distance_name : DistanceTree::tree_pattern_y_distance_names_) {
-                table.add_data_column<double>(y_distance_name + "." + target_tree_name, col_formatters);
+                table.add_data_column<double>(y_distance_name + label_ext, col_formatters);
             }
             if (calculate_symmetric_diff) {
                 table.add_data_column<unsigned long>("usd.uw." + target_tree_name, col_formatters);
