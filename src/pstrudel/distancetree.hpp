@@ -327,7 +327,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 table.add_data_column<double>(y_distance_name + label_ext, col_formatters);
             }
             if (calculate_symmetric_diff) {
-                table.add_data_column<unsigned long>("usd.uw." + target_tree_name, col_formatters);
+                table.add_data_column<unsigned long>("usd.uw" + label_ext, col_formatters);
             }
         }
 
