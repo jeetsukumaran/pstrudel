@@ -82,11 +82,12 @@ int get_trees(
         auto fullpath = colugo::filesys::absolute_path(filepath);
         logger.info("Reading trees for comparison from file ", file_idx+1, " of ", filepaths.size(), ": '", fullpath, "'");
         std::function<TreeT& ()> get_new_tree_reference = [&trees, &fullpath, &file_idx] () -> TreeT& { trees.emplace_back(fullpath, file_idx); return trees.back(); };
-        return reader.read(std::ifstream(fullpath), get_new_tree_reference, format);
+        num_trees_read += reader.read(std::ifstream(fullpath), get_new_tree_reference, format);
         // logger.info(num_trees_read, " trees read from '", fullpath,
         //         "' (total number of trees in comparison set is now: ", comparison_trees.size(), ")");
         ++file_idx;
     }
+    return num_trees_read;
 }
 
 //////////////////////////////////////////////////////////////////////////////
