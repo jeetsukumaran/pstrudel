@@ -665,8 +665,10 @@ int main(int argc, const char * argv[]) {
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff);
-            }
-        } // pairwise tree comparison
+
+                ++comparison_count;
+            } // for each tree_idx2 pairwise tree comparison
+        } // for each tree_idx1 pairwise tree comparison
 
         logger.info("Calculating normalized distances");
         auto max_y_ptd_uw = results_table.column("pwtd.uw").max<double>();
@@ -677,7 +679,12 @@ int main(int argc, const char * argv[]) {
         if (calculate_symmetric_diff) {
             max_rfd_uw = results_table.column("rfdu").max<double>();
         }
+        unsigned long row_idx = 0;
+        unsigned long nrows = results_table.num_rows();
         for (auto & row : results_table) {
+            if (log_frequency > 0 && (row_idx % log_frequency == 0)) {
+                logger.info("Normalizing entry ", row_idx + 1, " of ", nrows);
+            }
             row.set("pwtd.uw.norm", row.get<double>("pwtd.uw") / max_y_ptd_uw);
             row.set("pwtd.norm", row.get<double>("pwtd") / max_y_ptd_wt);
             row.set("ltt.norm", row.get<double>("ltt") / max_y_ltt);
@@ -685,6 +692,7 @@ int main(int argc, const char * argv[]) {
             if (calculate_symmetric_diff) {
                 row.set("rfdu.norm", row.get<double>("rfdu") / max_rfd_uw);
             }
+            ++row_idx;
         }
         logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
 
