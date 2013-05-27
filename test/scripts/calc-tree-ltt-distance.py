@@ -19,7 +19,7 @@ def compare_almost_equal(label, comparison_name, expected, observed, check_preci
         d = 1
     else:
         d = expected
-    if abs(observed-expected)/d > check_precision:
+    if abs(observed-expected) > check_precision:
         sys.stderr.write("{}: {}: expecting {:.22f} but found {:.22f}\n".format(label, comparison_name, expected, observed))
         return 1
     else:
