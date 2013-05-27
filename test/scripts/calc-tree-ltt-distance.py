@@ -25,6 +25,23 @@ def compare_almost_equal(label, comparison_name, expected, observed, check_preci
     else:
         return 0
 
+def compare_almost_equal_vectors(label, comparison_name, expected, observed, check_precision):
+    if len(expected) != len(observed):
+        sys.stderr.write("{}: {}: expecting profile length of {} but found {}\n".format(label, comparison_name, len(expected), len(observed)))
+        for idx in range(max(len(expected), len(observed))):
+            if idx >= len(expected):
+                ev = "{:24}".format("N/A")
+            else:
+                ev = "{:.22f}".format(expected[idx])
+            if idx >= len(observed):
+                ov = "{:24}".format("N/A")
+            else:
+                ov = "{:.22f}".format(observed[idx])
+            sys.stderr.write("    {:03d}: {}    {}\n".format(idx, ev, ov))
+        return 1
+    else:
+        return 0
+
 def preprocess_tree(tree, num_transects=None):
     tree_length = tree.length()
     num_leaves = len(tree.leaf_nodes())
@@ -109,14 +126,37 @@ def main():
     rep_lst = float(stdin_lines.pop(0))
     rep_slst = float(stdin_lines.pop(0))
 
-    tree1_rep_ltt_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
-    tree1_rep_lst_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
-    tree1_rep_slst_profile = [float(i) for i in stdin_lines.pop(0).split(",") if i]
-    tree2_rep_ltt_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
-    tree2_rep_lst_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
-    tree2_rep_slst_profile = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles = { tree1: {}, tree2: {} }
+    rep_tree_profiles[tree1]["ltt"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles[tree1]["lst"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles[tree1]["slst"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles[tree2]["ltt"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles[tree2]["lst"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    rep_tree_profiles[tree2]["slst"] = [float(i) for i in stdin_lines.pop(0).split(",") if i]
 
     fails = 0
+    for tree_idx, tree in enumerate((tree1, tree2)):
+        rep_ltt_profile = rep_tree_profiles[tree]["ltt"]
+        rep_lst_profile = rep_tree_profiles[tree]["lst"]
+        rep_slst_profile = rep_tree_profiles[tree]["slst"]
+        fails += compare_almost_equal_vectors(
+                args.label,
+                "Tree {}: lineage accumulation through time profile".format(tree_idx),
+                tree.lineage_accumulation_through_time,
+                rep_ltt_profile,
+                args.precision)
+        fails += compare_almost_equal_vectors(
+                args.label,
+                "Tree {}: lineage splitting time profile".format(tree_idx),
+                tree.lineage_splitting_times,
+                rep_lst_profile,
+                args.precision)
+        fails += compare_almost_equal_vectors(
+                args.label,
+                "Tree {}: scaled lineage splitting time profile".format(tree_idx),
+                tree.scaled_lineage_splitting_times,
+                rep_slst_profile,
+                args.precision)
     fails += compare_almost_equal(
             args.label,
             "lineage accumulation through time difference",

@@ -52,7 +52,7 @@ int test_file(const std::string & test_data_filename,
             colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
             auto result = ps.communicate(o.str());
             if (ps.returncode() != 0) {
-                std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
+                std::cerr << "\n-- test '" << label << "' returned error: " << ps.returncode() << "\n";
                 std::cerr << result.first;
                 std::cerr << result.second;
                 fails += 1;
