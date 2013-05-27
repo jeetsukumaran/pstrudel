@@ -176,18 +176,28 @@ template <class TreeT>
                 }
             }
         }
+        const std::vector<std::string> & get_tree_pattern_names() const {
+            return CanonicalTreePatterns::tree_pattern_names_;
+        }
         template <class T, class R>
-        void score(T & other_tree, R & row, bool scale_by_tree_length, bool calculate_symmetric_diff) {
-            for (auto & tpi : this->tree_patterns_) {
-                auto & tree_pattern_name = tpi.first;
-                auto & tree_pattern = tpi.second;
-                tree_pattern.tabulate_distances(
-                        tree_pattern_name,
-                        other_tree,
-                        row,
-                        scale_by_tree_length,
-                        calculate_symmetric_diff);
+        void score(
+                const std::string tree_pattern_name,
+                T & other_tree,
+                R & row,
+                bool scale_by_tree_length,
+                bool calculate_symmetric_diff) {
+            auto tpi = this->tree_patterns_.find(tree_pattern_name);
+            if (tpi == this->tree_patterns_.end()) {
+                colugo::console::abort("Invalid tree pattern name: '", tree_pattern_name, "'");
             }
+            auto & tree_pattern = tpi->second;
+            row.set("target.tree.pattern", tree_pattern_name);
+            tree_pattern.tabulate_distances(
+                    "",
+                    other_tree,
+                    row,
+                    scale_by_tree_length,
+                    calculate_symmetric_diff);
         }
         template <class W>
         void write_trees(W & writer, std::ostream & out) {
@@ -200,16 +210,15 @@ template <class TreeT>
             this->tree_pattern_cross_distances_.write(out);
         }
     public:
-        static void add_results_data_columns(platypus::DataTable & table,
+        static void add_canonical_columns(platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff) {
-            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
-                pstrudel::DistanceTree::add_results_data_columns(
-                        tree_pattern_name,
-                        table,
-                        col_formatters,
-                        calculate_symmetric_diff);
-            }
+            table.add_key_column<std::string>("target.tree.pattern");
+            pstrudel::DistanceTree::add_results_data_columns(
+                    "",
+                    table,
+                    col_formatters,
+                    calculate_symmetric_diff);
         }
 
     private:
@@ -563,30 +572,35 @@ int main(int argc, const char * argv[]) {
             logger.info("Edge lengths will NOT be scaled to tree length");
         }
         std::map<unsigned long, CanonicalTreePatterns> tree_patterns;
-        CanonicalTreePatterns::add_results_data_columns(results_table, col_formatting, calculate_symmetric_diff);
+        CanonicalTreePatterns::add_canonical_columns(results_table, col_formatting, calculate_symmetric_diff);
         unsigned long comparison_tree_idx = 0;
         for (auto & comparison_tree : comparison_trees) { // tree comparison
             auto comparison_tree_size = comparison_tree.get_num_tips();
             if (log_frequency > 0 && (comparison_tree_idx % log_frequency == 0)) {
                 logger.info("Calculating canonical distances for tree ", comparison_tree_idx + 1, " of ", comparison_tree_size);
             }
-            auto & results_table_row = results_table.add_row();
-            if (!analysis_label.empty()) {
-                results_table_row.set("analysis", analysis_label);
-            }
-            results_table_row.set("tree.idx", comparison_tree_idx + 1);
-            if (add_tree_source_key) {
-                results_table_row.set("source.file", comparison_tree.get_filepath());
-                results_table_row.set("source.tree", comparison_tree.get_file_tree_index()+1);
-            }
-            results_table_row.set("num.tips", comparison_tree_size);
-            results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
-
             if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                 logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
                 tree_patterns[comparison_tree_size].generate(comparison_tree_size);
             }
-            tree_patterns[comparison_tree_size].score(comparison_tree, results_table_row, scale_by_tree_length, calculate_symmetric_diff);
+            for (auto & tree_pattern_name : tree_patterns[comparison_tree_size].get_tree_pattern_names()) {
+                auto & results_table_row = results_table.add_row();
+                if (!analysis_label.empty()) {
+                    results_table_row.set("analysis", analysis_label);
+                }
+                results_table_row.set("tree.idx", comparison_tree_idx + 1);
+                if (add_tree_source_key) {
+                    results_table_row.set("source.file", comparison_tree.get_filepath());
+                    results_table_row.set("source.tree", comparison_tree.get_file_tree_index()+1);
+                }
+                results_table_row.set("num.tips", comparison_tree_size);
+                results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
+                tree_patterns[comparison_tree_size].score(tree_pattern_name,
+                        comparison_tree,
+                        results_table_row,
+                        scale_by_tree_length,
+                        calculate_symmetric_diff);
+            }
             comparison_tree_idx += 1;
         } // tree comparison
         logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
