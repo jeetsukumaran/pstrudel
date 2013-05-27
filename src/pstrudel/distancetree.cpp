@@ -235,13 +235,13 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
     // for (double t = transect_step; t < this->max_leaf_distance_; t += transect_step) {
     double offset = transect_step;
     for (unsigned int i; i <= num_transects; ++i) {
-        if (offset > this->max_leaf_distance_) {
-            transect_offsets.push_back(this->max_leaf_distance_);
+        if (offset >= this->max_leaf_distance_) {
             break;
         }
         transect_offsets.push_back(offset);
         offset += transect_step;
     }
+    transect_offsets.push_back(this->max_leaf_distance_);
     return transect_offsets;
 }
 
@@ -255,19 +255,23 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_accumulation_
         this->calc_node_root_distances();
     }
     this->calc_node_root_distances();
-    std::vector<double> num_lineages(transect_offsets.size(), 0.0);
+    std::vector<unsigned long> num_lineages(transect_offsets.size(), 0.0);
     for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
         if (ndi.parent_node() != nullptr) {
             auto transect_offsets_begin = transect_offsets.begin();
             for (auto toi = transect_offsets_begin ; toi != transect_offsets.end(); ++toi) {
                 if (ndi->get_root_distance() >= *toi && ndi.parent().get_root_distance() < *toi) {
                     auto idx = toi - transect_offsets_begin;
-                    num_lineages[idx] += 1.0/num_tips;
+                    num_lineages[idx] += 1.0;
                 }
             }
         }
     }
-    this->lineage_accumulation_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
+    std::vector<double> rel_num_lineages(num_lineages.begin(), num_lineages.end());
+    for (auto & n : rel_num_lineages) {
+        n = n / num_tips;
+    }
+    this->lineage_accumulation_through_time_profile_.set_data(rel_num_lineages.begin(), rel_num_lineages.end(), false);
     return this->lineage_accumulation_through_time_profile_;
 }
 

@@ -154,8 +154,8 @@ void Profile::build_interpolated_profile(unsigned long profile_size) {
         for (unsigned long bin_idx=0; bin_idx < raw_data_size - 1; ++bin_idx) {
             this->interpolate_linear(interpolated_profile, bin_idx, this->raw_data_[bin_idx], this->raw_data_[bin_idx+1], bin_sizes[bin_idx], profile_size);
         }
+        interpolated_profile.push_back(this->raw_data_.back());
     }
-    interpolated_profile.push_back(this->raw_data_.back());
 }
 
 void Profile::interpolate_flat(ProfileMetricVectorType & interpolated_profile, ProfileMetricValueType value, unsigned long num_points) {
