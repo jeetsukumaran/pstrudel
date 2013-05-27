@@ -14,45 +14,55 @@ def euclidean_distance(v1, v2):
         ss += pow((v1[idx1] - v2[idx1]), 2)
     return math.sqrt(ss)
 
+def compare_almost_equal(label, comparison_name, expected, observed, check_precision):
+    if expected == 0:
+        d = 1
+    else:
+        d = expected
+    if abs(observed-expected)/d > check_precision:
+        sys.stderr.write("{}: {}: expecting {:.22f} but found {:.22f}\n".format(label, comparison_name, expected, observed))
+        return 1
+    else:
+        return 0
+
+def preprocess_tree(tree, num_transects=None):
+    tree_length = tree.length()
+    num_leaves = len(tree.leaf_nodes())
+    max_leaf_distance_from_root = tree.minmax_leaf_distance_from_root()[1]
+    if not num_transects:
+        num_transects = (num_leaves - 1) * 10
+    offset_step = float(max_leaf_distance_from_root) / num_transects
+    transect_offsets = []
+    offset = offset_step
+    for transect_idx in range(num_transects):
+        transect_offsets.append(offset)
+        offset += offset_step
+    tree.lineage_accumulation_through_time = []
+    for tof in transect_offsets:
+        if tof > max_leaf_distance_from_root:
+            tof = max_leaf_distance_from_root
+        n = float(tree.num_lineages_at(tof))/num_leaves
+        tree.lineage_accumulation_through_time.append(n)
+    tree.lineage_splitting_times = []
+    tree.scaled_lineage_splitting_times = []
+    for node in tree.postorder_node_iter():
+        if node.is_leaf():
+            continue
+        if tree_length > 0:
+            tree.lineage_splitting_times.append(node.root_distance)
+            tree.scaled_lineage_splitting_times.append(float(node.root_distance)/tree_length)
+        else:
+            tree.lineage_splitting_times.append(0.0)
+            tree.scaled_lineage_splitting_times.append(0.0)
+    tree.lineage_splitting_times.sort()
+    tree.scaled_lineage_splitting_times.sort()
+
 def preprocess_trees(trees, num_transects=None):
     for tree in trees:
-        tree_length = tree.length()
-        num_leaves = len(tree.leaf_nodes())
-        max_leaf_distance_from_root = tree.minmax_leaf_distance_from_root()[1]
-        if not num_transects:
-            num_transects = (num_leaves - 1) * 10
-        offset_step = float(max_leaf_distance_from_root) / num_transects
-        transect_offsets = []
-        offset = offset_step
-        for transect_idx in range(num_transects):
-            transect_offsets.append(offset)
-            offset += offset_step
-        tree.lineage_accumulation_through_time = []
-        for tof in transect_offsets:
-            if tof > max_leaf_distance_from_root:
-                tof = max_leaf_distance_from_root
-            n = float(tree.num_lineages_at(tof))/num_leaves
-            tree.lineage_accumulation_through_time.append(n)
-        tree.lineage_splitting_times = []
-        tree.scaled_lineage_splitting_times = []
-        for node in tree.postorder_node_iter():
-            if node.is_leaf():
-                continue
-            if tree_length > 0:
-                tree.lineage_splitting_times.append(node.root_distance)
-                tree.scaled_lineage_splitting_times.append(float(node.root_distance)/tree_length)
-            else:
-                tree.lineage_splitting_times.append(0.0)
-                tree.scaled_lineage_splitting_times.append(0.0)
-        tree.lineage_splitting_times.sort()
-        tree.scaled_lineage_splitting_times.sort()
+        preprocess_tree(tree=tree, num_transects=num_transects)
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("treefile",
-            type=str,
-            nargs="*",
-            help="path to tree file(s)")
     parser.add_argument("-",
             action="store_true",
             default=False,
@@ -70,7 +80,7 @@ def main():
             help="number of transects or slices on tree for lineage accumulation counts (default=%(default)s)")
     parser.add_argument("-p", "--precision",
             type=int,
-            default=22,
+            default=1e-16,
             help="numerical precision (default=%(default)s)")
     parser.add_argument("-l", "--label",
             type=str,
@@ -82,30 +92,54 @@ def main():
             help="level of messaging")
     args = parser.parse_args()
 
-    trees = dendropy.TreeList()
-    if args.trees_from_stdin:
-        trees.read_from_stream(sys.stdin, schema=args.schema)
-    for fpath in args.treefile:
-        trees.read_from_path(os.path.expanduser(os.path.expandvars(fpath)), schema=args.schema)
-    if len(trees) == 0:
-        sys.exit("Need to specify '-' option and pipe trees to standard input and/or specify paths to at least one tree file as argument")
-    preprocess_trees(trees)
-    out_template = "{{}}\t{{}}\t{{:.{precision}f}}\t{{:.{precision}f}}\t{{:.{precision}f}}\n".format(precision=args.precision)
-    # out_template = "{}\t{}\t{:f}\t{:f}\t{:f}\n"
-    for tidx1 in range(len(trees)):
-        if (args.verbosity > 1):
-            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_accumulation_through_time)))
-            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_splitting_times)))
-            sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].scaled_lineage_splitting_times)))
-        for tidx2 in range(len(trees)):
-            sys.stdout.write(out_template.format(
-                tidx1,
-                tidx2,
-                euclidean_distance(trees[tidx1].lineage_accumulation_through_time , trees[tidx2].lineage_accumulation_through_time) ,
-                euclidean_distance(trees[tidx1].lineage_splitting_times           , trees[tidx2].lineage_splitting_times          )  ,
-                euclidean_distance(trees[tidx1].scaled_lineage_splitting_times    , trees[tidx2].scaled_lineage_splitting_times   )
-                ))
+    stdin_lines = sys.stdin.read().split("\n")
+    taxon_set = dendropy.TaxonSet()
 
+    tree1 = dendropy.Tree.get_from_string(stdin_lines.pop(0), args.schema, taxon_set=taxon_set)
+    tree2 = dendropy.Tree.get_from_string(stdin_lines.pop(0), args.schema, taxon_set=taxon_set)
+
+    preprocess_tree(tree1)
+    preprocess_tree(tree2)
+
+    exp_ltt = euclidean_distance(tree1.lineage_accumulation_through_time, tree2.lineage_accumulation_through_time)
+    exp_lst = euclidean_distance(tree1.lineage_splitting_times, tree2.lineage_splitting_times)
+    exp_slst = euclidean_distance(tree1.scaled_lineage_splitting_times, tree2.scaled_lineage_splitting_times)
+
+    rep_ltt = float(stdin_lines.pop(0))
+    rep_lst = float(stdin_lines.pop(0))
+    rep_slst = float(stdin_lines.pop(0))
+
+    tree1_rep_ltt_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    tree1_rep_lst_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    tree1_rep_slst_profile = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    tree2_rep_ltt_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    tree2_rep_lst_profile  = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    tree2_rep_slst_profile = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+
+    fails = 0
+    fails += compare_almost_equal(
+            args.label,
+            "lineage accumulation through time difference",
+            exp_ltt,
+            rep_ltt,
+            args.precision)
+    fails += compare_almost_equal(
+            args.label,
+            "lineage splitting times difference",
+            exp_lst,
+            rep_lst,
+            args.precision)
+    fails += compare_almost_equal(
+            args.label,
+            "scaled lineage splitting times difference",
+            exp_slst,
+            rep_slst,
+            args.precision)
+
+    if fails > 0:
+        sys.exit(1)
+    else:
+        sys.exit(0)
 
 if __name__ == "__main__":
     main()

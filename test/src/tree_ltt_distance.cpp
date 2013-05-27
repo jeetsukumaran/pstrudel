@@ -2,83 +2,65 @@
 #include <string>
 #include <iostream>
 #include <colugo/subprocess.hpp>
+#include <platypus/serialize/newick.hpp>
 #include <pstrudel/distancetree.hpp>
 #include <pstrudel/dataio.hpp>
 #include "pstrudel_testing.hpp"
 
 std::string TEST_DIR;
 std::string CHECK_SCRIPT;
+platypus::NewickWriter<pstrudel::DistanceTree> TREE_WRITER;
 
-int test_file(const std::string & test_data_filename, const std::string & format, const std::string label) {
+int test_file(const std::string & test_data_filename,
+        const std::string & format,
+        const std::string label_prefix) {
     typedef pstrudel::DistanceTree  TreeType;
     std::vector<TreeType>  trees;
     std::string test_data_filepath = pstrudel::test::join_path(TEST_DIR, "data", "trees", "general", test_data_filename);
     pstrudel::treeio::read_from_filepath(trees, test_data_filepath, format);
-
-    std::map<unsigned long, std::map<unsigned long, double>> lc_dists;
-    std::map<unsigned long, std::map<unsigned long, double>> lst_dists;
-    std::map<unsigned long, std::map<unsigned long, double>> slst_dists;
-    std::set<std::pair<unsigned long, unsigned long>> comparisons;
-    for (unsigned tidx1 = 0; tidx1 < trees.size(); ++tidx1) {
-        for (unsigned tidx2 = 0; tidx2 < trees.size(); ++tidx2) {
-            auto & tree1 = trees[tidx1];
-            auto & tree2 = trees[tidx2];
-            lc_dists[tidx1][tidx2] = tree1.get_lineage_accumulation_profile_distance(tree2);
-            lst_dists[tidx1][tidx2] = tree1.get_lineage_splitting_time_profile_distance(tree2);
-            slst_dists[tidx1][tidx2] = tree1.get_scaled_lineage_splitting_time_profile_distance(tree2);
-            comparisons.insert(std::make_pair(tidx1, tidx2));
+    unsigned long tree_idx1 = 0;
+    unsigned long tree_idx2 = 0;
+    unsigned long fails = 0;
+    for (auto & tree1 : trees) {
+        for (auto & tree2 : trees) {
+            std::string label = label_prefix + ":" + std::to_string(tree_idx1 + 1) + ":" + std::to_string(tree_idx2 + 1);
+            std::ostringstream o;
+            TREE_WRITER.write(o, tree1);
+            o << "\n";
+            TREE_WRITER.write(o, tree2);
+            o << "\n";
+            o << std::fixed << std::setprecision(22) << tree1.get_lineage_accumulation_profile_distance(tree2);
+            o << "\n";
+            o << std::fixed << std::setprecision(22) << tree1.get_lineage_splitting_time_profile_distance(tree2);
+            o << "\n";
+            o << std::fixed << std::setprecision(22) << tree1.get_scaled_lineage_splitting_time_profile_distance(tree2);
+            o << "\n";
+            std::vector<pstrudel::Profile *> profiles;
+            auto & calc1 = tree1.get_lineage_through_time_calculator();
+            auto & calc2 = tree2.get_lineage_through_time_calculator();
+            for (auto & calc : {&calc1, &calc2}) {
+                profiles.push_back(&(calc->get_lineage_accumulation_through_time_profile()));
+                profiles.push_back(&(calc->get_lineage_splitting_time_profile()));
+                profiles.push_back(&(calc->get_scaled_lineage_splitting_time_profile()));
+            }
+            for (auto & profile : profiles) {
+                for (auto & val : profile->get_profile()) {
+                    o << val << ",";
+                }
+                o << "\n";
+            }
+            colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
+            auto result = ps.communicate(o.str());
+            if (ps.returncode() != 0) {
+                std::cerr << "(test '" << label << "' returned error: " << ps.returncode() << ")\n";
+                std::cerr << result.first;
+                std::cerr << result.second;
+                fails += 1;
+            }
+            ++tree_idx2;
         }
+        ++tree_idx1;
     }
-
-    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-p", "22", "-f", format, "-l", label, test_data_filepath, "--verbosity", "10"});
-    int retcode = ps.wait();
-    auto ps_stdout = ps.get_stdout();
-    auto ps_stderr = ps.get_stderr();
-    if (retcode != 0) {
-        std::cerr << "(test '" << label << "' returned error: " << retcode << ")\n";
-        std::cerr << ps_stdout;
-        std::cerr << ps_stderr;
-        return 1;
-    }
-    int fails = 0;
-    unsigned long tidx1   = 0;
-    unsigned long tidx2   = 0;
-    double exp_lc_d   = 0.0;
-    double exp_lst_d  = 0.0;
-    double exp_slst_d = 0.0;
-    std::istringstream src(ps_stdout);
-    while (src.good()) {
-        src >> tidx1;
-        src >> tidx2;
-        src >> exp_lc_d;
-        src >> exp_lst_d;
-        src >> exp_slst_d;
-        fails += platypus::testing::compare_almost_equal(
-                exp_lc_d,
-                lc_dists[tidx1][tidx2],
-                __FILE__,
-                __LINE__,
-                "Incorrect lineage accumulation through time profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_almost_equal(
-                exp_lst_d,
-                lst_dists[tidx1][tidx2],
-                __FILE__,
-                __LINE__,
-                "Incorrect lineage splitting times profile distance for tree ", tidx1, " and tree ", tidx2);
-        fails += platypus::testing::compare_almost_equal(
-                exp_slst_d,
-                slst_dists[tidx1][tidx2],
-                __FILE__,
-                __LINE__,
-                "Incorrect scaled lineage splitting times profile distance for tree ", tidx1, " and tree ", tidx2);
-        comparisons.erase(std::make_pair(tidx1, tidx2));
-    }
-    fails += platypus::testing::compare_equal(
-            0UL,
-            comparisons.size(),
-            __FILE__,
-            __LINE__,
-            "Not all trees checked");
     return fails;
 }
 
@@ -97,9 +79,11 @@ int test_dist2() {
 int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "calc-tree-ltt-distance.py");
+    platypus::bind_standard_interface(TREE_WRITER);
+    TREE_WRITER.set_edge_length_precision(22);
     int fails = 0;
     fails += test_dist1();
-    fails += test_dist2();
+    // fails += test_dist2();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {

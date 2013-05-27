@@ -156,13 +156,13 @@ class LineageThroughTimeProfileCalculator {
         double get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other);
         double get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
         double get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
-        const Profile & get_lineage_accumulation_through_time_profile() const {
+        Profile & get_lineage_accumulation_through_time_profile() {
             return this->lineage_accumulation_through_time_profile_;
         }
-        const Profile & get_lineage_splitting_time_profile() const {
+        Profile & get_lineage_splitting_time_profile() {
             return this->lineage_splitting_time_profile_;
         }
-        const Profile & get_scaled_lineage_splitting_time_profile() const {
+        Profile & get_scaled_lineage_splitting_time_profile() {
             return this->scaled_lineage_splitting_time_profile_;
         }
 

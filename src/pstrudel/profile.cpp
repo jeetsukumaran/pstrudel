@@ -34,7 +34,7 @@ void Profile::clear() {
     this->last_profile_comparison_size_ = 0;
 }
 
-ProfileMetricVectorType & Profile::get_profile(unsigned long profile_size) {
+const ProfileMetricVectorType & Profile::get_profile(unsigned long profile_size) {
     if (profile_size == 0) {
         profile_size = this->raw_data_.size();
     }
@@ -178,7 +178,7 @@ void Profile::interpolate_linear(ProfileMetricVectorType & interpolated_profile,
     }
 }
 
-ProfileMetricValueType Profile::calc_euclidean_distance(ProfileMetricVectorType & v1, ProfileMetricVectorType & v2) {
+ProfileMetricValueType Profile::calc_euclidean_distance(const ProfileMetricVectorType & v1, const ProfileMetricVectorType & v2) {
     unsigned long v1_size = v1.size();
     unsigned long v2_size = v2.size();
     unsigned long v1_idx = 0;
