@@ -239,6 +239,64 @@ const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
 }; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////
+// write normalized
+void write_normalized_results(platypus::DataTable & results_table,
+        const std::string & table_output_fpath,
+        const std::string & stacked_table_output_fpath,
+        bool suppress_header_row,
+        unsigned long log_frequency,
+        colugo::Logger & logger) {
+    platypus::DataTable normalized_results_table;
+    for (auto & col_name : results_table.key_column_names()) {
+        normalized_results_table.add_key_column<std::string>(col_name);
+    }
+    std::map<std::string, double> max_vals;
+    for (auto & col_name : results_table.data_column_names()) {
+        normalized_results_table.add_key_column<double>(col_name);
+        max_vals[col_name] = results_table.column(col_name).max<double>();
+    }
+    unsigned long row_idx = 0;
+    unsigned long nrows = results_table.num_rows();
+    for (auto & results_row : results_table) {
+        if (log_frequency > 0 && (row_idx % log_frequency == 0)) {
+            logger.info("Normalizing entry ", row_idx + 1, " of ", nrows);
+        }
+        auto & normalized_row = normalized_results_table.add_row();
+
+        for (auto & col_name : results_table.key_column_names()) {
+            normalized_row.set(col_name, results_row.get<std::string>(col_name));
+        }
+        for (auto & col_name : results_table.data_column_names()) {
+            normalized_row.set(col_name,
+                    results_row.get<double>(col_name) / max_vals[col_name]);
+        }
+        ++row_idx;
+    }
+    logger.info("Writing normalized results");
+    // output primary results
+    {
+        auto & out_fpath = table_output_fpath;
+        std::ofstream out(out_fpath);
+        if (!out.good()) {
+            logger.abort("Unable to open file for output: '", out_fpath, "'");
+        }
+        normalized_results_table.write(out, "\t", !suppress_header_row);
+    }
+
+    // output stacked results
+    logger.info("Writing stacked normalized results");
+    {
+        auto & out_fpath = stacked_table_output_fpath;
+        std::ofstream out(out_fpath);
+        if (!out.good()) {
+            logger.abort("Unable to open file for output: '", out_fpath, "'");
+        }
+        normalized_results_table.write_stacked(out,
+                "dist.type", "dist", "\t", !suppress_header_row);
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////////
 // main
 
 int main(int argc, const char * argv[]) {
@@ -251,6 +309,7 @@ int main(int argc, const char * argv[]) {
     std::string      target_trees_filepath                   = "";
     bool             no_scale_by_tree_length                 = false;
     bool             calculate_symmetric_diff                = false;
+    bool             calculate_normalized                    = false;
     std::string      default_output_filename_stem            = "pstrudel-trees";
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
@@ -294,6 +353,12 @@ int main(int argc, const char * argv[]) {
             "-d",
             "--calculate-symmetric-difference",
             "In addition to `y` or profile distances, calculate the Robinson-Foulds or symmetric difference.",
+            nullptr,
+            "Distance Options");
+    parser.add_switch(&calculate_normalized,
+            "-n",
+            "--calculate-normalized-distances",
+            "Calculate distances normalized to maximum value.",
             nullptr,
             "Distance Options");
 
@@ -377,14 +442,20 @@ int main(int argc, const char * argv[]) {
     if (calculate_canonical_distances) {
         output_filepaths["canonical-distances"] = output_prefix + "canonical.distances.txt";
         output_filepaths["canonical-distances-stacked"] = output_prefix + "canonical.distances.stacked.txt";
+        output_filepaths["canonical-distances-normalized"] = output_prefix + "canonical.distances.normalized.txt";
+        output_filepaths["canonical-distances-normalized-stacked"] = output_prefix + "canonical.distances.normalized.stacked.txt";
     }
     if (!target_trees_filepath.empty()) {
         output_filepaths["target-distances"] = output_prefix + "target.distances.txt";
         output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
+        output_filepaths["target-distances-normalized"] = output_prefix + "target.distances.normalized.txt";
+        output_filepaths["target-distances-normalized-stacked"] = output_prefix + "target.distances.normalized.stacked.txt";
     }
     if (calculate_pairwise_distances) {
         output_filepaths["pairwise-distances"] = output_prefix + "pairwise.distances.txt";
         output_filepaths["pairwise-distances-stacked"] = output_prefix + "pairwise.distances.stacked.txt";
+        output_filepaths["pairwise-distances-normalized"] = output_prefix + "pairwise.distances.normalized.txt";
+        output_filepaths["pairwise-distances-normalized-stacked"] = output_prefix + "pairwise.distances.normalized.stacked.txt";
     }
 
     if (!replace_existing_output_files) {
@@ -527,6 +598,7 @@ int main(int argc, const char * argv[]) {
         // output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
         // output primary results
         {
+            logger.info("Writing target distance results");
             auto & out_fpath = output_filepaths["target-distances"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -537,6 +609,7 @@ int main(int argc, const char * argv[]) {
 
         // output stacked results
         {
+            logger.info("Writing stacked target distance results");
             auto & out_fpath = output_filepaths["target-distances-stacked"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -544,6 +617,16 @@ int main(int argc, const char * argv[]) {
             }
             results_table.write_stacked(out,
                     "dist.type", "dist", "\t", !suppress_header_row);
+        }
+
+        if (calculate_normalized) {
+            logger.info("Calculating normalized target distances");
+            write_normalized_results(results_table,
+                    output_filepaths["target-distances-normalized"],
+                    output_filepaths["target-distances-normalized-stacked"],
+                    suppress_header_row,
+                    log_frequency,
+                    logger);
         }
 
     } // target distances
@@ -603,10 +686,11 @@ int main(int argc, const char * argv[]) {
             }
             comparison_tree_idx += 1;
         } // tree comparison
-        logger.info("Completed calculating distances between comparison trees and canoncial tree patterns");
+        logger.info("Completed calculating distances between comparison trees and canonical tree patterns");
 
         // output canonical info
         {
+            logger.info("Writing canonical tree cross-distances");
             platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
             ref_tree_writer.set_suppress_edge_lengths(false);
             platypus::bind_standard_interface(ref_tree_writer);
@@ -621,6 +705,7 @@ int main(int argc, const char * argv[]) {
 
         // output primary results
         {
+            logger.info("Writing canonical distance results");
             auto & out_fpath = output_filepaths["canonical-distances"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -631,6 +716,7 @@ int main(int argc, const char * argv[]) {
 
         // output stacked results
         {
+            logger.info("Writing stacked canonical distance results");
             auto & out_fpath = output_filepaths["canonical-distances-stacked"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -638,6 +724,16 @@ int main(int argc, const char * argv[]) {
             }
             results_table.write_stacked(out,
                     "dist.type", "dist", "\t", !suppress_header_row);
+        }
+
+        if (calculate_normalized) {
+            logger.info("Calculating normalized canonical distances");
+            write_normalized_results(results_table,
+                    output_filepaths["canonical-distances-normalized"],
+                    output_filepaths["canonical-distances-normalized-stacked"],
+                    suppress_header_row,
+                    log_frequency,
+                    logger);
         }
     } // canonical ref trees
 
@@ -668,12 +764,6 @@ int main(int argc, const char * argv[]) {
 
         pstrudel::DistanceTree::add_results_data_columns(
                 "",
-                results_table,
-                col_formatting,
-                calculate_symmetric_diff);
-
-        pstrudel::DistanceTree::add_results_data_columns(
-                ".norm",
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff);
@@ -739,35 +829,11 @@ int main(int argc, const char * argv[]) {
                 ++comparison_count;
             } // for each tree_idx2 pairwise tree comparison
         } // for each tree_idx1 pairwise tree comparison
-
-        logger.info("Calculating normalized distances");
-        auto max_y_ptd_uw = results_table.column("pwtd.uw").max<double>();
-        auto max_y_ptd_wt = results_table.column("pwtd").max<double>();
-        auto max_y_ltt    = results_table.column("ltt").max<double>();
-        auto max_y_lst    = results_table.column("lst").max<double>();
-        double max_rfd_uw = 1.0;
-        if (calculate_symmetric_diff) {
-            max_rfd_uw = results_table.column("rfdu").max<double>();
-        }
-        unsigned long row_idx = 0;
-        unsigned long nrows = results_table.num_rows();
-        for (auto & row : results_table) {
-            if (log_frequency > 0 && (row_idx % log_frequency == 0)) {
-                logger.info("Normalizing entry ", row_idx + 1, " of ", nrows);
-            }
-            row.set("pwtd.uw.norm", row.get<double>("pwtd.uw") / max_y_ptd_uw);
-            row.set("pwtd.norm", row.get<double>("pwtd") / max_y_ptd_wt);
-            row.set("ltt.norm", row.get<double>("ltt") / max_y_ltt);
-            row.set("lst.norm", row.get<double>("lst") / max_y_lst);
-            if (calculate_symmetric_diff) {
-                row.set("rfdu.norm", row.get<double>("rfdu") / max_rfd_uw);
-            }
-            ++row_idx;
-        }
         logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
 
         // output primary results
         {
+            logger.info("Writing primary results");
             auto & out_fpath = output_filepaths["pairwise-distances"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -778,6 +844,7 @@ int main(int argc, const char * argv[]) {
 
         // output stacked results
         {
+            logger.info("Writing stacked primary results");
             auto & out_fpath = output_filepaths["pairwise-distances-stacked"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
@@ -785,6 +852,16 @@ int main(int argc, const char * argv[]) {
             }
             results_table.write_stacked(out,
                     "dist.type", "dist", "\t", !suppress_header_row);
+        }
+
+        if (calculate_normalized) {
+            logger.info("Calculating normalized pairwise distances");
+            write_normalized_results(results_table,
+                    output_filepaths["pairwise-distances-normalized"],
+                    output_filepaths["pairwise-distances-normalized-stacked"],
+                    suppress_header_row,
+                    log_frequency,
+                    logger);
         }
     } // pairwise distances
 }
