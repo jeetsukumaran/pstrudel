@@ -131,22 +131,22 @@ template <class TreeT>
                 auto leaves = this->generate_leaves();
 
                 // unbalanced tree, mean coalescent
-                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.mean.coal"],
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.mean.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_[".unbalanced.mean.coal"].add_edge_lengths(0); // mean
+                this->tree_patterns_["unbalanced.mean.coal"].add_edge_lengths(0); // mean
 
                 // unbalanced tree, converse coalescent
-                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.converse.coal"],
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.converse.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_[".unbalanced.converse.coal"].add_edge_lengths(1); // converse
+                this->tree_patterns_["unbalanced.converse.coal"].add_edge_lengths(1); // converse
 
                 // unbalanced tree, uniform coalescent
-                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.uniform.coal"],
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.uniform.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_[".unbalanced.uniform.coal"].add_edge_lengths(2); // uniform
+                this->tree_patterns_["unbalanced.uniform.coal"].add_edge_lengths(2); // uniform
 
                 // balanced tree
-                platypus::build_maximally_balanced_tree(this->tree_patterns_[".balanced"],
+                platypus::build_maximally_balanced_tree(this->tree_patterns_["balanced"],
                         leaves.begin(), leaves.end());
 
                 // calculate inter-reference tree distances
@@ -232,10 +232,10 @@ template <class TreeT>
 
 }; // CanonicalTreePatterns
 const std::vector<std::string> CanonicalTreePatterns::tree_pattern_names_{
-        ".unbalanced.mean.coal",
-        ".unbalanced.converse.coal",
-        ".unbalanced.uniform.coal",
-        ".balanced",
+        "unbalanced.mean.coal",
+        "unbalanced.converse.coal",
+        "unbalanced.uniform.coal",
+        "balanced",
 }; // static cons ttree_pattern_names_
 
 //////////////////////////////////////////////////////////////////////////////
