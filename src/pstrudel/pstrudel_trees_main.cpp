@@ -390,6 +390,9 @@ int main(int argc, const char * argv[]) {
                 colugo::Logger::LoggingLevel::NOTSET);
     }
     std::ofstream logfile(output_filepaths["log"]);
+    if (!logfile.good()) {
+        colugo::console::abort("Unable to open log file for output: '", output_filepaths["log"], "'");
+    }
     logger.add_channel(logfile,
             colugo::Logger::LoggingLevel::INFO,
             true,
@@ -475,6 +478,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["target-distances"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write(out);
         }
 
@@ -482,6 +488,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["target-distances-stacked"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write_stacked(out,
                     "dist.type", "dist");
         }
@@ -552,6 +561,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["canonical-distances"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write(out);
         }
 
@@ -559,6 +571,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["canonical-distances-stacked"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write_stacked(out,
                     "dist.type", "dist");
         }
@@ -677,6 +692,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["pairwise-distances"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write(out);
         }
 
@@ -684,6 +702,9 @@ int main(int argc, const char * argv[]) {
         {
             auto & out_fpath = output_filepaths["pairwise-distances-stacked"];
             std::ofstream out(out_fpath);
+            if (!out.good()) {
+                logger.abort("Unable to open file for output: '", out_fpath, "'");
+            }
             results_table.write_stacked(out,
                     "dist.type", "dist");
         }
