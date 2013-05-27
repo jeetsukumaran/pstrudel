@@ -247,13 +247,14 @@ void write_normalized_results(platypus::DataTable & results_table,
         unsigned long log_frequency,
         colugo::Logger & logger) {
     platypus::DataTable normalized_results_table;
-    for (auto & col_name : results_table.key_column_names()) {
-        normalized_results_table.add_key_column<std::string>(col_name);
-    }
     std::map<std::string, double> max_vals;
-    for (auto & col_name : results_table.data_column_names()) {
-        normalized_results_table.add_key_column<double>(col_name);
-        max_vals[col_name] = results_table.column(col_name).max<double>();
+    for (auto & col : results_table.column_ptrs()) {
+        if (col->is_key_column()) {
+            normalized_results_table.add_key_column<std::string>(col->get_label());
+        } else {
+            normalized_results_table.add_data_column<double>(col->get_label(), col->get_formatting());
+            max_vals[col->get_label()] = results_table.column(col->get_label()).max<double>();
+        }
     }
     unsigned long row_idx = 0;
     unsigned long nrows = results_table.num_rows();
