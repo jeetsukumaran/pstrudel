@@ -454,16 +454,26 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("tree.i.source.file");
             results_table.add_key_column<unsigned long>("tree.i.source.tree");
         }
-        unsigned long tt_idx = 0;
-        for (auto & ttree : target_trees) {
-            std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
-            pstrudel::DistanceTree::add_results_data_columns(
-                    target_tree_label,
-                    results_table,
-                    col_formatting,
-                    calculate_symmetric_diff);
-            ++tt_idx;
-        }
+
+        results_table.add_key_column<unsigned long>("target.tree.idx");
+        pstrudel::DistanceTree::add_results_data_columns(
+                "",
+                results_table,
+                col_formatting,
+                calculate_symmetric_diff);
+
+        // // each target tree gets its own column
+        // unsigned long target_tree_idx = 0;
+        // for (auto & ttree : target_trees) {
+        //     std::string target_tree_label = ".t" + std::to_string(target_tree_idx+1);
+        //     pstrudel::DistanceTree::add_results_data_columns(
+        //             target_tree_label,
+        //             results_table,
+        //             col_formatting,
+        //             calculate_symmetric_diff);
+        //     ++target_tree_idx;
+        // }
+
         logger.info("Beginning calculating distances between comparison trees and target tree(s)");
         if (scale_by_tree_length) {
             logger.info("Edge lengths will be scaled to tree length");
@@ -475,34 +485,34 @@ int main(int argc, const char * argv[]) {
         unsigned long total_comparisons = num_comparison_trees * (num_comparison_trees - 1) / 2;
         unsigned long comparison_count = 0;
         unsigned long comparison_tree_idx = 0;
+        unsigned long target_tree_idx = 0;
         for (auto & ctree : comparison_trees) {
-            auto & results_table_row = results_table.add_row();
-            tt_idx = 0;
+            target_tree_idx = 0;
             for (auto & ttree : target_trees) {
-                std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
+                auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
-                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", tt_idx + 1, " vs. tree ", comparison_tree_idx + 1);
+                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", target_tree_idx + 1, " vs. tree ", comparison_tree_idx + 1);
+                }
+                if (!analysis_label.empty()) {
+                    results_table_row.set("analysis", analysis_label);
                 }
                 results_table_row.set("tree.i.idx", comparison_tree_idx);
                 if (add_tree_source_key) {
                     results_table_row.set("tree.i.source.file", ctree.get_filepath());
                     results_table_row.set("tree.i.source.tree", ctree.get_file_tree_index()+1);
                 }
-                if (!analysis_label.empty()) {
-                    results_table_row.set("analysis", analysis_label);
-                }
+                results_table_row.set("target.tree.idx", target_tree_idx+1);
                 ctree.tabulate_distances(
-                        target_tree_label,
+                        "",
                         ttree,
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff);
-                ++tt_idx;
+                ++target_tree_idx;
                 ++comparison_count;
             } // for each target tree
             ++comparison_tree_idx;
         } // for each tree in comparison set
-
 
         // output_filepaths["target-distances"] = output_prefix + "target.distances.txt";
         // output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
