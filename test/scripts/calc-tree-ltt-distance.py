@@ -69,8 +69,8 @@ def main():
             default=None,
             help="number of transects or slices on tree for lineage accumulation counts (default=%(default)s)")
     parser.add_argument("-p", "--precision",
-            type=float,
-            default=1e-8,
+            type=int,
+            default=22,
             help="numerical precision (default=%(default)s)")
     parser.add_argument("-l", "--label",
             type=str,
@@ -90,13 +90,14 @@ def main():
     if len(trees) == 0:
         sys.exit("Need to specify '-' option and pipe trees to standard input and/or specify paths to at least one tree file as argument")
     preprocess_trees(trees)
+    out_template = "{{}}\t{{}}\t{{:.{precision}f}}\t{{:.{precision}f}}\t{{:.{precision}f}}\n".format(precision=args.precision)
     for tidx1 in range(len(trees)):
         if (args.verbosity > 1):
             sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_accumulation_through_time)))
             sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_splitting_times)))
             sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].scaled_lineage_splitting_times)))
         for tidx2 in range(len(trees)):
-            sys.stdout.write("{}\t{}\t{:.22f}\t{:.22f}\t{:.22f}\n".format(
+            sys.stdout.write(out_template.format(
                 tidx1,
                 tidx2,
                 euclidean_distance(trees[tidx1].lineage_accumulation_through_time , trees[tidx2].lineage_accumulation_through_time) ,

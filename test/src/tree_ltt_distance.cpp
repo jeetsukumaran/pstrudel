@@ -30,7 +30,7 @@ int test_file(const std::string & test_data_filename, const std::string & format
         }
     }
 
-    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", format, "-l", label, test_data_filepath, "--verbosity", "10"});
+    colugo::Subprocess ps({"python", CHECK_SCRIPT, "-p", "22", "-f", format, "-l", label, test_data_filepath, "--verbosity", "10"});
     int retcode = ps.wait();
     auto ps_stdout = ps.get_stdout();
     auto ps_stderr = ps.get_stderr();
@@ -98,7 +98,7 @@ int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "calc-tree-ltt-distance.py");
     int fails = 0;
-    fails += test_dist1();
+    // fails += test_dist1();
     fails += test_dist2();
     if (fails != 0) {
         return EXIT_FAILURE;
