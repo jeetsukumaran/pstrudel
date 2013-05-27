@@ -91,6 +91,7 @@ def main():
         sys.exit("Need to specify '-' option and pipe trees to standard input and/or specify paths to at least one tree file as argument")
     preprocess_trees(trees)
     out_template = "{{}}\t{{}}\t{{:.{precision}f}}\t{{:.{precision}f}}\t{{:.{precision}f}}\n".format(precision=args.precision)
+    # out_template = "{}\t{}\t{:f}\t{:f}\t{:f}\n"
     for tidx1 in range(len(trees)):
         if (args.verbosity > 1):
             sys.stderr.write("Tree {}: {}\n".format(tidx1, ", ".join("{:.22f}".format(i) for i in trees[tidx1].lineage_accumulation_through_time)))
