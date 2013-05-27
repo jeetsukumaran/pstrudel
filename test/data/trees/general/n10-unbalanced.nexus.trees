@@ -1,31 +1,25 @@
 #NEXUS
 
-
-
 BEGIN TAXA;
 
     DIMENSIONS NTAX=10;
     TAXLABELS
-        t1 
-        t2 
-        t3 
-        t4 
-        t5 
-        t6 
-        t7 
-        t8 
-        t9 
-        t10 
+        t1
+        t2
+        t3
+        t4
+        t5
+        t6
+        t7
+        t8
+        t9
+        t10
   ;
 END;
 
 BEGIN TREES;
-
-    TREE 0 = [&R] (t1:1.8[&root_distance=1.8],(t2:0.8[&root_distance=1.8],(t3:0.466667[&root_distance=1.8],(t4:0.3[&root_distance=1.8],(t5:0.2[&root_distance=1.8],(t6:0.133333[&root_distance=1.7999997],(t7:0.0857143[&root_distance=1.8],(t8:0.05[&root_distance=1.8],(t9:0.0222222[&root_distance=1.8],t10:0.0222222[&root_distance=1.8]):0.0277778[&root_distance=1.7777778]):0.0357143[&root_distance=1.75]):0.047619[&root_distance=1.7142857]):0.0666667[&root_distance=1.6666667]):0.1[&root_distance=1.6]):0.166667[&root_distance=1.5]):0.333333[&root_distance=1.333333]):1.0[&root_distance=1.0]):0.0[&root_distance=0.0];
-
-    TREE 1 = [&R] (t1:1.8[&root_distance=1.8],(t2:1.77778[&root_distance=1.8000022],(t3:1.75[&root_distance=1.8],(t4:1.71429[&root_distance=1.8000043],(t5:1.66667[&root_distance=1.8000033],(t6:1.6[&root_distance=1.8],(t7:1.5[&root_distance=1.8],(t8:1.33333[&root_distance=1.799997],(t9:1.0[&root_distance=1.8],t10:1.0[&root_distance=1.8]):0.333333[&root_distance=0.8]):0.166667[&root_distance=0.466667]):0.1[&root_distance=0.3]):0.0666667[&root_distance=0.2]):0.047619[&root_distance=0.1333333]):0.0357143[&root_distance=0.0857143]):0.0277778[&root_distance=0.05]):0.0222222[&root_distance=0.0222222]):0.0[&root_distance=0.0];
-
-    TREE 2 = [&R] (t1:9.0[&root_distance=9.0],(t2:8.0[&root_distance=9.0],(t3:7.0[&root_distance=9.0],(t4:6.0[&root_distance=9.0],(t5:5.0[&root_distance=9.0],(t6:4.0[&root_distance=9.0],(t7:3.0[&root_distance=9.0],(t8:2.0[&root_distance=9.0],(t9:1.0[&root_distance=9.0],t10:1.0[&root_distance=9.0]):1.0[&root_distance=8.0]):1.0[&root_distance=7.0]):1.0[&root_distance=6.0]):1.0[&root_distance=5.0]):1.0[&root_distance=4.0]):1.0[&root_distance=3.0]):1.0[&root_distance=2.0]):1.0[&root_distance=1.0]):0.0[&root_distance=0.0];
-
+    TREE 0 = [&R] (t1:1.8000000000000000444089[&root_distance=1.8],(t2:0.8000000000000000444089[&root_distance=1.8],(t3:0.4666666666666666740682[&root_distance=1.8],(t4:0.3000000000000000444089[&root_distance=1.8],(t5:0.2000000000000000111022[&root_distance=1.8],(t6:0.1333333333333333314830[&root_distance=1.8],(t7:0.0857142857142857150787[&root_distance=1.8],(t8:0.0500000000000000027756[&root_distance=1.8],(t9:0.0222222222222222230703[&root_distance=1.8],t10:0.0222222222222222230703[&root_distance=1.8]):0.0277777777777777797052[&root_distance=1.77777777778]):0.0357142857142857123032[&root_distance=1.75]):0.0476190476190476164042[&root_distance=1.71428571429]):0.0666666666666666796193[&root_distance=1.66666666667]):0.1000000000000000333067[&root_distance=1.6]):0.1666666666666666296592[&root_distance=1.5]):0.3333333333333333703408[&root_distance=1.33333333333]):1.0000000000000000000000[&root_distance=1.0]):0.0000000000000000000000[&root_distance=0.0];
+    TREE 1 = [&R] (t1:1.8000000000000000444089[&root_distance=1.8],(t2:1.7777777777777779011359[&root_distance=1.8],(t3:1.7500000000000002220446[&root_distance=1.8],(t4:1.7142857142857144125969[&root_distance=1.8],(t5:1.6666666666666667406815[&root_distance=1.8],(t6:1.6000000000000000888178[&root_distance=1.8],(t7:1.5000000000000000000000[&root_distance=1.8],(t8:1.3333333333333332593185[&root_distance=1.8],(t9:1.0000000000000000000000[&root_distance=1.8],t10:1.0000000000000000000000[&root_distance=1.8]):0.3333333333333332593185[&root_distance=0.8]):0.1666666666666667406815[&root_distance=0.466666666667]):0.1000000000000000888178[&root_distance=0.3]):0.0666666666666666518637[&root_distance=0.2]):0.0476190476190476719154[&root_distance=0.133333333333]):0.0357142857142858094477[&root_distance=0.0857142857143]):0.0277777777777776790913[&root_distance=0.05]):0.0222222222222221432730[&root_distance=0.0222222222222]):0.0000000000000000000000[&root_distance=0.0];
+    TREE 2 = [&R] (t1:9.0000000000000000000000[&root_distance=9.0],(t2:8.0000000000000000000000[&root_distance=9.0],(t3:7.0000000000000000000000[&root_distance=9.0],(t4:6.0000000000000000000000[&root_distance=9.0],(t5:5.0000000000000000000000[&root_distance=9.0],(t6:4.0000000000000000000000[&root_distance=9.0],(t7:3.0000000000000000000000[&root_distance=9.0],(t8:2.0000000000000000000000[&root_distance=9.0],(t9:1.0000000000000000000000[&root_distance=9.0],t10:1.0000000000000000000000[&root_distance=9.0]):1.0000000000000000000000[&root_distance=8.0]):1.0000000000000000000000[&root_distance=7.0]):1.0000000000000000000000[&root_distance=6.0]):1.0000000000000000000000[&root_distance=5.0]):1.0000000000000000000000[&root_distance=4.0]):1.0000000000000000000000[&root_distance=3.0]):1.0000000000000000000000[&root_distance=2.0]):1.0000000000000000000000[&root_distance=1.0]):0.0000000000000000000000[&root_distance=0.0];
 END;
 

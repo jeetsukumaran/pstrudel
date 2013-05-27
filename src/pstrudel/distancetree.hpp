@@ -282,44 +282,42 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
 
         template <class T, class R>
         void tabulate_distances(
-                const std::string & label_suffix,
                 T & other_tree,
                 R & row,
                 bool scale_by_tree_length,
                 bool calculate_symmetric_diff) {
             double d = 0.0;
             d = this->get_unweighted_pairwise_tip_profile_distance(other_tree);
-            row.set("pwtd.uw" + label_suffix, d);
+            row.set("pwtd.uw", d);
             d = this->get_lineage_accumulation_profile_distance(other_tree);
-            row.set("ltt" + label_suffix, d);
+            row.set("ltt", d);
             if (scale_by_tree_length) {
                 d = this->get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("pwtd" + label_suffix, d);
+                row.set("pwtd", d);
                 d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree);
-                row.set("lst" + label_suffix, d);
+                row.set("lst", d);
             } else {
                 d = this->get_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("pwtd" + label_suffix, d);
+                row.set("pwtd", d);
                 d = this->get_lineage_splitting_time_profile_distance(other_tree);
-                row.set("lst" + label_suffix, d);
+                row.set("lst", d);
             }
             if (calculate_symmetric_diff) {
                 d = this->get_unlabeled_symmetric_difference(other_tree);
-                row.set("rfdu" + label_suffix, d);
+                row.set("rfdu", d);
             }
         }
 
     public:
         static void add_results_data_columns(
-                const std::string & label_suffix,
                 platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff) {
             for (auto & y_distance_name : DistanceTree::tree_pattern_y_distance_names_) {
-                table.add_data_column<double>(y_distance_name + label_suffix, col_formatters);
+                table.add_data_column<double>(y_distance_name, col_formatters);
             }
             if (calculate_symmetric_diff) {
-                table.add_data_column<double>("rfdu" + label_suffix, col_formatters);
+                table.add_data_column<double>("rfdu", col_formatters);
             }
         }
 

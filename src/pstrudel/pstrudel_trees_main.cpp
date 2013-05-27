@@ -13,6 +13,8 @@
 #include "pstrudel.hpp"
 #include "distancetree.hpp"
 
+const unsigned long DEFAULT_PRECISION = 22;
+
 //////////////////////////////////////////////////////////////////////////////
 // WorkingTree
 
@@ -193,7 +195,6 @@ template <class TreeT>
             auto & tree_pattern = tpi->second;
             row.set("target.tree.pattern", tree_pattern_name);
             tree_pattern.tabulate_distances(
-                    "",
                     other_tree,
                     row,
                     scale_by_tree_length,
@@ -215,7 +216,6 @@ template <class TreeT>
                 bool calculate_symmetric_diff) {
             table.add_key_column<std::string>("target.tree.pattern");
             pstrudel::DistanceTree::add_results_data_columns(
-                    "",
                     table,
                     col_formatters,
                     calculate_symmetric_diff);
@@ -516,7 +516,7 @@ int main(int argc, const char * argv[]) {
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
 
-    platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(16)};
+    platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(DEFAULT_PRECISION)};
 
     // target distances
     if (!target_trees_filepath.empty()) {
@@ -538,7 +538,6 @@ int main(int argc, const char * argv[]) {
 
         results_table.add_key_column<unsigned long>("target.tree.idx");
         pstrudel::DistanceTree::add_results_data_columns(
-                "",
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff);
@@ -584,7 +583,6 @@ int main(int argc, const char * argv[]) {
                 }
                 results_table_row.set("target.tree.idx", target_tree_idx+1);
                 ctree.tabulate_distances(
-                        "",
                         ttree,
                         results_table_row,
                         scale_by_tree_length,
@@ -679,7 +677,8 @@ int main(int argc, const char * argv[]) {
                 }
                 results_table_row.set("num.tips", comparison_tree_size);
                 results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
-                tree_patterns[comparison_tree_size].score(tree_pattern_name,
+                tree_patterns[comparison_tree_size].score(
+                        tree_pattern_name,
                         comparison_tree,
                         results_table_row,
                         scale_by_tree_length,
@@ -694,6 +693,7 @@ int main(int argc, const char * argv[]) {
             logger.info("Writing canonical tree cross-distances");
             platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
             ref_tree_writer.set_suppress_edge_lengths(false);
+            ref_tree_writer.set_edge_length_precision(DEFAULT_PRECISION);
             platypus::bind_standard_interface(ref_tree_writer);
             for (auto & tpi : tree_patterns) {
                 std::string prefix = output_prefix + "canonical.n" + std::to_string(tpi.first) + ".";
@@ -764,7 +764,6 @@ int main(int argc, const char * argv[]) {
         results_table.add_key_column<std::string>("comp.class");
 
         pstrudel::DistanceTree::add_results_data_columns(
-                "",
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff);
@@ -821,7 +820,6 @@ int main(int argc, const char * argv[]) {
 
                 // data
                 tree1.tabulate_distances(
-                        "",
                         tree2,
                         results_table_row,
                         scale_by_tree_length,
