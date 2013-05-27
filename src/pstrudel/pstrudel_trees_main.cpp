@@ -68,75 +68,90 @@ int get_trees(std::vector<TreeT>& trees,
 }
 
 template <class TreeT>
-int get_trees(
-        std::vector<TreeT>& trees,
-        const std::vector<std::string> filepaths,
-        const std::string& format,
-        colugo::Logger & logger) {
-    auto reader = platypus::NclTreeReader<TreeT>();
-    platypus::bind_standard_interface(reader);
-    reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
-    unsigned long file_idx = 0;
-    unsigned long num_trees_read = 0;
-    for (auto & filepath : filepaths) {
-        auto fullpath = colugo::filesys::absolute_path(filepath);
-        logger.info("Reading trees for comparison from file ", file_idx+1, " of ", filepaths.size(), ": '", fullpath, "'");
-        std::function<TreeT& ()> get_new_tree_reference = [&trees, &fullpath, &file_idx] () -> TreeT& { trees.emplace_back(fullpath, file_idx); return trees.back(); };
-        num_trees_read += reader.read(std::ifstream(fullpath), get_new_tree_reference, format);
-        // logger.info(num_trees_read, " trees read from '", fullpath,
-        //         "' (total number of trees in comparison set is now: ", comparison_trees.size(), ")");
-        ++file_idx;
-    }
-    return num_trees_read;
-}
-
-//////////////////////////////////////////////////////////////////////////////
-// TreePatternManager
-
-class CanonicalTreePatterns {
-    public:
-        typedef pstrudel::DistanceTree                         tree_type;
-        typedef typename pstrudel::DistanceTree::value_type    value_type;
-        CanonicalTreePatterns()
-                : num_tips_(0) {
-        }
-        std::vector<value_type> generate_leaves() {
-            std::vector<value_type> leaves;
-            leaves.reserve(this->num_tips_);
-            for (unsigned long i = 0; i < this->num_tips_; ++i) {
-                leaves.emplace_back();
-                auto & leaf = leaves.back();
-                leaf.set_label("t" + std::to_string(i+1));
+    int get_trees(
+            std::vector<TreeT>& trees,
+            const std::vector<std::string> filepaths,
+            const std::string& format,
+            int type_of_file_info_to_store,
+            colugo::Logger & logger) {
+        auto reader = platypus::NclTreeReader<TreeT>();
+        platypus::bind_standard_interface(reader);
+        reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
+        unsigned long file_idx = 0;
+        unsigned long num_trees_read = 0;
+        for (auto & filepath : filepaths) {
+            auto fullpath = colugo::filesys::absolute_path(filepath);
+            std::string stored_filepath;
+            if (type_of_file_info_to_store <= 1) {
+                stored_filepath = std::to_string(file_idx + 1);
+            } else if (type_of_file_info_to_store <= 2) {
+                stored_filepath = colugo::filesys::get_path_leaf(fullpath);
+            } else if (type_of_file_info_to_store <= 3) {
+                stored_filepath = filepath;
+            } else if (type_of_file_info_to_store <= 4) {
+                stored_filepath = fullpath;
             }
-            return leaves;
+            logger.info("Reading trees for comparison from file ", file_idx+1, " of ", filepaths.size(), ": '", fullpath, "'");
+            std::function<TreeT& ()> get_new_tree_reference = [&trees, &stored_filepath, &file_idx] () -> TreeT& { trees.emplace_back(stored_filepath, file_idx); return trees.back(); };
+            std::ifstream src(fullpath);
+            if (!src.good()) {
+                logger.abort("Failed to open file for input: '", fullpath, "'");
+            }
+            num_trees_read += reader.read(src, get_new_tree_reference, format);
+            // logger.info(num_trees_read, " trees read from '", fullpath,
+            //         "' (total number of trees in comparison set is now: ", comparison_trees.size(), ")");
+            ++file_idx;
         }
-        void generate(unsigned long num_tips) {
-            // setup
-            this->num_tips_ = num_tips;
-            auto leaves = this->generate_leaves();
+        return num_trees_read;
+    }
 
-            // unbalanced tree, mean coalescent
-            platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.mean.coal"],
-                    leaves.begin(), leaves.end());
-            this->tree_patterns_[".unbalanced.mean.coal"].add_edge_lengths(0); // mean
+    //////////////////////////////////////////////////////////////////////////////
+    // TreePatternManager
 
-            // unbalanced tree, converse coalescent
-            platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.converse.coal"],
-                    leaves.begin(), leaves.end());
-            this->tree_patterns_[".unbalanced.converse.coal"].add_edge_lengths(1); // converse
+    class CanonicalTreePatterns {
+        public:
+            typedef pstrudel::DistanceTree                         tree_type;
+            typedef typename pstrudel::DistanceTree::value_type    value_type;
+            CanonicalTreePatterns()
+                    : num_tips_(0) {
+            }
+            std::vector<value_type> generate_leaves() {
+                std::vector<value_type> leaves;
+                leaves.reserve(this->num_tips_);
+                for (unsigned long i = 0; i < this->num_tips_; ++i) {
+                    leaves.emplace_back();
+                    auto & leaf = leaves.back();
+                    leaf.set_label("t" + std::to_string(i+1));
+                }
+                return leaves;
+            }
+            void generate(unsigned long num_tips) {
+                // setup
+                this->num_tips_ = num_tips;
+                auto leaves = this->generate_leaves();
 
-            // unbalanced tree, uniform coalescent
-            platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.uniform.coal"],
-                    leaves.begin(), leaves.end());
-            this->tree_patterns_[".unbalanced.uniform.coal"].add_edge_lengths(2); // uniform
+                // unbalanced tree, mean coalescent
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.mean.coal"],
+                        leaves.begin(), leaves.end());
+                this->tree_patterns_[".unbalanced.mean.coal"].add_edge_lengths(0); // mean
 
-            // balanced tree
-            platypus::build_maximally_balanced_tree(this->tree_patterns_[".balanced"],
-                    leaves.begin(), leaves.end());
+                // unbalanced tree, converse coalescent
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.converse.coal"],
+                        leaves.begin(), leaves.end());
+                this->tree_patterns_[".unbalanced.converse.coal"].add_edge_lengths(1); // converse
 
-            // calculate inter-reference tree distances
-            this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
-            for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
+                // unbalanced tree, uniform coalescent
+                platypus::build_maximally_unbalanced_tree(this->tree_patterns_[".unbalanced.uniform.coal"],
+                        leaves.begin(), leaves.end());
+                this->tree_patterns_[".unbalanced.uniform.coal"].add_edge_lengths(2); // uniform
+
+                // balanced tree
+                platypus::build_maximally_balanced_tree(this->tree_patterns_[".balanced"],
+                        leaves.begin(), leaves.end());
+
+                // calculate inter-reference tree distances
+                this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
+                for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
                 this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.uw" + tree_pattern_name);
                 this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.wt" + tree_pattern_name);
                 this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.swt" + tree_pattern_name);
@@ -231,7 +246,8 @@ int main(int argc, const char * argv[]) {
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
     bool             suppress_header_row                     = false;
-    bool             add_tree_source_key                     = false;
+    int              add_tree_source_key                     = 0;
+    std::string      analysis_label;
     bool             replace_existing_output_files           = false;
     unsigned long    log_frequency                           = 0;
     bool             quiet                                   = false;
@@ -293,14 +309,20 @@ int main(int argc, const char * argv[]) {
             nullptr,
             "Output Options"
             );
-    parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
-            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
-            nullptr, "Output Options");
     parser.add_switch(&add_tree_source_key, nullptr, "--add-tree-source-key",
-            "Add a column in the results identifying the filename of the source of the tree(s) being compared.",
+            "Add a column in the results identifying the filename of the source of the tree(s) being compared:"
+            " 1: value is index of file; 2: value is basename of file; 3: value is relative path of file;"
+            " 4: value is absolute path of file.",
             nullptr, "Output Options");
+    parser.add_option<std::string>(&analysis_label, "-l", "--add-label",
+            "Add column to results with LABEL as values for all rows.",
+            "LABEL",
+            "Output Options");
     parser.add_switch(&suppress_header_row, nullptr, "--suppress-header-row",
             "Do not write column/field name row in results.",
+            nullptr, "Output Options");
+    parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
+            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
             nullptr, "Output Options");
     parser.add_switch(&log_frequency,
             nullptr,
@@ -409,7 +431,7 @@ int main(int argc, const char * argv[]) {
         get_trees(comparison_trees, std::cin, "<stdin>", format, 0);
         logger.info(comparison_trees.size(), " trees read from standard input");
     } else {
-        get_trees(comparison_trees, args, format, logger);
+        get_trees(comparison_trees, args, format, add_tree_source_key, logger);
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
 
@@ -424,6 +446,9 @@ int main(int argc, const char * argv[]) {
         get_trees(target_trees, src, target_trees_full_filepath, format, 0);
         logger.info(target_trees.size(), " trees read from '", target_trees_full_filepath, "'");
         platypus::DataTable results_table;
+        if (!analysis_label.empty()) {
+            results_table.add_key_column<std::string>("analysis");
+        }
         results_table.add_key_column<unsigned long>("tree.i.idx");
         if (add_tree_source_key) {
             results_table.add_key_column<std::string>("tree.i.source.file");
@@ -439,7 +464,6 @@ int main(int argc, const char * argv[]) {
                     calculate_symmetric_diff);
             ++tt_idx;
         }
-
         logger.info("Beginning calculating distances between comparison trees and target tree(s)");
         if (scale_by_tree_length) {
             logger.info("Edge lengths will be scaled to tree length");
@@ -458,6 +482,14 @@ int main(int argc, const char * argv[]) {
                 std::string target_tree_label = ".t" + std::to_string(tt_idx+1);
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
                     logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", tt_idx + 1, " vs. tree ", comparison_tree_idx + 1);
+                }
+                results_table_row.set("tree.i.idx", comparison_tree_idx);
+                if (add_tree_source_key) {
+                    results_table_row.set("tree.i.source.file", ctree.get_filepath());
+                    results_table_row.set("tree.i.source.tree", ctree.get_file_tree_index()+1);
+                }
+                if (!analysis_label.empty()) {
+                    results_table_row.set("analysis", analysis_label);
                 }
                 ctree.tabulate_distances(
                         target_tree_label,
@@ -481,7 +513,7 @@ int main(int argc, const char * argv[]) {
             if (!out.good()) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
-            results_table.write(out);
+            results_table.write(out, "\t", !suppress_header_row);
         }
 
         // output stacked results
@@ -492,7 +524,7 @@ int main(int argc, const char * argv[]) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
             results_table.write_stacked(out,
-                    "dist.type", "dist");
+                    "dist.type", "dist", "\t", !suppress_header_row);
         }
 
     } // target distances
@@ -501,6 +533,9 @@ int main(int argc, const char * argv[]) {
     if (calculate_canonical_distances) {
         // set up table
         platypus::DataTable results_table;
+        if (!analysis_label.empty()) {
+            results_table.add_key_column<std::string>("analysis");
+        }
         results_table.add_key_column<unsigned long>("tree.idx");
         if (add_tree_source_key) {
             results_table.add_key_column<std::string>("source.file");
@@ -526,6 +561,9 @@ int main(int argc, const char * argv[]) {
                 logger.info("Calculating canonical distances for tree ", comparison_tree_idx + 1, " of ", comparison_tree_size);
             }
             auto & results_table_row = results_table.add_row();
+            if (!analysis_label.empty()) {
+                results_table_row.set("analysis", analysis_label);
+            }
             results_table_row.set("tree.idx", comparison_tree_idx + 1);
             if (add_tree_source_key) {
                 results_table_row.set("source.file", comparison_tree.get_filepath());
@@ -564,7 +602,7 @@ int main(int argc, const char * argv[]) {
             if (!out.good()) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
-            results_table.write(out);
+            results_table.write(out, "\t", !suppress_header_row);
         }
 
         // output stacked results
@@ -575,7 +613,7 @@ int main(int argc, const char * argv[]) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
             results_table.write_stacked(out,
-                    "dist.type", "dist");
+                    "dist.type", "dist", "\t", !suppress_header_row);
         }
     } // canonical ref trees
 
@@ -583,6 +621,9 @@ int main(int argc, const char * argv[]) {
     if (calculate_pairwise_distances) {
         // set up table
         platypus::DataTable results_table;
+        if (!analysis_label.empty()) {
+            results_table.add_key_column<std::string>("analysis");
+        }
         results_table.add_key_column<unsigned long>("tree.i.idx");
         if (add_tree_source_key) {
             results_table.add_key_column<std::string>("tree.i.source.file");
@@ -631,6 +672,11 @@ int main(int argc, const char * argv[]) {
                 }
                 auto & tree2 = comparison_trees[tree_idx2];
                 auto & results_table_row = results_table.add_row();
+
+                // analysis id
+                if (!analysis_label.empty()) {
+                    results_table_row.set("analysis", analysis_label);
+                }
 
                 // tree 1 key
                 results_table_row.set("tree.i.idx", tree_idx1 + 1);
@@ -703,7 +749,7 @@ int main(int argc, const char * argv[]) {
             if (!out.good()) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
-            results_table.write(out);
+            results_table.write(out, "\t", !suppress_header_row);
         }
 
         // output stacked results
@@ -714,7 +760,7 @@ int main(int argc, const char * argv[]) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
             }
             results_table.write_stacked(out,
-                    "dist.type", "dist");
+                    "dist.type", "dist", "\t", !suppress_header_row);
         }
     } // pairwise distances
 }
