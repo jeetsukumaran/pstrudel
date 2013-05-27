@@ -98,7 +98,7 @@ int main(int, const char * argv[]) {
     TEST_DIR = pstrudel::test::get_test_dir(argv[0]);
     CHECK_SCRIPT = pstrudel::test::join_path(TEST_DIR, "calc-tree-ltt-distance.py");
     int fails = 0;
-    // fails += test_dist1();
+    fails += test_dist1();
     fails += test_dist2();
     if (fails != 0) {
         return EXIT_FAILURE;
