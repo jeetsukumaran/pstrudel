@@ -244,7 +244,6 @@ void write_normalized_results(platypus::DataTable & results_table,
         const std::string & table_output_fpath,
         const std::string & stacked_table_output_fpath,
         bool suppress_header_row,
-        unsigned long log_frequency,
         colugo::Logger & logger) {
     platypus::DataTable normalized_results_table;
     std::map<std::string, double> max_vals;
@@ -258,8 +257,9 @@ void write_normalized_results(platypus::DataTable & results_table,
     }
     unsigned long row_idx = 0;
     unsigned long nrows = results_table.num_rows();
+    unsigned long log_frequency = nrows/10;
     for (auto & results_row : results_table) {
-        if (log_frequency > 0 && (row_idx % log_frequency == 0)) {
+        if (log_frequency > 0 && row_idx % log_frequency == 0) {
             logger.info("Normalizing entry ", row_idx + 1, " of ", nrows);
         }
         auto & normalized_row = normalized_results_table.add_row();
@@ -318,7 +318,6 @@ int main(int argc, const char * argv[]) {
     unsigned int     add_tree_source_key                     = 0;
     std::string      analysis_label;
     bool             replace_existing_output_files           = false;
-    unsigned long    log_frequency                           = 0;
     bool             quiet                                   = false;
 
     colugo::OptionParser parser = colugo::OptionParser(
@@ -399,11 +398,6 @@ int main(int argc, const char * argv[]) {
     parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
             "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
             nullptr, "Output Options");
-    parser.add_switch(&log_frequency,
-            nullptr,
-            "--log-frequency",
-            "Frequency with which to log tree processing progress.",
-            nullptr, "Run Options");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.",
             nullptr, "Run Options");
     parser.parse(argc, argv);
@@ -563,6 +557,7 @@ int main(int argc, const char * argv[]) {
         unsigned long num_target_trees = target_trees.size();
         unsigned long num_comparison_trees = comparison_trees.size();
         unsigned long total_comparisons = num_comparison_trees * num_target_trees;
+        unsigned long log_frequency = total_comparisons / 10;
         unsigned long comparison_count = 0;
         unsigned long comparison_tree_idx = 0;
         unsigned long target_tree_idx = 0;
@@ -571,7 +566,7 @@ int main(int argc, const char * argv[]) {
             for (auto & ttree : target_trees) {
                 auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
-                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Target tree ", target_tree_idx + 1, " vs. tree ", comparison_tree_idx + 1);
+                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Tree ", comparison_tree_idx + 1);
                 }
                 if (!analysis_label.empty()) {
                     results_table_row.set("analysis", analysis_label);
@@ -624,7 +619,6 @@ int main(int argc, const char * argv[]) {
                     output_filepaths["target-distances-normalized"],
                     output_filepaths["target-distances-normalized-stacked"],
                     suppress_header_row,
-                    log_frequency,
                     logger);
         }
 
@@ -644,9 +638,7 @@ int main(int argc, const char * argv[]) {
         }
         results_table.add_key_column<unsigned long>("num.tips");
         results_table.add_key_column<double>("tree.length", col_formatting);
-        if (log_frequency == 0) {
-            log_frequency = std::max(static_cast<unsigned long>(comparison_trees.size() / 10), 10UL);
-        }
+        unsigned long log_frequency = comparison_trees.size() / 10;
         logger.info("Beginning calculating distances between comparison trees and canonical tree patterns");
         if (scale_by_tree_length) {
             logger.info("Edge lengths will be scaled to tree length");
@@ -658,13 +650,14 @@ int main(int argc, const char * argv[]) {
         unsigned long comparison_tree_idx = 0;
         for (auto & comparison_tree : comparison_trees) { // tree comparison
             auto comparison_tree_size = comparison_tree.get_num_tips();
-            if (log_frequency > 0 && (comparison_tree_idx % log_frequency == 0)) {
+            if (log_frequency > 0 && comparison_tree_idx % log_frequency == 0) {
                 logger.info("Calculating canonical distances for tree ", comparison_tree_idx + 1, " of ", comparison_tree_size);
             }
             if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                 logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
                 tree_patterns[comparison_tree_size].generate(comparison_tree_size);
             }
+
             for (auto & tree_pattern_name : tree_patterns[comparison_tree_size].get_tree_pattern_names()) {
                 auto & results_table_row = results_table.add_row();
                 if (!analysis_label.empty()) {
@@ -733,7 +726,6 @@ int main(int argc, const char * argv[]) {
                     output_filepaths["canonical-distances-normalized"],
                     output_filepaths["canonical-distances-normalized-stacked"],
                     suppress_header_row,
-                    log_frequency,
                     logger);
         }
     } // canonical ref trees
@@ -776,12 +768,13 @@ int main(int argc, const char * argv[]) {
         }
         unsigned long num_trees = comparison_trees.size();
         unsigned long total_comparisons = num_trees * (num_trees - 1) / 2;
+        unsigned long log_frequency = total_comparisons / 10;
         unsigned long comparison_count = 0;
         for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
             auto & tree1 = comparison_trees[tree_idx1];
             for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
                 ++comparison_count;
-                if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
+                if (log_frequency > 0 && comparison_count % log_frequency == 0) {
                     logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Tree ", tree_idx1 + 1, " vs. tree ", tree_idx2 + 1);
                 }
                 auto & tree2 = comparison_trees[tree_idx2];
@@ -859,7 +852,6 @@ int main(int argc, const char * argv[]) {
                     output_filepaths["pairwise-distances-normalized"],
                     output_filepaths["pairwise-distances-normalized-stacked"],
                     suppress_header_row,
-                    log_frequency,
                     logger);
         }
     } // pairwise distances
