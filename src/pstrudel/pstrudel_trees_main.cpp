@@ -562,7 +562,7 @@ int main(int argc, const char * argv[]) {
         }
         unsigned long num_target_trees = target_trees.size();
         unsigned long num_comparison_trees = comparison_trees.size();
-        unsigned long total_comparisons = num_comparison_trees * (num_comparison_trees - 1) / 2;
+        unsigned long total_comparisons = num_comparison_trees * num_target_trees;
         unsigned long comparison_count = 0;
         unsigned long comparison_tree_idx = 0;
         unsigned long target_tree_idx = 0;
