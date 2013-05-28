@@ -97,7 +97,7 @@ def main():
             help="number of transects or slices on tree for lineage accumulation counts (default=%(default)s)")
     parser.add_argument("-p", "--precision",
             type=int,
-            default=1e-16,
+            default=1e-14,
             help="numerical precision (default=%(default)s)")
     parser.add_argument("-l", "--label",
             type=str,
