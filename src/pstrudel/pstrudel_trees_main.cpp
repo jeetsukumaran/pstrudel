@@ -260,7 +260,7 @@ void write_normalized_results(platypus::DataTable & results_table,
     unsigned long log_frequency = nrows/10;
     for (auto & results_row : results_table) {
         if (log_frequency > 0 && row_idx % log_frequency == 0) {
-            logger.info("Normalizing entry ", row_idx + 1, " of ", nrows);
+            logger.info("Normalizing entries: ", (row_idx * 100)/nrows, "%");
         }
         auto & normalized_row = normalized_results_table.add_row();
 
@@ -273,6 +273,7 @@ void write_normalized_results(platypus::DataTable & results_table,
         }
         ++row_idx;
     }
+    logger.info("Normalizing entries: done");
     logger.info("Writing normalized results");
     // output primary results
     {
@@ -566,7 +567,7 @@ int main(int argc, const char * argv[]) {
             for (auto & ttree : target_trees) {
                 auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
-                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Tree ", comparison_tree_idx + 1);
+                    logger.info("Calculating distances to target tree(s): ", (comparison_count * 100)/total_comparisons, "%");
                 }
                 if (!analysis_label.empty()) {
                     results_table_row.set("analysis", analysis_label);
@@ -587,6 +588,7 @@ int main(int argc, const char * argv[]) {
             } // for each target tree
             ++comparison_tree_idx;
         } // for each tree in comparison set
+        logger.info("Calculating distances to target tree(s): done");
 
         // output_filepaths["target-distances"] = output_prefix + "target.distances.txt";
         // output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
@@ -651,7 +653,7 @@ int main(int argc, const char * argv[]) {
         for (auto & comparison_tree : comparison_trees) { // tree comparison
             auto comparison_tree_size = comparison_tree.get_num_tips();
             if (log_frequency > 0 && comparison_tree_idx % log_frequency == 0) {
-                logger.info("Calculating canonical distances for tree ", comparison_tree_idx + 1, " of ", comparison_tree_size);
+                logger.info("Calculating canonical distances: ", (comparison_tree_idx * 100)/comparison_trees.size(), "%");
             }
             if (tree_patterns.find(comparison_tree_size) == tree_patterns.end()) {
                 logger.info("Building canonical ", comparison_tree_size, "-leaf reference trees");
@@ -679,7 +681,7 @@ int main(int argc, const char * argv[]) {
             }
             comparison_tree_idx += 1;
         } // tree comparison
-        logger.info("Completed calculating distances between comparison trees and canonical tree patterns");
+        logger.info("Calculating canonical distances: done");
 
         // output canonical info
         {
@@ -775,7 +777,7 @@ int main(int argc, const char * argv[]) {
             for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
                 ++comparison_count;
                 if (log_frequency > 0 && comparison_count % log_frequency == 0) {
-                    logger.info("Comparison ", comparison_count, " of ", total_comparisons, ": Tree ", tree_idx1 + 1, " vs. tree ", tree_idx2 + 1);
+                    logger.info("Calculating pairwise distances: ", (comparison_count * 100)/total_comparisons, "%");
                 }
                 auto & tree2 = comparison_trees[tree_idx2];
                 auto & results_table_row = results_table.add_row();
@@ -821,7 +823,7 @@ int main(int argc, const char * argv[]) {
                 ++comparison_count;
             } // for each tree_idx2 pairwise tree comparison
         } // for each tree_idx1 pairwise tree comparison
-        logger.info("Completed calculating pairwise distances between all distinct pairs of trees");
+        logger.info("Calculating pairwise distances: done");
 
         // output primary results
         {
