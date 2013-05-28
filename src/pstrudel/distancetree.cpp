@@ -232,15 +232,16 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
         this->calc_node_root_distances();
     }
     double transect_step = (static_cast<double>(this->max_leaf_distance_) / num_transects);
-    // for (double t = transect_step; t < this->max_leaf_distance_; t += transect_step) {
     double offset = transect_step;
-    for (unsigned int i; i <= num_transects; ++i) {
+    for (unsigned int i=0; i < num_transects-1; ++i) {
         if (offset >= this->max_leaf_distance_) {
             break;
         }
         transect_offsets.push_back(offset);
         offset += transect_step;
     }
+    // this is put here separately to account for accumulated error
+    // resulting in slightly less than the complete distance recovered
     transect_offsets.push_back(this->max_leaf_distance_);
     return transect_offsets;
 }
@@ -255,7 +256,7 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_accumulation_
         this->calc_node_root_distances();
     }
     this->calc_node_root_distances();
-    std::vector<unsigned long> num_lineages(transect_offsets.size(), 0.0);
+    std::vector<double> num_lineages(transect_offsets.size(), 0.0);
     for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
         if (ndi.parent_node() != nullptr) {
             auto transect_offsets_begin = transect_offsets.begin();
@@ -267,11 +268,12 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_accumulation_
             }
         }
     }
-    std::vector<double> rel_num_lineages(num_lineages.begin(), num_lineages.end());
-    for (auto & n : rel_num_lineages) {
+    // std::vector<double> rel_num_lineages(num_lineages.begin(), num_lineages.end());
+    for (auto & n : num_lineages) {
         n = n / num_tips;
     }
-    this->lineage_accumulation_through_time_profile_.set_data(rel_num_lineages.begin(), rel_num_lineages.end(), false);
+    // std::cout << ">>> " << num_lineages.size() << ", " << transect_offsets.size() << std::endl;
+    this->lineage_accumulation_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
     return this->lineage_accumulation_through_time_profile_;
 }
 
