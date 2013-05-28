@@ -315,7 +315,7 @@ int main(int argc, const char * argv[]) {
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
     bool             suppress_header_row                     = false;
-    int              add_tree_source_key                     = 0;
+    unsigned int     add_tree_source_key                     = 0;
     std::string      analysis_label;
     bool             replace_existing_output_files           = false;
     unsigned long    log_frequency                           = 0;
@@ -384,7 +384,7 @@ int main(int argc, const char * argv[]) {
             nullptr,
             "Output Options"
             );
-    parser.add_switch(&add_tree_source_key, nullptr, "--add-tree-source-key",
+    parser.add_option<unsigned int>(&add_tree_source_key, nullptr, "--add-tree-source-key",
             "Add a column in the results identifying the filename of the source of the tree(s) being compared:"
             " 1: value is index of file; 2: value is basename of file; 3: value is relative path of file;"
             " 4: value is absolute path of file.",
