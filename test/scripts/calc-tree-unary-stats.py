@@ -89,6 +89,14 @@ def main():
             rep_gamma,
             args.precision)
 
+    rep_nbar = float(stdin_lines.pop(0))
+    fails += compare_almost_equal(
+            args.label,
+            "N-Bar",
+            tree.N_bar(),
+            rep_nbar,
+            args.precision)
+
     if fails > 0:
         sys.exit(1)
     else:

@@ -35,6 +35,9 @@ int test_file(const std::string & test_data_filename,
 
         o << std::fixed << std::setprecision(22) << tree.get_pybus_harvey_gamma();
         o << "\n";
+        o << std::fixed << std::setprecision(22) << tree.get_N_bar();
+        o << "\n";
+
         colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
         auto result = ps.communicate(o.str());
         if (ps.returncode() != 0) {

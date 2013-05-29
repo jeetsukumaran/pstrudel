@@ -517,6 +517,19 @@ double DistanceTree::get_pybus_harvey_gamma() {
 }
 
 double DistanceTree::get_N_bar() {
+    if (this->N_bar_ == 0.0) {
+        unsigned long leaf_count = 0;
+        double nbar = 0.0;
+        for (auto nd = this->leaf_begin(); nd != this->leaf_end(); ++nd) {
+            ++leaf_count;
+            auto parent_node = nd.parent_node();
+            while (parent_node != nullptr) {
+                nbar += 1;
+                parent_node = parent_node->parent_node();
+            }
+        }
+        this->N_bar_ = nbar / leaf_count;
+    }
     return this->N_bar_;
 }
 
