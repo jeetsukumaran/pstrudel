@@ -479,7 +479,7 @@ std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
 }
 
 double DistanceTree::get_pybus_harvey_gamma() {
-    if (this->pybus_harvey_gamma_ <= 0.0) {
+    if (this->pybus_harvey_gamma_ == 0.0) {
         if (this->number_of_tips_ == 0) {
             this->calc_num_tips();
         }
@@ -496,7 +496,8 @@ double DistanceTree::get_pybus_harvey_gamma() {
             intervals.push_back(older - node_ages[age_idx]);
             older = node_ages[age_idx];
         }
-        assert(intervals.size() == node_ages.size() - 1);
+        intervals.push_back(older);
+        assert(intervals.size() == this->number_of_tips_ - 1);
         double T = 0.0;
         double accum = 0.0;
         unsigned long list_idx;
@@ -506,7 +507,7 @@ double DistanceTree::get_pybus_harvey_gamma() {
             accum += T;
         }
         list_idx = this->number_of_tips_ - 2;
-        T += static_cast<double>(this->number_of_tips_) * intervals[list_idx];
+        T += this->number_of_tips_ * intervals[list_idx];
         double nmt = this->number_of_tips_ - 2.0;
         double numerator = accum/nmt - T/2.0;
         double C = T * std::pow(1/(12*nmt), 0.5);

@@ -25,6 +25,23 @@ def compare_almost_equal(label, comparison_name, expected, observed, check_preci
     else:
         return 0
 
+def compare_almost_equal_vectors(label, comparison_name, expected, observed, check_precision):
+    if len(expected) != len(observed):
+        sys.stderr.write("{}: {}: expecting profile length of {} but found {}\n".format(label, comparison_name, len(expected), len(observed)))
+        for idx in range(max(len(expected), len(observed))):
+            if idx >= len(expected):
+                ev = "{:24}".format("N/A")
+            else:
+                ev = "{:.22f}".format(expected[idx])
+            if idx >= len(observed):
+                ov = "{:24}".format("N/A")
+            else:
+                ov = "{:.22f}".format(observed[idx])
+            sys.stderr.write("    {:03d}: {}    {}\n".format(idx, ev, ov))
+        return 1
+    else:
+        return 0
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f", "--format",
@@ -52,7 +69,18 @@ def main():
     args = parser.parse_args()
     stdin_lines = sys.stdin.read().split("\n")
     tree = dendropy.Tree.get_from_string(stdin_lines.pop(0), args.schema)
+
     fails = 0
+
+    exp_node_ages = [age for age in tree.calc_node_ages() if age]
+    rep_node_ages = [float(i) for i in stdin_lines.pop(0).split(",") if i]
+    fails += compare_almost_equal_vectors(
+            args.label,
+            "Node Ages",
+            exp_node_ages,
+            rep_node_ages,
+            args.precision)
+
     rep_gamma = float(stdin_lines.pop(0))
     fails += compare_almost_equal(
             args.label,
@@ -60,6 +88,7 @@ def main():
             tree.pybus_harvey_gamma(),
             rep_gamma,
             args.precision)
+
     if fails > 0:
         sys.exit(1)
     else:
