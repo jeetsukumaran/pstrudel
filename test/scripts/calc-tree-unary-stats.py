@@ -113,6 +113,14 @@ def main():
             rep_nbar,
             args.precision)
 
+    rep_treeness = float(stdin_lines.pop(0))
+    fails += compare_almost_equal(
+            args.label,
+            "treeness",
+            tree.treeness(),
+            rep_treeness,
+            args.precision)
+
     if fails > 0:
         sys.exit(1)
     else:

@@ -582,6 +582,21 @@ double DistanceTree::get_B1() {
 }
 
 double DistanceTree::get_treeness() {
+    if (this->treeness_ == 0.0) {
+        double internal = 0.0;
+        double external = 0.0;
+        for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
+            if (nd.parent_node() == nullptr) {
+                continue;
+            }
+            if (nd.is_leaf()) {
+                external += nd->get_edge_length();
+            } else {
+                internal += nd->get_edge_length();
+            }
+        }
+        this->treeness_ = internal/(external + internal);
+    }
     return this->treeness_;
 }
 

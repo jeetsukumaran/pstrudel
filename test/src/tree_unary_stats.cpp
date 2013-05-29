@@ -41,6 +41,8 @@ int test_file(const std::string & test_data_filename,
         o << "\n";
         o << std::fixed << std::setprecision(22) << tree.get_N_bar();
         o << "\n";
+        o << std::fixed << std::setprecision(22) << tree.get_treeness();
+        o << "\n";
 
 
         colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
