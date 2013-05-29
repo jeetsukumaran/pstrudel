@@ -580,7 +580,8 @@ int main(int argc, const char * argv[]) {
             for (auto & reference_tree : reference_trees) {
                 auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
-                    logger.info("Calculating distances to reference tree(s): ", (comparison_count * 100)/total_comparisons, "%");
+                    logger.info("Calculating distances to reference tree(s): ",
+                                (comparison_count * 100)/total_comparisons, "%");
                 }
                 if (!analysis_label.empty()) {
                     results_table_row.set("analysis", analysis_label);
@@ -807,7 +808,6 @@ int main(int argc, const char * argv[]) {
         for (unsigned long tree_idx1 = 0; tree_idx1 < num_trees - 1; ++tree_idx1) {
             auto & tree1 = comparison_trees[tree_idx1];
             for (unsigned long tree_idx2 = tree_idx1+1; tree_idx2 < num_trees; ++tree_idx2) {
-                ++comparison_count;
                 if (log_frequency > 0 && comparison_count % log_frequency == 0) {
                     logger.info("Calculating pairwise distances: ", (comparison_count * 100)/total_comparisons, "%");
                 }
