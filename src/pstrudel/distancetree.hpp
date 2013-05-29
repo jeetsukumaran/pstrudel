@@ -23,32 +23,37 @@ class DistanceNodeValue : public platypus::StandardNodeValue<double> {
     public:
         DistanceNodeValue()
             : num_leaves_(0)
-            , root_distance_(0.0) {
+            , root_distance_(0.0)
+            , age_(0.0) {
         }
         DistanceNodeValue(DistanceNodeValue&& other)
             : platypus::StandardNodeValue<double>(std::move(other))
             , desc_path_lens_(std::move(other.desc_path_lens_))
             , num_leaves_(other.num_leaves_)
-            , root_distance_(other.root_distance_) {
+            , root_distance_(other.root_distance_)
+            , age_(other.age_) {
         }
         DistanceNodeValue(const DistanceNodeValue& other)
             : platypus::StandardNodeValue<double>(other)
             , desc_path_lens_(other.desc_path_lens_)
             , num_leaves_(other.num_leaves_)
-            , root_distance_(other.root_distance_) {
+            , root_distance_(other.root_distance_)
+            , age_(other.age_) {
         }
         DistanceNodeValue& operator=(const DistanceNodeValue& other) {
             platypus::StandardNodeValue<double>::operator=(other);
             this->desc_path_lens_ = other.desc_path_lens_;
             this->num_leaves_ = other.num_leaves_;
             this->root_distance_ = other.root_distance_;
+            this->age_ = 0.0;
             return *this;
         }
         void clear() override {
             platypus::StandardNodeValue<double>::clear();
             this->desc_path_lens_.clear();
             this->num_leaves_ = 0;
-            this->root_distance_ = 0;
+            this->root_distance_ = 0.0;
+            this->age_ = 0.0;
         }
         void set_desc_path_len(DistanceNodeValue & nd, double len, unsigned long step_count) {
             this->desc_path_lens_[&nd] = std::make_pair(len, step_count);
@@ -77,10 +82,17 @@ class DistanceNodeValue : public platypus::StandardNodeValue<double> {
         double get_root_distance() const {
             return this->root_distance_;
         }
+        void set_age(double d) {
+            this->age_ = d;
+        }
+        double get_age() const {
+            return this->age_;
+        }
     private:
         std::map<DistanceNodeValue *, std::pair<double, unsigned long>>    desc_path_lens_;
         unsigned long                                                      num_leaves_;
         double                                                             root_distance_;
+        double                                                             age_;
 }; // DistanceNodeValue
 
 //////////////////////////////////////////////////////////////////////////////
@@ -236,6 +248,15 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 this->total_tree_length_ += ndi->get_edge_length();
             }
         }
+        std::vector<double> calc_node_ages(bool include_leaves=true);
+
+        /////////////////////////////////////////////////////////////////////////
+        // Unary metrics
+        double get_pybus_harvey_gamma();
+        double get_N_bar();
+        double get_colless_tree_imbalance();
+        double get_B1();
+        double get_treeness();
 
         /////////////////////////////////////////////////////////////////////////
         // Manipulators
@@ -270,7 +291,6 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         double get_scaled_lineage_splitting_time_profile_distance(DistanceTree & other) {
             return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
         }
-
 
         // symmetric difference
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
@@ -373,6 +393,11 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         SymmetricDifferenceCalculator            symmetric_difference_calculator_;
         LineageThroughTimeProfileCalculator      lineage_through_time_calculator_;
         static const std::vector<std::string>    tree_pattern_y_distance_names_;
+        double                                   B1_;
+        double                                   colless_tree_imbalance_;
+        double                                   pybus_harvey_gamma_;
+        double                                   N_bar_;
+        double                                   treeness_;
 
 }; // DistanceTree
 

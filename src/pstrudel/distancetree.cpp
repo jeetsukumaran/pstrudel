@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <map>
 #include <platypus/model/coalescent.hpp>
 #include "distancetree.hpp"
@@ -338,16 +339,25 @@ DistanceTree::DistanceTree(bool is_rooted)
           , total_tree_length_(0.0)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
-          , lineage_through_time_calculator_(*this) {
+          , lineage_through_time_calculator_(*this)
+          , pybus_harvey_gamma_(0.0)
+          , N_bar_(0.0)
+          , colless_tree_imbalance_(0.0)
+          , treeness_(0.0) {
 }
 
 DistanceTree::DistanceTree(DistanceTree && other)
         : platypus::StandardTree<DistanceNodeValue>(other)
-         , number_of_tips_(other.number_of_tips_)
-         , total_tree_length_(other.total_tree_length_)
-         , pairwise_tip_distance_profile_calculator_(*this)
-         , symmetric_difference_calculator_(*this)
-         , lineage_through_time_calculator_(*this) {
+          , number_of_tips_(other.number_of_tips_)
+          , total_tree_length_(other.total_tree_length_)
+          , pairwise_tip_distance_profile_calculator_(*this)
+          , symmetric_difference_calculator_(*this)
+          , lineage_through_time_calculator_(*this)
+          , B1_(0.0)
+          , colless_tree_imbalance_(0.0)
+          , pybus_harvey_gamma_(0.0)
+          , N_bar_(0.0)
+          , treeness_(0.0) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
@@ -355,11 +365,16 @@ DistanceTree::DistanceTree(DistanceTree && other)
 
 DistanceTree::DistanceTree(const DistanceTree & other)
         : platypus::StandardTree<DistanceNodeValue>(other)
-         , number_of_tips_(other.number_of_tips_)
-         , total_tree_length_(other.total_tree_length_)
-         , pairwise_tip_distance_profile_calculator_(*this)
-         , symmetric_difference_calculator_(*this)
-         , lineage_through_time_calculator_(*this) {
+          , number_of_tips_(other.number_of_tips_)
+          , total_tree_length_(other.total_tree_length_)
+          , pairwise_tip_distance_profile_calculator_(*this)
+          , symmetric_difference_calculator_(*this)
+          , lineage_through_time_calculator_(*this)
+          , B1_(0.0)
+          , colless_tree_imbalance_(0.0)
+          , pybus_harvey_gamma_(0.0)
+          , N_bar_(0.0)
+          , treeness_(0.0) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
@@ -372,6 +387,11 @@ DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
+    this->pybus_harvey_gamma_ = other.pybus_harvey_gamma_;
+    this->N_bar_ = other.N_bar_;
+    this->colless_tree_imbalance_ = other.colless_tree_imbalance_;
+    this->B1_ = other.B1_;
+    this->treeness_ = other.treeness_;
     return *this;
 }
 
@@ -435,6 +455,80 @@ void DistanceTree::add_edge_lengths(int regime) {
             ndi->set_edge_length(0.0);
         }
     }
+}
+
+std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
+    std::vector<double> ages;
+    ages.reserve(this->number_of_tips_ * 2);
+    for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
+        if (nd.is_leaf()) {
+            nd->set_age(0.0);
+            if (include_leaves) {
+                ages.push_back(0.0);
+            }
+        } else {
+            // Assumes, and does not check, that tree is ultrametric
+            DistanceTree::value_type & ch = nd.first_child();
+            double age = ch.get_age() + ch.get_edge_length();
+            nd->set_age(age);
+            ages.push_back(age);
+        }
+    }
+    std::sort(ages.begin(), ages.end(), std::greater<double>());
+    return ages;
+}
+
+double DistanceTree::get_pybus_harvey_gamma() {
+    if (this->pybus_harvey_gamma_ <= 0.0) {
+        if (this->number_of_tips_ == 0) {
+            this->calc_num_tips();
+        }
+        DistanceTree::node_type * node_ptr = nullptr;
+        auto node_ages = this->calc_node_ages(false);
+        std::vector<double> intervals;
+        if (node_ages.empty()) {
+            throw std::runtime_error("Cannot calculate statistic on empty tree");
+        }
+        intervals.reserve(node_ages.size());
+        auto cur_age_iter = node_ages.begin();
+        double older = node_ages[0];
+        for (unsigned long age_idx = 1; age_idx < node_ages.size(); ++age_idx) {
+            intervals.push_back(older - node_ages[age_idx]);
+            older = node_ages[age_idx];
+        }
+        assert(intervals.size() == node_ages.size() - 1);
+        double T = 0.0;
+        double accum = 0.0;
+        unsigned long list_idx;
+        for (unsigned long i = 2; i < this->number_of_tips_; ++i) {
+            list_idx = i - 2;
+            T += static_cast<double>(i) * intervals[list_idx];
+            accum += T;
+        }
+        list_idx = this->number_of_tips_ - 2;
+        T += static_cast<double>(this->number_of_tips_) * intervals[list_idx];
+        double nmt = this->number_of_tips_ - 2.0;
+        double numerator = accum/nmt - T/2.0;
+        double C = T * std::pow(1/(12*nmt), 0.5);
+        this->pybus_harvey_gamma_ = numerator/C;
+    }
+    return this->pybus_harvey_gamma_;
+}
+
+double DistanceTree::get_N_bar() {
+    return this->N_bar_;
+}
+
+double DistanceTree::get_colless_tree_imbalance() {
+    return this->colless_tree_imbalance_;
+}
+
+double DistanceTree::get_B1() {
+    return this->B1_;
+}
+
+double DistanceTree::get_treeness() {
+    return this->treeness_;
 }
 
 } // namespace pstrudel
