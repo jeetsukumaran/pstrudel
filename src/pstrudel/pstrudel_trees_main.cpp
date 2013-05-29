@@ -193,7 +193,7 @@ template <class TreeT>
                 colugo::console::abort("Invalid tree pattern name: '", tree_pattern_name, "'");
             }
             auto & tree_pattern = tpi->second;
-            row.set("target.tree.pattern", tree_pattern_name);
+            row.set("canonical.tree.pattern", tree_pattern_name);
             tree_pattern.tabulate_distances(
                     other_tree,
                     row,
@@ -214,7 +214,7 @@ template <class TreeT>
         static void add_canonical_columns(platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff) {
-            table.add_key_column<std::string>("target.tree.pattern");
+            table.add_key_column<std::string>("canonical.tree.pattern");
             pstrudel::DistanceTree::add_results_data_columns(
                     table,
                     col_formatters,
@@ -308,7 +308,7 @@ int main(int argc, const char * argv[]) {
     unsigned         long num_interpolated_points            = 0;
     bool             calculate_canonical_distances           = false;
     bool             calculate_pairwise_distances            = false;
-    std::string      target_trees_filepath                   = "";
+    std::string      reference_trees_filepath                   = "";
     bool             no_scale_by_tree_length                 = false;
     bool             calculate_symmetric_diff                = false;
     bool             calculate_normalized                    = false;
@@ -339,9 +339,9 @@ int main(int argc, const char * argv[]) {
             "Calculate distances from every tree in input set to canonical tree patterns.",
             nullptr,
             "Comparison Options");
-    parser.add_option<std::string>(&target_trees_filepath, "-t", "--target-trees",
-            "Calculate distances from every tree in input set to every tree in TARGET-TREE-FILEPATH.",
-            "TARGET-TREE-FILEPATH",
+    parser.add_option<std::string>(&reference_trees_filepath, "-r", "--reference-trees",
+            "Calculate distances from every tree in input set to every tree in REFERENCE-TREE-FILEPATH.",
+            "REFERENCE-TREE-FILEPATH",
             "Comparison Options");
 
     parser.add_switch(&no_scale_by_tree_length,
@@ -425,8 +425,8 @@ int main(int argc, const char * argv[]) {
         colugo::console::out_ln(border);
     }
 
-    if (!calculate_canonical_distances && target_trees_filepath.empty() && !calculate_pairwise_distances) {
-        colugo::console::err_line("Need to specify at least one of '-p'/'--pairwise', '-c'/'--canonical', or '-t'/'--target-trees' options");
+    if (!calculate_canonical_distances && reference_trees_filepath.empty() && !calculate_pairwise_distances) {
+        colugo::console::err_line("Need to specify at least one of '-p'/'--pairwise', '-c'/'--canonical', or '-t'/'--reference-trees' options");
         exit(EXIT_FAILURE);
     }
 
@@ -448,11 +448,11 @@ int main(int argc, const char * argv[]) {
         output_filepaths["canonical-distances-normalized"] = output_prefix + "canonical.distances.normalized.txt";
         output_filepaths["canonical-distances-normalized-stacked"] = output_prefix + "canonical.distances.normalized.stacked.txt";
     }
-    if (!target_trees_filepath.empty()) {
-        output_filepaths["target-distances"] = output_prefix + "target.distances.txt";
-        output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
-        output_filepaths["target-distances-normalized"] = output_prefix + "target.distances.normalized.txt";
-        output_filepaths["target-distances-normalized-stacked"] = output_prefix + "target.distances.normalized.stacked.txt";
+    if (!reference_trees_filepath.empty()) {
+        output_filepaths["reference-distances"] = output_prefix + "reference.distances.txt";
+        output_filepaths["reference-distances-stacked"] = output_prefix + "reference.distances.stacked.txt";
+        output_filepaths["reference-distances-normalized"] = output_prefix + "reference.distances.normalized.txt";
+        output_filepaths["reference-distances-normalized-stacked"] = output_prefix + "reference.distances.normalized.stacked.txt";
     }
     if (calculate_pairwise_distances) {
         output_filepaths["pairwise-distances"] = output_prefix + "pairwise.distances.txt";
@@ -520,14 +520,14 @@ int main(int argc, const char * argv[]) {
 
     platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(DEFAULT_PRECISION)};
 
-    // target distances
-    if (!target_trees_filepath.empty()) {
-        std::vector<WorkingTree> target_trees;
-        auto target_trees_full_filepath = colugo::filesys::absolute_path(target_trees_filepath);
-        logger.info("Reading target trees from '", target_trees_full_filepath, "'");
-        std::ifstream src(target_trees_full_filepath);
-        get_trees(target_trees, src, target_trees_full_filepath, format, 0);
-        logger.info(target_trees.size(), " trees read from '", target_trees_full_filepath, "'");
+    // reference distances
+    if (!reference_trees_filepath.empty()) {
+        std::vector<WorkingTree> reference_trees;
+        auto reference_trees_full_filepath = colugo::filesys::absolute_path(reference_trees_filepath);
+        logger.info("Reading reference trees from '", reference_trees_full_filepath, "'");
+        std::ifstream src(reference_trees_full_filepath);
+        get_trees(reference_trees, src, reference_trees_full_filepath, format, 0);
+        logger.info(reference_trees.size(), " trees read from '", reference_trees_full_filepath, "'");
         platypus::DataTable results_table;
         if (!analysis_label.empty()) {
             results_table.add_key_column<std::string>("analysis");
@@ -544,74 +544,74 @@ int main(int argc, const char * argv[]) {
                     col_formatting,
                     true);
         }
-        results_table.add_key_column<unsigned long>("target.tree.idx");
+        results_table.add_key_column<unsigned long>("reference.tree.idx");
         pstrudel::DistanceTree::add_results_data_columns(
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff);
 
-        // // each target tree gets its own column
-        // unsigned long target_tree_idx = 0;
-        // for (auto & ttree : target_trees) {
-        //     std::string target_tree_label = ".t" + std::to_string(target_tree_idx+1);
+        // // each reference tree gets its own column
+        // unsigned long reference_tree_idx = 0;
+        // for (auto & reference_tree : reference_trees) {
+        //     std::string reference_tree_label = ".t" + std::to_string(reference_tree_idx+1);
         //     pstrudel::DistanceTree::add_results_data_columns(
-        //             target_tree_label,
+        //             reference_tree_label,
         //             results_table,
         //             col_formatting,
         //             calculate_symmetric_diff);
-        //     ++target_tree_idx;
+        //     ++reference_tree_idx;
         // }
 
-        logger.info("Beginning calculating distances between comparison trees and target tree(s)");
+        logger.info("Beginning calculating distances between comparison trees and reference tree(s)");
         if (scale_by_tree_length) {
             logger.info("Edge lengths will be scaled to tree length");
         } else {
             logger.info("Edge lengths will NOT be scaled to tree length");
         }
-        unsigned long num_target_trees = target_trees.size();
+        unsigned long num_reference_trees = reference_trees.size();
         unsigned long num_comparison_trees = comparison_trees.size();
-        unsigned long total_comparisons = num_comparison_trees * num_target_trees;
+        unsigned long total_comparisons = num_comparison_trees * num_reference_trees;
         unsigned long log_frequency = total_comparisons / 10;
         unsigned long comparison_count = 0;
         unsigned long comparison_tree_idx = 0;
-        unsigned long target_tree_idx = 0;
+        unsigned long reference_tree_idx = 0;
         for (auto & ctree : comparison_trees) {
-            target_tree_idx = 0;
-            for (auto & ttree : target_trees) {
+            reference_tree_idx = 0;
+            for (auto & reference_tree : reference_trees) {
                 auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
-                    logger.info("Calculating distances to target tree(s): ", (comparison_count * 100)/total_comparisons, "%");
+                    logger.info("Calculating distances to reference tree(s): ", (comparison_count * 100)/total_comparisons, "%");
                 }
                 if (!analysis_label.empty()) {
                     results_table_row.set("analysis", analysis_label);
                 }
-                results_table_row.set("tree.i.idx", comparison_tree_idx);
+                results_table_row.set("tree.i.idx", comparison_tree_idx+1);
                 if (add_tree_source_key) {
                     results_table_row.set("tree.i.source.file", ctree.get_filepath());
                     results_table_row.set("tree.i.source.tree", ctree.get_file_tree_index()+1);
                 }
-                results_table_row.set("target.tree.idx", target_tree_idx+1);
+                results_table_row.set("reference.tree.idx", reference_tree_idx+1);
                 if (calculate_unary_statistics) {
                     ctree.tabulate_unary_statistics("", results_table_row);
                 }
                 ctree.tabulate_distances(
-                        ttree,
+                        reference_tree,
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff);
-                ++target_tree_idx;
+                ++reference_tree_idx;
                 ++comparison_count;
-            } // for each target tree
+            } // for each reference tree
             ++comparison_tree_idx;
         } // for each tree in comparison set
-        logger.info("Calculating distances to target tree(s): done");
+        logger.info("Calculating distances to reference tree(s): done");
 
-        // output_filepaths["target-distances"] = output_prefix + "target.distances.txt";
-        // output_filepaths["target-distances-stacked"] = output_prefix + "target.distances.stacked.txt";
+        // output_filepaths["reference-distances"] = output_prefix + "reference.distances.txt";
+        // output_filepaths["reference-distances-stacked"] = output_prefix + "reference.distances.stacked.txt";
         // output primary results
         {
-            logger.info("Writing target distance results");
-            auto & out_fpath = output_filepaths["target-distances"];
+            logger.info("Writing reference distance results");
+            auto & out_fpath = output_filepaths["reference-distances"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
@@ -621,8 +621,8 @@ int main(int argc, const char * argv[]) {
 
         // output stacked results
         {
-            logger.info("Writing stacked target distance results");
-            auto & out_fpath = output_filepaths["target-distances-stacked"];
+            logger.info("Writing stacked reference distance results");
+            auto & out_fpath = output_filepaths["reference-distances-stacked"];
             std::ofstream out(out_fpath);
             if (!out.good()) {
                 logger.abort("Unable to open file for output: '", out_fpath, "'");
@@ -632,15 +632,15 @@ int main(int argc, const char * argv[]) {
         }
 
         if (calculate_normalized) {
-            logger.info("Calculating normalized target distances");
+            logger.info("Calculating normalized reference distances");
             write_normalized_results(results_table,
-                    output_filepaths["target-distances-normalized"],
-                    output_filepaths["target-distances-normalized-stacked"],
+                    output_filepaths["reference-distances-normalized"],
+                    output_filepaths["reference-distances-normalized-stacked"],
                     suppress_header_row,
                     logger);
         }
 
-    } // target distances
+    } // reference distances
 
     // canonical distances
     if (calculate_canonical_distances) {
