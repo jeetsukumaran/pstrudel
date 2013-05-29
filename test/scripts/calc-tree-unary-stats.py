@@ -81,6 +81,22 @@ def main():
             rep_node_ages,
             args.precision)
 
+    rep_b1 = float(stdin_lines.pop(0))
+    fails += compare_almost_equal(
+            args.label,
+            "B1",
+            tree.B1(),
+            rep_b1,
+            args.precision)
+
+    rep_colless = float(stdin_lines.pop(0))
+    fails += compare_almost_equal(
+            args.label,
+            "Colless' Imbalance",
+            tree.colless_tree_imbalance(),
+            rep_colless,
+            args.precision)
+
     rep_gamma = float(stdin_lines.pop(0))
     fails += compare_almost_equal(
             args.label,
@@ -95,14 +111,6 @@ def main():
             "N-Bar",
             tree.N_bar(),
             rep_nbar,
-            args.precision)
-
-    rep_colless = float(stdin_lines.pop(0))
-    fails += compare_almost_equal(
-            args.label,
-            "Colless' Imbalance",
-            tree.colless_tree_imbalance(),
-            rep_colless,
             args.precision)
 
     if fails > 0:

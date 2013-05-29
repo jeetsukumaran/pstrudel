@@ -553,6 +553,31 @@ double DistanceTree::get_colless_tree_imbalance() {
 }
 
 double DistanceTree::get_B1() {
+    if (this->B1_ == 0.0) {
+        double b1 = 0.0;
+        std::map<DistanceTree::value_type *, double> nd_mi;
+        for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
+            double mi = 0.0;
+            if (nd.parent_node() == nullptr) {
+                continue;
+            }
+            unsigned long num_ch = 0;
+            for (auto ch = this->children_begin(nd); ch != this->children_end(); ++ch) {
+                ++num_ch;
+                if (nd_mi[&(*ch)] > mi) {
+                    mi = nd_mi[&(*ch)];
+                }
+            }
+            if (num_ch == 0) {
+                nd_mi[&(*nd)] = 0.0;
+            } else {
+                mi += 1;
+                nd_mi[&(*nd)] = mi;
+                b1 += 1.0/mi;
+            }
+        }
+        this->B1_ = b1;
+    }
     return this->B1_;
 }
 
