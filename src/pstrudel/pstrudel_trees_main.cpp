@@ -154,13 +154,13 @@ template <class TreeT>
                 // calculate inter-reference tree distances
                 this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
                 for (auto & tree_pattern_name : CanonicalTreePatterns::tree_pattern_names_) {
-                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.uw" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.wt" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.swt" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("ltt" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("lst" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<double>("lst.s" + tree_pattern_name);
-                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("rfdu.uw" + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.uw." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.wt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("pwtd.swt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("ltt." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("lst." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<double>("lst.s." + tree_pattern_name);
+                this->tree_pattern_cross_distances_.add_data_column<unsigned long>("rfdu.uw." + tree_pattern_name);
             }
             for (auto & tree_pattern_name1 : CanonicalTreePatterns::tree_pattern_names_) {
                 auto & row = this->tree_pattern_cross_distances_.add_row();
@@ -168,13 +168,13 @@ template <class TreeT>
                 auto & tree1 = this->tree_patterns_[tree_pattern_name1];
                 for (auto & tree_pattern_name2 : CanonicalTreePatterns::tree_pattern_names_) {
                     auto & tree2 = this->tree_patterns_[tree_pattern_name2];
-                    row.set("pwtd.uw" + tree_pattern_name2, tree2.get_unweighted_pairwise_tip_profile_distance(tree1));
-                    row.set("pwtd.wt" + tree_pattern_name2, tree2.get_scaled_weighted_pairwise_tip_profile_distance(tree1));
-                    row.set("pwtd.swt" + tree_pattern_name2, tree2.get_weighted_pairwise_tip_profile_distance(tree1));
-                    row.set("ltt" + tree_pattern_name2, tree2.get_lineage_accumulation_profile_distance(tree1));
-                    row.set("lst" + tree_pattern_name2, tree2.get_lineage_splitting_time_profile_distance(tree1));
-                    row.set("lst.s" + tree_pattern_name2, tree2.get_scaled_lineage_splitting_time_profile_distance(tree1));
-                    row.set("rfdu.uw" + tree_pattern_name2, tree2.get_unlabeled_symmetric_difference(tree1));
+                    row.set("pwtd.uw." + tree_pattern_name2, tree2.get_unweighted_pairwise_tip_profile_distance(tree1));
+                    row.set("pwtd.wt." + tree_pattern_name2, tree2.get_scaled_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("pwtd.swt." + tree_pattern_name2, tree2.get_weighted_pairwise_tip_profile_distance(tree1));
+                    row.set("ltt." + tree_pattern_name2, tree2.get_lineage_accumulation_profile_distance(tree1));
+                    row.set("lst." + tree_pattern_name2, tree2.get_lineage_splitting_time_profile_distance(tree1));
+                    row.set("lst.s." + tree_pattern_name2, tree2.get_scaled_lineage_splitting_time_profile_distance(tree1));
+                    row.set("rfdu.uw." + tree_pattern_name2, tree2.get_unlabeled_symmetric_difference(tree1));
                 }
             }
         }

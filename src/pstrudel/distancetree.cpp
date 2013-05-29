@@ -236,22 +236,28 @@ void LineageThroughTimeProfileCalculator::calc_node_root_distances() {
 
 std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(unsigned long num_transects) {
     std::vector<double> transect_offsets;
+    transect_offsets.reserve(num_transects);
     if (this->max_leaf_distance_ == 0) {
         this->calc_node_root_distances();
     }
-    double max_dist = this->max_leaf_distance_ - (this->min_edge_length_/1e10); // account for some error
-    double transect_step = (static_cast<double>(max_dist) / num_transects);
-    double offset = transect_step;
-    for (unsigned int i=0; i < num_transects-1; ++i) {
-        if (offset >= max_dist) {
-            break;
+    if (this->max_leaf_distance_ < 1e-14) {
+        // tree has no edge lengths
+        transect_offsets.insert(transect_offsets.end(), num_transects, 0.0);
+    } else {
+        double max_dist = std::abs(this->max_leaf_distance_ - (this->min_edge_length_/1e10)); // account for some error
+        double transect_step = (static_cast<double>(max_dist) / num_transects);
+        double offset = transect_step;
+        for (unsigned int i=0; i < num_transects-1; ++i) {
+            if (offset >= max_dist) {
+                break;
+            }
+            transect_offsets.push_back(offset);
+            offset += transect_step;
         }
-        transect_offsets.push_back(offset);
-        offset += transect_step;
+        // this is put here separately to account for accumulated error
+        // resulting in slightly less than the complete distance recovered
+        transect_offsets.push_back(max_dist);
     }
-    // this is put here separately to account for accumulated error
-    // resulting in slightly less than the complete distance recovered
-    transect_offsets.push_back(max_dist);
     return transect_offsets;
 }
 
