@@ -302,6 +302,17 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
+        template <class R>
+        void tabulate_unary_statistics(const std::string & prefix, R & row) {
+            row.set(prefix + "ntips"             , this->number_of_tips_);
+            row.set(prefix + "length"            , this->total_tree_length_);
+            row.set(prefix + "B1"                , this->get_B1());
+            row.set(prefix + "colless.imbalance" , this->get_colless_tree_imbalance());
+            row.set(prefix + "gamma"             , this->get_pybus_harvey_gamma());
+            row.set(prefix + "N.bar"             , this->get_N_bar());
+            row.set(prefix + "treeness"          , this->get_treeness());
+        }
+
         template <class T, class R>
         void tabulate_distances(
                 T & other_tree,
@@ -331,6 +342,21 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
 
     public:
+
+        static void add_unary_statistic_columns(
+                const std::string & prefix,
+                platypus::DataTable & table,
+                platypus::stream::OutputStreamFormatters & col_formatters,
+                bool is_key_column) {
+            table.add_column<unsigned long>(prefix + "ntips", {}, is_key_column);
+            table.add_column<double>(prefix + "length", col_formatters, is_key_column);
+            table.add_column<double>(prefix + "B1", col_formatters, is_key_column);
+            table.add_column<double>(prefix + "colless.imbalance", col_formatters, is_key_column);
+            table.add_column<double>(prefix + "gamma", col_formatters, is_key_column);
+            table.add_column<double>(prefix + "N.bar", col_formatters, is_key_column);
+            table.add_column<double>(prefix + "treeness", col_formatters, is_key_column);
+        }
+
         static void add_results_data_columns(
                 platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,

@@ -312,6 +312,7 @@ int main(int argc, const char * argv[]) {
     bool             no_scale_by_tree_length                 = false;
     bool             calculate_symmetric_diff                = false;
     bool             calculate_normalized                    = false;
+    bool             calculate_unary_statistics              = false;
     std::string      default_output_filename_stem            = "pstrudel-trees";
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
@@ -346,22 +347,28 @@ int main(int argc, const char * argv[]) {
     parser.add_switch(&no_scale_by_tree_length,
             nullptr,
             "--no-scale-by-tree-length",
-            "By default, all edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated;"
+            "By default, for all distance calculations, edge weights will be scaled or normalized to tree length (sum of edge lengths on a tree) before distances are calculated;"
             " set this option to use unscaled (raw) edge lengths.",
             nullptr,
-            "Distance Options");
+            "Calculation Options");
     parser.add_switch(&calculate_symmetric_diff,
-            "-d",
+            "-s",
             "--calculate-symmetric-difference",
             "In addition to `y` or profile distances, calculate the Robinson-Foulds or symmetric difference.",
             nullptr,
-            "Distance Options");
+            "Calculation Options");
     parser.add_switch(&calculate_normalized,
             "-n",
             "--calculate-normalized-distances",
             "Calculate distances normalized to maximum value.",
             nullptr,
-            "Distance Options");
+            "Calculation Options");
+    parser.add_switch(&calculate_unary_statistics,
+            "-u",
+            "--calculate-unary-statistics",
+            "Calculate various unary tree statistics for each tree, such as Pybus and Harvey's Gamma, Colless' Imbalance, etc.",
+            nullptr,
+            "Calculation Options");
 
     parser.add_option<std::string>(&format, "-f", "--format",
             "Format for tree sources, one of: 'nexus' [default] or 'newick'.",
@@ -530,7 +537,13 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("tree.i.source.file");
             results_table.add_key_column<unsigned long>("tree.i.source.tree");
         }
-
+        if (calculate_unary_statistics) {
+            pstrudel::DistanceTree::add_unary_statistic_columns(
+                    "",
+                    results_table,
+                    col_formatting,
+                    true);
+        }
         results_table.add_key_column<unsigned long>("target.tree.idx");
         pstrudel::DistanceTree::add_results_data_columns(
                 results_table,
@@ -578,6 +591,9 @@ int main(int argc, const char * argv[]) {
                     results_table_row.set("tree.i.source.tree", ctree.get_file_tree_index()+1);
                 }
                 results_table_row.set("target.tree.idx", target_tree_idx+1);
+                if (calculate_unary_statistics) {
+                    ctree.tabulate_unary_statistics("", results_table_row);
+                }
                 ctree.tabulate_distances(
                         ttree,
                         results_table_row,
@@ -638,8 +654,13 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("source.file");
             results_table.add_key_column<std::string>("source.tree");
         }
-        results_table.add_key_column<unsigned long>("num.tips");
-        results_table.add_key_column<double>("tree.length", col_formatting);
+        if (calculate_unary_statistics) {
+            pstrudel::DistanceTree::add_unary_statistic_columns(
+                    "",
+                    results_table,
+                    col_formatting,
+                    true);
+        }
         unsigned long log_frequency = comparison_trees.size() / 10;
         logger.info("Beginning calculating distances between comparison trees and canonical tree patterns");
         if (scale_by_tree_length) {
@@ -670,8 +691,9 @@ int main(int argc, const char * argv[]) {
                     results_table_row.set("source.file", comparison_tree.get_filepath());
                     results_table_row.set("source.tree", comparison_tree.get_file_tree_index()+1);
                 }
-                results_table_row.set("num.tips", comparison_tree_size);
-                results_table_row.set("tree.length", comparison_tree.get_total_tree_length());
+                if (calculate_unary_statistics) {
+                    comparison_tree.tabulate_unary_statistics("", results_table_row);
+                }
                 tree_patterns[comparison_tree_size].score(
                         tree_pattern_name,
                         comparison_tree,
@@ -744,15 +766,25 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("tree.i.source.file");
             results_table.add_key_column<unsigned long>("tree.i.source.tree");
         }
-        results_table.add_key_column<unsigned long>("tree.i.num.tips");
-        results_table.add_key_column<double>("tree.i.length", col_formatting);
+        if (calculate_unary_statistics) {
+            pstrudel::DistanceTree::add_unary_statistic_columns(
+                    "tree.i.",
+                    results_table,
+                    col_formatting,
+                    true);
+        }
         results_table.add_key_column<unsigned long>("tree.j.idx");
         if (add_tree_source_key) {
             results_table.add_key_column<std::string>("tree.j.source.file");
             results_table.add_key_column<unsigned long>("tree.j.source.tree");
         }
-        results_table.add_key_column<unsigned long>("tree.j.num.tips");
-        results_table.add_key_column<double>("tree.j.length", col_formatting);
+        if (calculate_unary_statistics) {
+            pstrudel::DistanceTree::add_unary_statistic_columns(
+                    "tree.j.",
+                    results_table,
+                    col_formatting,
+                    true);
+        }
 
         results_table.add_key_column<std::string>("comp.type");
         results_table.add_key_column<std::string>("comp.class");
@@ -793,8 +825,9 @@ int main(int argc, const char * argv[]) {
                     results_table_row.set("tree.i.source.file", tree1.get_filepath());
                     results_table_row.set("tree.i.source.tree", tree1.get_file_tree_index()+1);
                 }
-                results_table_row.set("tree.i.num.tips", tree1.get_num_tips());
-                results_table_row.set("tree.i.length", tree1.get_total_tree_length());
+                if (calculate_unary_statistics) {
+                    tree1.tabulate_unary_statistics("tree.i.", results_table_row);
+                }
 
                 // tree 2 key
                 results_table_row.set("tree.j.idx", tree_idx2 + 1);
@@ -802,8 +835,9 @@ int main(int argc, const char * argv[]) {
                     results_table_row.set("tree.j.source.file", tree2.get_filepath());
                     results_table_row.set("tree.j.source.tree", tree2.get_file_tree_index()+1);
                 }
-                results_table_row.set("tree.j.num.tips", tree2.get_num_tips());
-                results_table_row.set("tree.j.length", tree2.get_total_tree_length());
+                if (calculate_unary_statistics) {
+                    tree2.tabulate_unary_statistics("tree.j.", results_table_row);
+                }
 
                 // comparison key
                 if (tree1.get_filepath() == tree2.get_filepath()) {
