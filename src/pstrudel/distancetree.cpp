@@ -543,8 +543,10 @@ double DistanceTree::get_colless_tree_imbalance() {
             if (nd.is_leaf()) {
                 continue;
             }
-            unsigned long left = nd.first_child().get_num_leaves();
-            unsigned long right = nd.last_child().get_num_leaves();
+            assert(nd.first_child_node() != nullptr);
+            assert(nd.last_child_node() != nullptr);
+            long left = nd.first_child().get_num_leaves();
+            long right = nd.last_child().get_num_leaves();
             colless += std::abs(right-left);
         }
         this->colless_tree_imbalance_ = colless * (2.0/(this->number_of_tips_ * (this->number_of_tips_-3) + 2));
