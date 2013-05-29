@@ -83,7 +83,7 @@ int main(int, const char * argv[]) {
     TREE_WRITER.set_edge_length_precision(22);
     int fails = 0;
     fails += test_dist1();
-    // fails += test_dist2();
+    fails += test_dist2();
     if (fails != 0) {
         return EXIT_FAILURE;
     } else {

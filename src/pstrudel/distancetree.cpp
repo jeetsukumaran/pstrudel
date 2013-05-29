@@ -1,3 +1,4 @@
+#include <limits>
 #include <algorithm>
 #include <map>
 #include <platypus/model/coalescent.hpp>
@@ -164,6 +165,7 @@ LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::opera
     this->lineage_splitting_time_profile_ = other.lineage_splitting_time_profile_;
     this->scaled_lineage_splitting_time_profile_ = other.scaled_lineage_splitting_time_profile_;
     this->max_leaf_distance_ = other.max_leaf_distance_;
+    this->min_edge_length_ = other.min_edge_length_;
     return *this;
 }
 
@@ -199,6 +201,7 @@ double LineageThroughTimeProfileCalculator::get_scaled_lineage_splitting_time_pr
 
 void LineageThroughTimeProfileCalculator::clear() {
     this->max_leaf_distance_ = 0.0;
+    this->min_edge_length_ = -1.0;
     this->lineage_accumulation_through_time_profile_.clear();
     this->lineage_splitting_time_profile_.clear();
     this->scaled_lineage_splitting_time_profile_.clear();
@@ -213,12 +216,16 @@ unsigned long LineageThroughTimeProfileCalculator::get_default_num_transects() {
 
 void LineageThroughTimeProfileCalculator::calc_node_root_distances() {
     this->max_leaf_distance_ = 0.0;
+    this->min_edge_length_ = -1.0;
     double distance = 0.0;
     for (auto ndi = this->tree_.preorder_begin(); ndi != this->tree_.preorder_end(); ++ndi) {
         if (ndi.parent_node() == nullptr) {
             distance = 0.0;
         } else {
             distance = ndi.parent().get_root_distance() + ndi->get_edge_length();
+            if (this->min_edge_length_ < 0 || ndi->get_edge_length() < this->min_edge_length_) {
+                this->min_edge_length_ = ndi->get_edge_length();
+            }
         }
         ndi->set_root_distance(distance);
         if (distance > this->max_leaf_distance_) {
@@ -232,10 +239,11 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
     if (this->max_leaf_distance_ == 0) {
         this->calc_node_root_distances();
     }
-    double transect_step = (static_cast<double>(this->max_leaf_distance_) / num_transects);
+    double max_dist = this->max_leaf_distance_ - (this->min_edge_length_/1e10); // account for some error
+    double transect_step = (static_cast<double>(max_dist) / num_transects);
     double offset = transect_step;
     for (unsigned int i=0; i < num_transects-1; ++i) {
-        if (offset >= this->max_leaf_distance_) {
+        if (offset >= max_dist) {
             break;
         }
         transect_offsets.push_back(offset);
@@ -243,7 +251,7 @@ std::vector<double> LineageThroughTimeProfileCalculator::build_transect_offsets(
     }
     // this is put here separately to account for accumulated error
     // resulting in slightly less than the complete distance recovered
-    transect_offsets.push_back(this->max_leaf_distance_);
+    transect_offsets.push_back(max_dist);
     return transect_offsets;
 }
 
@@ -262,7 +270,19 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_accumulation_
         if (ndi.parent_node() != nullptr) {
             auto transect_offsets_begin = transect_offsets.begin();
             for (auto toi = transect_offsets_begin ; toi != transect_offsets.end(); ++toi) {
-                if (ndi->get_root_distance() >= *toi && ndi.parent().get_root_distance() < *toi) {
+                // std::cout << "calculating: ";
+                // std::cout << ndi->get_root_distance() << ", " << *toi << ", " << ndi.parent().get_root_distance();
+                // std::cout << " (" << this->max_leaf_distance_ << ") ";
+                // std::cout << (ndi->get_root_distance() >= *toi);
+                // std::cout << " && ";
+                // std::cout << (ndi.parent().get_root_distance() <= *toi);
+                // std::cout << " :: ";
+                // std::cout << std::fixed << std::setprecision(22) << std::abs(ndi->get_root_distance() - *toi);
+                // std::cout << std::endl;
+                if (
+                    ((ndi->get_root_distance() >= *toi || std::abs(ndi->get_root_distance() - *toi) < 1e-10)
+                        && (ndi.parent().get_root_distance() <= *toi))
+                    ) {
                     auto idx = toi - transect_offsets_begin;
                     num_lineages[idx] += 1.0;
                 }

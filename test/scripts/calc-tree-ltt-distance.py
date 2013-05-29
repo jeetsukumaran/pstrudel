@@ -39,13 +39,27 @@ def compare_almost_equal_vectors(label, comparison_name, expected, observed, che
                 ov = "{:.22f}".format(observed[idx])
             sys.stderr.write("    {:03d}: {}    {}\n".format(idx, ev, ov))
         return 1
-    else:
-        return 0
+    fails = 0
+    for idx in range(max(len(expected), len(observed))):
+        ev = expected[idx]
+        ov = observed[idx]
+        if abs(ev - ov) > check_precision:
+            fails += 1
+            leader = "{} FAIL:".format(comparison_name)
+            sys.stderr.write("{}   Index {:03d} (Max={:03d}): {:.22f}    {:.22f}\n".format(leader, idx, len(expected)-1, ev, ov))
+    return fails
 
 def preprocess_tree(tree, num_transects=None):
     tree_length = tree.length()
     num_leaves = len(tree.leaf_nodes())
+    min_edge_length = None
+    for edge in tree.postorder_edge_iter():
+        if edge.length > 0.0 and (min_edge_length > edge.length or min_edge_length is None):
+            min_edge_length = edge.length
+    if min_edge_length is None:
+        min_edge_length = 0
     max_leaf_distance_from_root = tree.minmax_leaf_distance_from_root()[1]
+    max_leaf_distance_from_root = max_leaf_distance_from_root - (float(min_edge_length)/1e3) # account for error
     if not num_transects:
         num_transects = (num_leaves - 1) * 10
     offset_step = float(max_leaf_distance_from_root) / num_transects

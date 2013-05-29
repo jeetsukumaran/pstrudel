@@ -163,7 +163,8 @@ class LineageThroughTimeProfileCalculator {
             , lineage_accumulation_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , scaled_lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
-            , max_leaf_distance_(0.0) { }
+            , max_leaf_distance_(0.0)
+            , min_edge_length_(-1.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
         double get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other);
         double get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
@@ -196,6 +197,7 @@ class LineageThroughTimeProfileCalculator {
         Profile           lineage_splitting_time_profile_;
         Profile           scaled_lineage_splitting_time_profile_;
         double            max_leaf_distance_;
+        double            min_edge_length_;
 
 }; // LineageThroughTimeProfileCalculator
 
