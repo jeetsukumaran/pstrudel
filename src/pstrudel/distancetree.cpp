@@ -273,7 +273,6 @@ const Profile & LineageThroughTimeProfileCalculator::build_lineage_accumulation_
     for (auto & n : num_lineages) {
         n = n / num_tips;
     }
-    // std::cout << ">>> " << num_lineages.size() << ", " << transect_offsets.size() << std::endl;
     this->lineage_accumulation_through_time_profile_.set_data(num_lineages.begin(), num_lineages.end(), false);
     return this->lineage_accumulation_through_time_profile_;
 }
@@ -340,9 +339,10 @@ DistanceTree::DistanceTree(bool is_rooted)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
+          , B1_(0.0)
+          , colless_tree_imbalance_(0.0)
           , pybus_harvey_gamma_(0.0)
           , N_bar_(0.0)
-          , colless_tree_imbalance_(0.0)
           , treeness_(0.0) {
 }
 
@@ -353,11 +353,11 @@ DistanceTree::DistanceTree(DistanceTree && other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
-          , B1_(0.0)
-          , colless_tree_imbalance_(0.0)
-          , pybus_harvey_gamma_(0.0)
-          , N_bar_(0.0)
-          , treeness_(0.0) {
+          , B1_(other.B1_)
+          , colless_tree_imbalance_(other.colless_tree_imbalance_)
+          , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
+          , N_bar_(other.N_bar_)
+          , treeness_(other.treeness_) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
@@ -370,11 +370,11 @@ DistanceTree::DistanceTree(const DistanceTree & other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
-          , B1_(0.0)
-          , colless_tree_imbalance_(0.0)
-          , pybus_harvey_gamma_(0.0)
-          , N_bar_(0.0)
-          , treeness_(0.0) {
+          , B1_(other.B1_)
+          , colless_tree_imbalance_(other.colless_tree_imbalance_)
+          , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
+          , N_bar_(other.N_bar_)
+          , treeness_(other.treeness_) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
@@ -479,7 +479,7 @@ std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
 }
 
 double DistanceTree::get_pybus_harvey_gamma() {
-    if (this->pybus_harvey_gamma_ == 0.0) {
+    if (this->pybus_harvey_gamma_ <= 0.0) {
         if (this->number_of_tips_ == 0) {
             this->calc_num_tips();
         }
@@ -517,7 +517,7 @@ double DistanceTree::get_pybus_harvey_gamma() {
 }
 
 double DistanceTree::get_N_bar() {
-    if (this->N_bar_ == 0.0) {
+    if (this->N_bar_ <= 0.0) {
         unsigned long leaf_count = 0;
         double nbar = 0.0;
         for (auto nd = this->leaf_begin(); nd != this->leaf_end(); ++nd) {
@@ -534,7 +534,7 @@ double DistanceTree::get_N_bar() {
 }
 
 double DistanceTree::get_colless_tree_imbalance() {
-    if (this->colless_tree_imbalance_ == 0.0) {
+    if (this->colless_tree_imbalance_ <= 0.0) {
         double colless = 0.0;
         if (this->begin()->get_num_leaves() == 0) {
             this->symmetric_difference_calculator_.calc_subtree_leaf_set_sizes();
@@ -555,7 +555,7 @@ double DistanceTree::get_colless_tree_imbalance() {
 }
 
 double DistanceTree::get_B1() {
-    if (this->B1_ == 0.0) {
+    if (this->B1_ <= 0.0) {
         double b1 = 0.0;
         std::map<DistanceTree::value_type *, double> nd_mi;
         for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
@@ -584,7 +584,7 @@ double DistanceTree::get_B1() {
 }
 
 double DistanceTree::get_treeness() {
-    if (this->treeness_ == 0.0) {
+    if (this->treeness_ <= 0.0) {
         double internal = 0.0;
         double external = 0.0;
         for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
