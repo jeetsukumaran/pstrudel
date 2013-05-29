@@ -534,6 +534,21 @@ double DistanceTree::get_N_bar() {
 }
 
 double DistanceTree::get_colless_tree_imbalance() {
+    if (this->colless_tree_imbalance_ == 0.0) {
+        double colless = 0.0;
+        if (this->begin()->get_num_leaves() == 0) {
+            this->symmetric_difference_calculator_.calc_subtree_leaf_set_sizes();
+        }
+        for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
+            if (nd.is_leaf()) {
+                continue;
+            }
+            unsigned long left = nd.first_child().get_num_leaves();
+            unsigned long right = nd.last_child().get_num_leaves();
+            colless += std::abs(right-left);
+        }
+        this->colless_tree_imbalance_ = colless * (2.0/(this->number_of_tips_ * (this->number_of_tips_-3) + 2));
+    }
     return this->colless_tree_imbalance_;
 }
 

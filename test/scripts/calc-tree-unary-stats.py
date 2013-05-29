@@ -97,6 +97,14 @@ def main():
             rep_nbar,
             args.precision)
 
+    rep_colless = float(stdin_lines.pop(0))
+    fails += compare_almost_equal(
+            args.label,
+            "Colless' Imbalance",
+            tree.colless_tree_imbalance(),
+            rep_colless,
+            args.precision)
+
     if fails > 0:
         sys.exit(1)
     else:

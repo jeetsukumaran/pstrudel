@@ -37,6 +37,8 @@ int test_file(const std::string & test_data_filename,
         o << "\n";
         o << std::fixed << std::setprecision(22) << tree.get_N_bar();
         o << "\n";
+        o << std::fixed << std::setprecision(22) << tree.get_colless_tree_imbalance();
+        o << "\n";
 
         colugo::Subprocess ps({"python", CHECK_SCRIPT, "-f", "newick", "-l", label});
         auto result = ps.communicate(o.str());
