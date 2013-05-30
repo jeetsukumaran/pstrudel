@@ -265,6 +265,9 @@ void write_normalized_results(platypus::DataTable & results_table,
         } else {
             normalized_results_table.add_data_column<double>(col->get_label(), col->get_formatting());
             max_vals[col->get_label()] = results_table.column(col->get_label()).max<double>();
+            if (max_vals[col->get_label()] == 0.0) {
+                max_vals[col->get_label()] = 1.0;
+            }
         }
     }
     unsigned long row_idx = 0;
