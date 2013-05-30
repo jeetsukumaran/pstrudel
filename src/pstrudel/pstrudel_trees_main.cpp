@@ -528,6 +528,18 @@ int main(int argc, const char * argv[]) {
         std::ifstream src(reference_trees_full_filepath);
         get_trees(reference_trees, src, reference_trees_full_filepath, format, 0);
         logger.info(reference_trees.size(), " trees read from '", reference_trees_full_filepath, "'");
+
+        std::string stored_reference_filepath;
+        if (add_tree_source_key == 1) {
+            stored_reference_filepath = "1";
+        } else if (add_tree_source_key <= 2) {
+            stored_reference_filepath = colugo::filesys::get_path_leaf(reference_trees_full_filepath);
+        } else if (add_tree_source_key <= 3) {
+            stored_reference_filepath = reference_trees_filepath;
+        } else if (add_tree_source_key <= 4) {
+            stored_reference_filepath = reference_trees_full_filepath;
+        }
+
         platypus::DataTable results_table;
         if (!analysis_label.empty()) {
             results_table.add_key_column<std::string>("analysis");
@@ -543,6 +555,9 @@ int main(int argc, const char * argv[]) {
                     results_table,
                     col_formatting,
                     true);
+        }
+        if (add_tree_source_key) {
+            results_table.add_key_column<std::string>("reference.tree.file");
         }
         results_table.add_key_column<unsigned long>("reference.tree.idx");
         pstrudel::DistanceTree::add_results_data_columns(
@@ -590,6 +605,9 @@ int main(int argc, const char * argv[]) {
                 if (add_tree_source_key) {
                     results_table_row.set("tree.i.source.file", ctree.get_filepath());
                     results_table_row.set("tree.i.source.tree", ctree.get_file_tree_index()+1);
+                }
+                if (add_tree_source_key) {
+                    results_table_row.set("reference.tree.file", stored_reference_filepath);
                 }
                 results_table_row.set("reference.tree.idx", reference_tree_idx+1);
                 if (calculate_unary_statistics) {
