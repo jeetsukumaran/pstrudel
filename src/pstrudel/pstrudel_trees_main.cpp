@@ -336,6 +336,7 @@ int main(int argc, const char * argv[]) {
     std::string      default_output_filename_stem            = "pstrudel-trees";
     std::string      output_prefix                           = default_output_filename_stem;
     bool             create_aggregated_comparison_trees_copy = false;
+    unsigned long    output_precision                        = 22;
     bool             suppress_header_row                     = false;
     unsigned int     add_tree_source_key                     = 0;
     std::string      analysis_label;
@@ -417,6 +418,9 @@ int main(int argc, const char * argv[]) {
             nullptr,
             "Output Options"
             );
+    parser.add_option<unsigned long>(&output_precision, nullptr, "--output-precision",
+            "Number of digits of precision in output (default=%default).",
+            "NUM-DIGITS", "Output Options");
     parser.add_option<unsigned int>(&add_tree_source_key, nullptr, "--add-tree-source-key",
             "Add a column in the results identifying the filename of the source of the tree(s) being compared:"
             " 1: value is index of file; 2: value is basename of file; 3: value is relative path of file;"
@@ -544,7 +548,7 @@ int main(int argc, const char * argv[]) {
         logger.info(comparison_trees.size(), " trees read from ", args.size(), " file(s)");
     }
 
-    platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(DEFAULT_PRECISION)};
+    platypus::stream::OutputStreamFormatters col_formatting{std::fixed, std::setprecision(output_precision)};
 
     // reference distances
     if (!reference_trees_filepath.empty()) {
@@ -770,7 +774,7 @@ int main(int argc, const char * argv[]) {
             logger.info("Writing canonical tree cross-distances");
             platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
             ref_tree_writer.set_suppress_edge_lengths(false);
-            ref_tree_writer.set_edge_length_precision(DEFAULT_PRECISION);
+            ref_tree_writer.set_edge_length_precision(output_precision);
             platypus::bind_standard_interface(ref_tree_writer);
             for (auto & tpi : tree_patterns) {
                 std::string prefix = output_prefix + "canonical.n" + std::to_string(tpi.first) + ".";
