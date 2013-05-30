@@ -335,7 +335,7 @@ int main(int argc, const char * argv[]) {
     bool             calculate_unary_statistics_differences  = false;
     std::string      default_output_filename_stem            = "pstrudel-trees";
     std::string      output_prefix                           = default_output_filename_stem;
-    bool             create_aggregated_comparison_trees_copy = false;
+    // bool             create_aggregated_comparison_trees_copy = false;
     unsigned long    output_precision                        = 22;
     bool             suppress_header_row                     = false;
     unsigned int     add_tree_source_key                     = 0;
@@ -433,9 +433,9 @@ int main(int argc, const char * argv[]) {
     parser.add_switch(&suppress_header_row, nullptr, "--suppress-header-row",
             "Do not write column/field name row in results.",
             nullptr, "Output Options");
-    parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
-            "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
-            nullptr, "Output Options");
+    // parser.add_switch(&create_aggregated_comparison_trees_copy, nullptr, "--save-comparison-trees",
+    //         "Save a copy of the comparison trees in a file (aggregating them from across multiple files if multiple source files specified).",
+    //         nullptr, "Output Options");
     parser.add_switch(&quiet, "-q", "--quiet", "Suppress all informational/progress messages.",
             nullptr, "Run Options");
     parser.parse(argc, argv);
@@ -469,9 +469,9 @@ int main(int argc, const char * argv[]) {
     }
     std::map<std::string, std::string> output_filepaths;
     output_filepaths["log"] = output_prefix + "log";
-    if (create_aggregated_comparison_trees_copy) {
-        output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
-    }
+    // if (create_aggregated_comparison_trees_copy) {
+    //     output_filepaths["comparison-trees"] = output_prefix + "comparison.trees";
+    // }
     if (calculate_canonical_distances) {
         output_filepaths["canonical-distances"] = output_prefix + "canonical.distances.txt";
         output_filepaths["canonical-distances-stacked"] = output_prefix + "canonical.distances.stacked.txt";
