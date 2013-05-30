@@ -187,13 +187,17 @@ template <class TreeT>
                 T & other_tree,
                 R & row,
                 bool scale_by_tree_length,
-                bool calculate_symmetric_diff) {
+                bool calculate_symmetric_diff,
+                bool calculate_unary_statistics) {
             auto tpi = this->tree_patterns_.find(tree_pattern_name);
             if (tpi == this->tree_patterns_.end()) {
                 colugo::console::abort("Invalid tree pattern name: '", tree_pattern_name, "'");
             }
             auto & tree_pattern = tpi->second;
             row.set("canonical.tree.pattern", tree_pattern_name);
+            if (calculate_unary_statistics) {
+                tree_pattern.tabulate_unary_statistics("canonical.tree.", row);
+            }
             tree_pattern.tabulate_distances(
                     other_tree,
                     row,
@@ -213,8 +217,16 @@ template <class TreeT>
     public:
         static void add_canonical_columns(platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
-                bool calculate_symmetric_diff) {
+                bool calculate_symmetric_diff,
+                bool calculate_unary_statistics) {
             table.add_key_column<std::string>("canonical.tree.pattern");
+            if (calculate_unary_statistics) {
+                pstrudel::DistanceTree::add_unary_statistic_columns(
+                        "canonical.tree.",
+                        table,
+                        col_formatters,
+                        true);
+            }
             pstrudel::DistanceTree::add_results_data_columns(
                     table,
                     col_formatters,
@@ -560,6 +572,13 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("reference.tree.file");
         }
         results_table.add_key_column<unsigned long>("reference.tree.idx");
+        if (calculate_unary_statistics) {
+            pstrudel::DistanceTree::add_unary_statistic_columns(
+                    "reference.",
+                    results_table,
+                    col_formatting,
+                    true);
+        }
         pstrudel::DistanceTree::add_results_data_columns(
                 results_table,
                 col_formatting,
@@ -618,6 +637,9 @@ int main(int argc, const char * argv[]) {
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff);
+                if (calculate_unary_statistics) {
+                    reference_tree.tabulate_unary_statistics("reference.", results_table_row);
+                }
                 ++reference_tree_idx;
                 ++comparison_count;
             } // for each reference tree
@@ -680,6 +702,7 @@ int main(int argc, const char * argv[]) {
                     col_formatting,
                     true);
         }
+        CanonicalTreePatterns::add_canonical_columns(results_table, col_formatting, calculate_symmetric_diff, calculate_unary_statistics);
         unsigned long log_frequency = comparison_trees.size() / 10;
         logger.info("Beginning calculating distances between comparison trees and canonical tree patterns");
         if (scale_by_tree_length) {
@@ -688,7 +711,6 @@ int main(int argc, const char * argv[]) {
             logger.info("Edge lengths will NOT be scaled to tree length");
         }
         std::map<unsigned long, CanonicalTreePatterns> tree_patterns;
-        CanonicalTreePatterns::add_canonical_columns(results_table, col_formatting, calculate_symmetric_diff);
         unsigned long comparison_tree_idx = 0;
         for (auto & comparison_tree : comparison_trees) { // tree comparison
             auto comparison_tree_size = comparison_tree.get_num_tips();
@@ -718,7 +740,8 @@ int main(int argc, const char * argv[]) {
                         comparison_tree,
                         results_table_row,
                         scale_by_tree_length,
-                        calculate_symmetric_diff);
+                        calculate_symmetric_diff,
+                        calculate_unary_statistics);
             }
             comparison_tree_idx += 1;
         } // tree comparison
