@@ -318,8 +318,18 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 T & other_tree,
                 R & row,
                 bool scale_by_tree_length,
-                bool calculate_symmetric_diff) {
+                bool calculate_symmetric_diff,
+                bool calculate_unary_statistics_differences) {
             double d = 0.0;
+            if (calculate_unary_statistics_differences) {
+                row.set("diff.ntips"             , std::abs(this->number_of_tips_ - other_tree.number_of_tips_));
+                row.set("diff.length"            , std::abs(this->total_tree_length_ - other_tree.total_tree_length_));
+                row.set("diff.B1"                , std::abs(this->get_B1() - other_tree.get_B1()));
+                row.set("diff.colless.imbalance" , std::abs(this->get_colless_tree_imbalance() - other_tree.get_colless_tree_imbalance()));
+                row.set("diff.gamma"             , std::abs(this->get_pybus_harvey_gamma() - other_tree.get_pybus_harvey_gamma()));
+                row.set("diff.N.bar"             , std::abs(this->get_N_bar() - other_tree.get_N_bar()));
+                row.set("diff.treeness"          , std::abs(this->get_treeness() - other_tree.get_treeness()));
+            }
             d = this->get_unweighted_pairwise_tip_profile_distance(other_tree);
             row.set("pwtd.uw", d);
             d = this->get_lineage_accumulation_profile_distance(other_tree);
@@ -360,7 +370,14 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         static void add_results_data_columns(
                 platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
-                bool calculate_symmetric_diff) {
+                bool calculate_symmetric_diff,
+                bool calculate_unary_statistics_differences) {
+            if (calculate_unary_statistics_differences) {
+                DistanceTree::add_unary_statistic_columns("diff.",
+                        table,
+                        col_formatters,
+                        false);
+            }
             for (auto & y_distance_name : DistanceTree::tree_pattern_y_distance_names_) {
                 table.add_data_column<double>(y_distance_name, col_formatters);
             }
