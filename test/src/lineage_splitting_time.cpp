@@ -4,18 +4,18 @@
 #include <colugo/subprocess.hpp>
 #include <platypus/serialize/newick.hpp>
 #include <pstrudel/dataio.hpp>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include "pstrudel_testing.hpp"
 
 std::string TEST_DIR;
 std::string CHECK_SCRIPT;
 static const unsigned long DEFAULT_NUM_TIPS = 50;
-platypus::NewickWriter<pstrudel::DistanceTree> TREE_WRITER;
+platypus::NewickWriter<pstrudel::TreeShape> TREE_WRITER;
 
 int test_file(const std::string & test_data_filepath,
         const std::string & label_prefix) {
     int fails = 0;
-    std::vector<pstrudel::DistanceTree>  trees;
+    std::vector<pstrudel::TreeShape>  trees;
     pstrudel::treeio::read_from_filepath(trees, test_data_filepath, "nexus");
     unsigned long tree_idx = 0;
     for (auto & tree : trees) {

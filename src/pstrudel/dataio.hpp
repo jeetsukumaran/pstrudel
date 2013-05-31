@@ -315,31 +315,31 @@ void write_nexus(std::vector<TreeT>& trees,
 // //     return tree_count;
 // // }
 
-// pstrudel::treeio::read_from_stream<pstrudel::PairwiseDistanceTree>(
+// pstrudel::treeio::read_from_stream<pstrudel::PairwiseTreeShape>(
 //         src,
 //         format,
-//         [&trees] () -> pstrudel::PairwiseDistanceTree& { trees.emplace_back(); return trees.back(); },
-//         &pstrudel::PairwiseDistanceTree::value_type::set_label,
-//         &pstrudel::PairwiseDistanceTree::value_type::set_edge_length);
+//         [&trees] () -> pstrudel::PairwiseTreeShape& { trees.emplace_back(); return trees.back(); },
+//         &pstrudel::PairwiseTreeShape::value_type::set_label,
+//         &pstrudel::PairwiseTreeShape::value_type::set_edge_length);
 
-// pstrudel::treeio::read_from_stream<pstrudel::PairwiseDistanceTree>(
+// pstrudel::treeio::read_from_stream<pstrudel::PairwiseTreeShape>(
 //         src,
 //         format,
-//         [&trees] () -> pstrudel::PairwiseDistanceTree& { trees.emplace_back(); return trees.back(); },
-//         [] (pstrudel::PairwiseDistanceTree& tree, bool is_rooted) { tree.set_rooted(is_rooted); },
-//         [] (pstrudel::PairwiseDistanceTree::value_type& node, const std::string& label) { node.set_label(label); },
-//         [] (pstrudel::PairwiseDistanceTree::value_type& node, double edge_length) { node.set_edge_length(edge_length); },
-//         [] (pstrudel::PairwiseDistanceTree& tree) -> pstrudel::PairwiseDistanceTree::node_type * {return tree.create_node(); },
-//         [] (pstrudel::PairwiseDistanceTree& tree) -> pstrudel::PairwiseDistanceTree::node_type * {return tree.create_node(); }
+//         [&trees] () -> pstrudel::PairwiseTreeShape& { trees.emplace_back(); return trees.back(); },
+//         [] (pstrudel::PairwiseTreeShape& tree, bool is_rooted) { tree.set_rooted(is_rooted); },
+//         [] (pstrudel::PairwiseTreeShape::value_type& node, const std::string& label) { node.set_label(label); },
+//         [] (pstrudel::PairwiseTreeShape::value_type& node, double edge_length) { node.set_edge_length(edge_length); },
+//         [] (pstrudel::PairwiseTreeShape& tree) -> pstrudel::PairwiseTreeShape::node_type * {return tree.create_node(); },
+//         [] (pstrudel::PairwiseTreeShape& tree) -> pstrudel::PairwiseTreeShape::node_type * {return tree.create_node(); }
 //         );
 
-// pstrudel::treeio::read_from_stream<pstrudel::PairwiseDistanceTree>(
+// pstrudel::treeio::read_from_stream<pstrudel::PairwiseTreeShape>(
 //         src,
 //         format,
-//         [&trees] () -> pstrudel::PairwiseDistanceTree& { trees.emplace_back(); return trees.back(); },
-//         [] (pstrudel::PairwiseDistanceTree& tree, bool is_rooted) { tree.set_rooted(is_rooted); },
-//         [] (pstrudel::PairwiseDistanceTree::value_type& node, const std::string& label) { node.set_label(label); },
-//         [] (pstrudel::PairwiseDistanceTree::value_type& node, double edge_length) { node.set_edge_length(edge_length); }
+//         [&trees] () -> pstrudel::PairwiseTreeShape& { trees.emplace_back(); return trees.back(); },
+//         [] (pstrudel::PairwiseTreeShape& tree, bool is_rooted) { tree.set_rooted(is_rooted); },
+//         [] (pstrudel::PairwiseTreeShape::value_type& node, const std::string& label) { node.set_label(label); },
+//         [] (pstrudel::PairwiseTreeShape::value_type& node, double edge_length) { node.set_edge_length(edge_length); }
 //         );
 
 /**

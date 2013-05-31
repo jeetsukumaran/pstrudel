@@ -4,17 +4,17 @@
 #include <colugo/subprocess.hpp>
 #include <platypus/model/treepattern.hpp>
 #include <platypus/serialize/newick.hpp>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include "pstrudel_testing.hpp"
 
 std::string TEST_DIR;
 std::string CHECK_SCRIPT;
 static const unsigned long DEFAULT_NUM_TIPS = 50;
-platypus::NewickWriter<pstrudel::DistanceTree> TREE_WRITER;
+platypus::NewickWriter<pstrudel::TreeShape> TREE_WRITER;
 
-pstrudel::DistanceTree generate_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
-    pstrudel::DistanceTree tree;
-    std::vector<pstrudel::DistanceTree::value_type> leaves;
+pstrudel::TreeShape generate_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
+    pstrudel::TreeShape tree;
+    std::vector<pstrudel::TreeShape::value_type> leaves;
     leaves.reserve(ntips);
     for (unsigned long i = 0; i < ntips; ++i) {
         leaves.emplace_back();
@@ -25,7 +25,7 @@ pstrudel::DistanceTree generate_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_
     return tree;
 }
 
-int check_tree(pstrudel::DistanceTree & tree, int regime, const std::string & label) {
+int check_tree(pstrudel::TreeShape & tree, int regime, const std::string & label) {
     std::string regime_arg;
     if (regime == 0) {
         regime_arg = "mean-coalescent";

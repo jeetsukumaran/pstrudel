@@ -2,12 +2,12 @@
 #include <string>
 #include <iostream>
 #include <platypus/parse/newick.hpp>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include <pstrudel/dataio.hpp>
 #include "pstrudel_testing.hpp"
 
 int main(int argc, const char * argv[]) {
-    typedef pstrudel::DistanceTree  TreeType;
+    typedef pstrudel::TreeShape  TreeType;
     std::vector<TreeType>  trees;
     std::string test_dir = pstrudel::test::get_test_dir(argv[0]);
     std::string test_data_filepath = pstrudel::test::join_path(test_dir, "data", "trees", "general", "n10-rooted-patterns.nex");

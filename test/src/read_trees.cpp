@@ -1,11 +1,11 @@
 #include <vector>
 #include <iostream>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include <pstrudel/dataio.hpp>
 #include "pstrudel_testing.hpp"
 
 int main() {
-    typedef pstrudel::DistanceTree  TreeType;
+    typedef pstrudel::TreeShape  TreeType;
     std::vector<TreeType>  trees;
     pstrudel::treeio::read_from_filepath(trees, "data/trees/general/n06-rooted-patterns.nex", "nexus");
     int fails = 0;

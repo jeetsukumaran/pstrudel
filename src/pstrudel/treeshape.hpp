@@ -98,7 +98,7 @@ class DistanceNodeValue : public platypus::StandardNodeValue<double> {
 //////////////////////////////////////////////////////////////////////////////
 // forward declaration
 
-class DistanceTree;
+class TreeShape;
 
 //////////////////////////////////////////////////////////////////////////////
 // PairwiseTipDistanceProfileCalculator
@@ -106,7 +106,7 @@ class DistanceTree;
 class PairwiseTipDistanceProfileCalculator {
 
     public:
-        PairwiseTipDistanceProfileCalculator(DistanceTree & tree)
+        PairwiseTipDistanceProfileCalculator(TreeShape & tree)
             : tree_(tree) { }
         PairwiseTipDistanceProfileCalculator & operator=(const PairwiseTipDistanceProfileCalculator & other);
         double get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other);
@@ -117,7 +117,7 @@ class PairwiseTipDistanceProfileCalculator {
         void build_pairwise_tip_distance_profiles();
 
     private:
-        DistanceTree &    tree_;
+        TreeShape &    tree_;
         Profile           unweighted_pairwise_tip_distance_profile_;
         Profile           weighted_pairwise_tip_distance_profile_;
         Profile           scaled_weighted_pairwise_tip_distance_profile_;
@@ -132,7 +132,7 @@ class SymmetricDifferenceCalculator {
         typedef std::unordered_multiset<unsigned long> SizesSetType;
 
     public:
-        SymmetricDifferenceCalculator(DistanceTree & tree)
+        SymmetricDifferenceCalculator(TreeShape & tree)
             : tree_(tree) { }
         SymmetricDifferenceCalculator & operator=(const SymmetricDifferenceCalculator & other);
         void calc_subtree_leaf_set_sizes();
@@ -148,7 +148,7 @@ class SymmetricDifferenceCalculator {
                 SizesSetType * unmatched2 = nullptr);
 
     private:
-        DistanceTree &    tree_;
+        TreeShape &    tree_;
         SizesSetType      subtree_leaf_set_sizes_;
 }; // SymmetricDifferenceCalculator
 
@@ -158,7 +158,7 @@ class SymmetricDifferenceCalculator {
 class LineageThroughTimeProfileCalculator {
 
     public:
-        LineageThroughTimeProfileCalculator(DistanceTree & tree)
+        LineageThroughTimeProfileCalculator(TreeShape & tree)
             : tree_(tree)
             , lineage_accumulation_through_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
             , lineage_splitting_time_profile_(0, Profile::InterpolationMethod::STAIRCASE)
@@ -192,7 +192,7 @@ class LineageThroughTimeProfileCalculator {
         std::pair<const Profile &, const Profile &> build_lineage_splitting_time_profile();
 
     protected:
-        DistanceTree &    tree_;
+        TreeShape &    tree_;
         Profile           lineage_accumulation_through_time_profile_;
         Profile           lineage_splitting_time_profile_;
         Profile           scaled_lineage_splitting_time_profile_;
@@ -203,9 +203,9 @@ class LineageThroughTimeProfileCalculator {
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// DistanceTree
+// TreeShape
 
-class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
+class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
 
     public:
         typedef DistanceNodeValue value_type;
@@ -216,11 +216,11 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         /////////////////////////////////////////////////////////////////////////
         // Lifecycle and assignment
 
-        DistanceTree(bool is_rooted=true);
-        DistanceTree(DistanceTree && other);
-        DistanceTree(const DistanceTree & other);
-        DistanceTree & operator=(const DistanceTree & other);
-        ~DistanceTree() override {}
+        TreeShape(bool is_rooted=true);
+        TreeShape(TreeShape && other);
+        TreeShape(const TreeShape & other);
+        TreeShape & operator=(const TreeShape & other);
+        ~TreeShape() override {}
 
         /////////////////////////////////////////////////////////////////////////
         // Basic metrics
@@ -270,13 +270,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         // Calculators
 
         // pairwise tup profile
-        double get_unweighted_pairwise_tip_profile_distance(DistanceTree & other) {
+        double get_unweighted_pairwise_tip_profile_distance(TreeShape & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_unweighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
-        double get_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
+        double get_weighted_pairwise_tip_profile_distance(TreeShape & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
-        double get_scaled_weighted_pairwise_tip_profile_distance(DistanceTree & other) {
+        double get_scaled_weighted_pairwise_tip_profile_distance(TreeShape & other) {
             return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
         }
 
@@ -284,13 +284,13 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         LineageThroughTimeProfileCalculator & get_lineage_through_time_calculator() {
             return this->lineage_through_time_calculator_;
         }
-        double get_lineage_accumulation_profile_distance(DistanceTree & other) {
+        double get_lineage_accumulation_profile_distance(TreeShape & other) {
             return this->lineage_through_time_calculator_.get_lineage_accumulation_profile_distance(other.lineage_through_time_calculator_);
         }
-        double get_lineage_splitting_time_profile_distance(DistanceTree & other) {
+        double get_lineage_splitting_time_profile_distance(TreeShape & other) {
             return this->lineage_through_time_calculator_.get_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
         }
-        double get_scaled_lineage_splitting_time_profile_distance(DistanceTree & other) {
+        double get_scaled_lineage_splitting_time_profile_distance(TreeShape & other) {
             return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
         }
 
@@ -298,7 +298,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         SymmetricDifferenceCalculator & get_symmetric_difference_calculator() {
             return this->symmetric_difference_calculator_;
         }
-        unsigned long get_unlabeled_symmetric_difference(DistanceTree & other) {
+        unsigned long get_unlabeled_symmetric_difference(TreeShape & other) {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
@@ -373,12 +373,12 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
                 bool calculate_symmetric_diff,
                 bool calculate_unary_statistics_differences) {
             if (calculate_unary_statistics_differences) {
-                DistanceTree::add_unary_statistic_columns("diff.",
+                TreeShape::add_unary_statistic_columns("diff.",
                         table,
                         col_formatters,
                         false);
             }
-            for (auto & y_distance_name : DistanceTree::tree_pattern_y_distance_names_) {
+            for (auto & y_distance_name : TreeShape::tree_pattern_y_distance_names_) {
                 table.add_data_column<double>(y_distance_name, col_formatters);
             }
             if (calculate_symmetric_diff) {
@@ -429,7 +429,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         }
 
     private:
-        std::vector<DistanceTree::node_type *> get_nodes_in_level_order();
+        std::vector<TreeShape::node_type *> get_nodes_in_level_order();
 
     private:
         unsigned long                            number_of_tips_;
@@ -444,7 +444,7 @@ class DistanceTree : public platypus::StandardTree<DistanceNodeValue> {
         double                                   N_bar_;
         double                                   treeness_;
 
-}; // DistanceTree
+}; // TreeShape
 
 
 

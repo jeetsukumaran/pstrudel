@@ -11,14 +11,14 @@
 #include "dataio.hpp"
 #include "split.hpp"
 #include "pstrudel.hpp"
-#include "distancetree.hpp"
+#include "treeshape.hpp"
 
 const unsigned long DEFAULT_PRECISION = 22;
 
 //////////////////////////////////////////////////////////////////////////////
 // WorkingTree
 
-class WorkingTree : public pstrudel::DistanceTree {
+class WorkingTree : public pstrudel::TreeShape {
 
     public:
         WorkingTree(const std::string & filepath, unsigned long file_index=0)
@@ -112,8 +112,8 @@ template <class TreeT>
 
     class CanonicalTreePatterns {
         public:
-            typedef pstrudel::DistanceTree                         tree_type;
-            typedef typename pstrudel::DistanceTree::value_type    value_type;
+            typedef pstrudel::TreeShape                         tree_type;
+            typedef typename pstrudel::TreeShape::value_type    value_type;
             CanonicalTreePatterns()
                     : num_tips_(0) {
             }
@@ -224,13 +224,13 @@ template <class TreeT>
                 bool calculate_unary_statistics_differences) {
             table.add_key_column<std::string>("canonical.tree.pattern");
             if (calculate_unary_statistics) {
-                pstrudel::DistanceTree::add_unary_statistic_columns(
+                pstrudel::TreeShape::add_unary_statistic_columns(
                         "canonical.tree.",
                         table,
                         col_formatters,
                         true);
             }
-            pstrudel::DistanceTree::add_results_data_columns(
+            pstrudel::TreeShape::add_results_data_columns(
                     table,
                     col_formatters,
                     calculate_symmetric_diff,
@@ -239,7 +239,7 @@ template <class TreeT>
 
     private:
         unsigned long                                    num_tips_;
-        std::map<std::string, pstrudel::DistanceTree>    tree_patterns_;
+        std::map<std::string, pstrudel::TreeShape>    tree_patterns_;
         platypus::DataTable                              tree_pattern_cross_distances_;
         // std::map<std::string, double>                    max_unweighted_pairwise_tip_profile_distance_;
         // std::map<std::string, double>                    max_weighted_pairwise_tip_profile_distance_;
@@ -580,7 +580,7 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<unsigned long>("tree.i.source.tree");
         }
         if (calculate_unary_statistics) {
-            pstrudel::DistanceTree::add_unary_statistic_columns(
+            pstrudel::TreeShape::add_unary_statistic_columns(
                     "",
                     results_table,
                     col_formatting,
@@ -591,13 +591,13 @@ int main(int argc, const char * argv[]) {
         }
         results_table.add_key_column<unsigned long>("reference.tree.idx");
         if (calculate_unary_statistics) {
-            pstrudel::DistanceTree::add_unary_statistic_columns(
+            pstrudel::TreeShape::add_unary_statistic_columns(
                     "reference.",
                     results_table,
                     col_formatting,
                     true);
         }
-        pstrudel::DistanceTree::add_results_data_columns(
+        pstrudel::TreeShape::add_results_data_columns(
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff,
@@ -607,7 +607,7 @@ int main(int argc, const char * argv[]) {
         // unsigned long reference_tree_idx = 0;
         // for (auto & reference_tree : reference_trees) {
         //     std::string reference_tree_label = ".t" + std::to_string(reference_tree_idx+1);
-        //     pstrudel::DistanceTree::add_results_data_columns(
+        //     pstrudel::TreeShape::add_results_data_columns(
         //             reference_tree_label,
         //             results_table,
         //             col_formatting,
@@ -717,7 +717,7 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<std::string>("source.tree");
         }
         if (calculate_unary_statistics) {
-            pstrudel::DistanceTree::add_unary_statistic_columns(
+            pstrudel::TreeShape::add_unary_statistic_columns(
                     "",
                     results_table,
                     col_formatting,
@@ -772,7 +772,7 @@ int main(int argc, const char * argv[]) {
         // output canonical info
         {
             logger.info("Writing canonical tree cross-distances");
-            platypus::NewickWriter<pstrudel::DistanceTree> ref_tree_writer;
+            platypus::NewickWriter<pstrudel::TreeShape> ref_tree_writer;
             ref_tree_writer.set_suppress_edge_lengths(false);
             ref_tree_writer.set_edge_length_precision(output_precision);
             platypus::bind_standard_interface(ref_tree_writer);
@@ -831,7 +831,7 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<unsigned long>("tree.i.source.tree");
         }
         if (calculate_unary_statistics) {
-            pstrudel::DistanceTree::add_unary_statistic_columns(
+            pstrudel::TreeShape::add_unary_statistic_columns(
                     "tree.i.",
                     results_table,
                     col_formatting,
@@ -843,7 +843,7 @@ int main(int argc, const char * argv[]) {
             results_table.add_key_column<unsigned long>("tree.j.source.tree");
         }
         if (calculate_unary_statistics) {
-            pstrudel::DistanceTree::add_unary_statistic_columns(
+            pstrudel::TreeShape::add_unary_statistic_columns(
                     "tree.j.",
                     results_table,
                     col_formatting,
@@ -853,7 +853,7 @@ int main(int argc, const char * argv[]) {
         results_table.add_key_column<std::string>("comp.type");
         results_table.add_key_column<std::string>("comp.class");
 
-        pstrudel::DistanceTree::add_results_data_columns(
+        pstrudel::TreeShape::add_results_data_columns(
                 results_table,
                 col_formatting,
                 calculate_symmetric_diff,

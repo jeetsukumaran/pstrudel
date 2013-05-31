@@ -1,6 +1,6 @@
 SET(PSTRUDEL_MAIN_LIB_SOURCES
     character.cpp
-    distancetree.cpp
+    treeshape.cpp
     profile.cpp
     split.cpp)
 SET(PSTRUDEL_MAIN_PROG_SOURCES

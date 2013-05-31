@@ -2,7 +2,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include <platypus/numeric/rng.hpp>
 #include "pstrudel_testing.hpp"
 

@@ -5,13 +5,13 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <pstrudel/distancetree.hpp>
+#include <pstrudel/treeshape.hpp>
 #include <pstrudel/dataio.hpp>
 #include "pstrudel_testing.hpp"
 
 int main(int argc, const char * argv[]) {
 
-    typedef pstrudel::DistanceTree  TreeType;
+    typedef pstrudel::TreeShape  TreeType;
 
     std::vector<TreeType>  trees;
     std::string test_dir = pstrudel::test::get_test_dir(argv[0]);

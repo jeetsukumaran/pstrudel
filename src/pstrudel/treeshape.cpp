@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <map>
 #include <platypus/model/coalescent.hpp>
-#include "distancetree.hpp"
+#include "treeshape.hpp"
 
 namespace pstrudel {
 
@@ -349,16 +349,16 @@ std::pair<const Profile &, const Profile &> LineageThroughTimeProfileCalculator:
 }
 
 //////////////////////////////////////////////////////////////////////////////
-// DistanceTree
+// TreeShape
 
-const std::vector<std::string> DistanceTree::tree_pattern_y_distance_names_{
+const std::vector<std::string> TreeShape::tree_pattern_y_distance_names_{
         "pwtd",
         "pwtd.uw",
         "ltt",
         "lst",
 }; // static cons ttree_pattern_names_
 
-DistanceTree::DistanceTree(bool is_rooted)
+TreeShape::TreeShape(bool is_rooted)
         : platypus::StandardTree<DistanceNodeValue>(is_rooted)
           , number_of_tips_(0)
           , total_tree_length_(0.0)
@@ -372,7 +372,7 @@ DistanceTree::DistanceTree(bool is_rooted)
           , treeness_(0.0) {
 }
 
-DistanceTree::DistanceTree(DistanceTree && other)
+TreeShape::TreeShape(TreeShape && other)
         : platypus::StandardTree<DistanceNodeValue>(other)
           , number_of_tips_(other.number_of_tips_)
           , total_tree_length_(other.total_tree_length_)
@@ -389,7 +389,7 @@ DistanceTree::DistanceTree(DistanceTree && other)
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
 }
 
-DistanceTree::DistanceTree(const DistanceTree & other)
+TreeShape::TreeShape(const TreeShape & other)
         : platypus::StandardTree<DistanceNodeValue>(other)
           , number_of_tips_(other.number_of_tips_)
           , total_tree_length_(other.total_tree_length_)
@@ -406,7 +406,7 @@ DistanceTree::DistanceTree(const DistanceTree & other)
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
 }
 
-DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
+TreeShape & TreeShape::operator=(const TreeShape & other) {
     platypus::StandardTree<DistanceNodeValue>::operator=(other);
     this->number_of_tips_ = other.number_of_tips_;
     this->total_tree_length_ = other.total_tree_length_;
@@ -421,18 +421,18 @@ DistanceTree & DistanceTree::operator=(const DistanceTree & other) {
     return *this;
 }
 
-std::vector<DistanceTree::node_type *> DistanceTree::get_nodes_in_level_order() {
-    std::vector<DistanceTree::node_type *> nodes_in_level_order;
-    std::map<DistanceTree::node_type *, unsigned long> steps_from_root;
+std::vector<TreeShape::node_type *> TreeShape::get_nodes_in_level_order() {
+    std::vector<TreeShape::node_type *> nodes_in_level_order;
+    std::map<TreeShape::node_type *, unsigned long> steps_from_root;
     for (auto ndi = this->preorder_begin(); ndi != this->preorder_end(); ++ndi) {
-        DistanceTree::node_type * nptr = ndi.node();
+        TreeShape::node_type * nptr = ndi.node();
         if (ndi.parent_node() == nullptr) {
             steps_from_root[nptr] = 0;
         } else {
             steps_from_root[nptr] = steps_from_root[ndi.parent_node()] + 1;
         }
     }
-    std::multimap<unsigned long, DistanceTree::node_type *> steps_from_root_inv;
+    std::multimap<unsigned long, TreeShape::node_type *> steps_from_root_inv;
     for (auto & si : steps_from_root) {
         steps_from_root_inv.insert(std::make_pair(si.second, si.first));
     }
@@ -444,13 +444,13 @@ std::vector<DistanceTree::node_type *> DistanceTree::get_nodes_in_level_order() 
 }
 
 // type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
-void DistanceTree::add_edge_lengths(int regime) {
+void TreeShape::add_edge_lengths(int regime) {
     auto nodes_in_level_order = this->get_nodes_in_level_order();
     if (this->number_of_tips_ == 0) {
         for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi, ++this->number_of_tips_) {
         }
     }
-    std::map<DistanceTree::node_type *, double> node_ages;
+    std::map<TreeShape::node_type *, double> node_ages;
     unsigned long num_lineages = this->number_of_tips_;
     unsigned long total_lineages = num_lineages;
     double prev_age = 0.0;
@@ -483,7 +483,7 @@ void DistanceTree::add_edge_lengths(int regime) {
     }
 }
 
-std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
+std::vector<double> TreeShape::calc_node_ages(bool include_leaves) {
     std::vector<double> ages;
     ages.reserve(this->number_of_tips_ * 2);
     for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
@@ -494,7 +494,7 @@ std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
             }
         } else {
             // Assumes, and does not check, that tree is ultrametric
-            DistanceTree::value_type & ch = nd.first_child();
+            TreeShape::value_type & ch = nd.first_child();
             double age = ch.get_age() + ch.get_edge_length();
             nd->set_age(age);
             ages.push_back(age);
@@ -504,12 +504,12 @@ std::vector<double> DistanceTree::calc_node_ages(bool include_leaves) {
     return ages;
 }
 
-double DistanceTree::get_pybus_harvey_gamma() {
+double TreeShape::get_pybus_harvey_gamma() {
     if (this->pybus_harvey_gamma_ <= 0.0) {
         if (this->number_of_tips_ == 0) {
             this->calc_num_tips();
         }
-        DistanceTree::node_type * node_ptr = nullptr;
+        TreeShape::node_type * node_ptr = nullptr;
         auto node_ages = this->calc_node_ages(false);
         std::vector<double> intervals;
         if (node_ages.empty()) {
@@ -542,7 +542,7 @@ double DistanceTree::get_pybus_harvey_gamma() {
     return this->pybus_harvey_gamma_;
 }
 
-double DistanceTree::get_N_bar() {
+double TreeShape::get_N_bar() {
     if (this->N_bar_ <= 0.0) {
         unsigned long leaf_count = 0;
         double nbar = 0.0;
@@ -559,7 +559,7 @@ double DistanceTree::get_N_bar() {
     return this->N_bar_;
 }
 
-double DistanceTree::get_colless_tree_imbalance() {
+double TreeShape::get_colless_tree_imbalance() {
     if (this->colless_tree_imbalance_ <= 0.0) {
         double colless = 0.0;
         if (this->begin()->get_num_leaves() == 0) {
@@ -580,10 +580,10 @@ double DistanceTree::get_colless_tree_imbalance() {
     return this->colless_tree_imbalance_;
 }
 
-double DistanceTree::get_B1() {
+double TreeShape::get_B1() {
     if (this->B1_ <= 0.0) {
         double b1 = 0.0;
-        std::map<DistanceTree::value_type *, double> nd_mi;
+        std::map<TreeShape::value_type *, double> nd_mi;
         for (auto nd = this->postorder_begin(); nd != this->postorder_end(); ++nd) {
             double mi = 0.0;
             if (nd.parent_node() == nullptr) {
@@ -609,7 +609,7 @@ double DistanceTree::get_B1() {
     return this->B1_;
 }
 
-double DistanceTree::get_treeness() {
+double TreeShape::get_treeness() {
     if (this->treeness_ <= 0.0) {
         double internal = 0.0;
         double external = 0.0;
