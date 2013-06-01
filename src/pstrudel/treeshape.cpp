@@ -460,6 +460,30 @@ void TreeShape::create_coalescent_intervals(int regime) {
     }
 }
 
+void TreeShape::add_edge_lengths(unsigned long length, bool equalize_root_tip_distances) {
+    for (auto nd = this->preorder_begin(); nd != this->preorder_end(); ++nd) {
+        nd->set_edge_length(length);
+    }
+    if (equalize_root_tip_distances) {
+        unsigned long max_distance_from_root = 0;
+        std::map<node_type *, unsigned long> distance_from_root;
+        for (auto nd = this->preorder_begin(); nd != this->preorder_end(); ++nd) {
+            nd->set_edge_length(1.0);
+            if (nd.parent_node() == nullptr) {
+                distance_from_root[nd.node()] = 0;
+            } else {
+                distance_from_root[nd.node()] = distance_from_root[nd.parent_node()] + 1;
+                if (max_distance_from_root < distance_from_root[nd.node()]) {
+                    max_distance_from_root = distance_from_root[nd.node()];
+                }
+            }
+        }
+        for (auto nd = this->leaf_begin(); nd != this->leaf_end(); ++nd) {
+            nd->set_edge_length(max_distance_from_root - distance_from_root[nd.parent_node()]);
+        }
+    }
+}
+
 std::vector<double> TreeShape::calc_node_ages(bool include_leaves) {
     std::vector<double> ages;
     ages.reserve(this->number_of_tips_ * 2);

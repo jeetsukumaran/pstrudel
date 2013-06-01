@@ -265,6 +265,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
 
         // type: 0 = mean coalescent, 1 = converse-coalescent, 2 = uniform
         void create_coalescent_intervals(int regime=0);
+        void add_edge_lengths(unsigned long length, bool equalize_root_tip_distances);
 
         /////////////////////////////////////////////////////////////////////////
         // Calculators
