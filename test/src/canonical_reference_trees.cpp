@@ -54,19 +54,19 @@ int check_tree(pstrudel::TreeShape & tree, int regime, const std::string & label
 
 int test_mean_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
-    tree.add_edge_lengths(0);
+    tree.create_coalescent_intervals(0);
     return check_tree(tree, 0, "[UNBALANCED, MEAN-COAL]");
 }
 
 int test_converse_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
-    tree.add_edge_lengths(1);
+    tree.create_coalescent_intervals(1);
     return check_tree(tree, 1, "[UNBALANCED, CONVERSE-COAL]");
 }
 
 int test_uniform_coalescent_ages_on_unbalanced_tree(unsigned long ntips=DEFAULT_NUM_TIPS) {
     auto tree = generate_unbalanced_tree(ntips);
-    tree.add_edge_lengths(2);
+    tree.create_coalescent_intervals(2);
     return check_tree(tree, 2, "[UNBALANCED, UNIFORM]");
 }
 

@@ -135,17 +135,17 @@ template <class TreeT>
                 // unbalanced tree, mean coalescent
                 platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.mean.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_["unbalanced.mean.coal"].add_edge_lengths(0); // mean
+                this->tree_patterns_["unbalanced.mean.coal"].create_coalescent_intervals(0); // mean
 
                 // unbalanced tree, converse coalescent
                 platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.converse.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_["unbalanced.converse.coal"].add_edge_lengths(1); // converse
+                this->tree_patterns_["unbalanced.converse.coal"].create_coalescent_intervals(1); // converse
 
                 // unbalanced tree, uniform coalescent
                 platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.uniform.coal"],
                         leaves.begin(), leaves.end());
-                this->tree_patterns_["unbalanced.uniform.coal"].add_edge_lengths(2); // uniform
+                this->tree_patterns_["unbalanced.uniform.coal"].create_coalescent_intervals(2); // uniform
 
                 // balanced tree
                 platypus::build_maximally_balanced_tree(this->tree_patterns_["balanced"],

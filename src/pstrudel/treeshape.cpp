@@ -421,8 +421,8 @@ TreeShape & TreeShape::operator=(const TreeShape & other) {
     return *this;
 }
 
-// type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
-void TreeShape::add_edge_lengths(int regime) {
+// type: 0 = mean coalescent, 1 = converse-coalescent, 2 = uniform
+void TreeShape::create_coalescent_intervals(int regime) {
     if (this->number_of_tips_ == 0) {
         for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi, ++this->number_of_tips_) {
         }
