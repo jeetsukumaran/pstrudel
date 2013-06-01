@@ -421,31 +421,8 @@ TreeShape & TreeShape::operator=(const TreeShape & other) {
     return *this;
 }
 
-std::vector<TreeShape::node_type *> TreeShape::get_nodes_in_level_order() {
-    std::vector<TreeShape::node_type *> nodes_in_level_order;
-    std::map<TreeShape::node_type *, unsigned long> steps_from_root;
-    for (auto ndi = this->preorder_begin(); ndi != this->preorder_end(); ++ndi) {
-        TreeShape::node_type * nptr = ndi.node();
-        if (ndi.parent_node() == nullptr) {
-            steps_from_root[nptr] = 0;
-        } else {
-            steps_from_root[nptr] = steps_from_root[ndi.parent_node()] + 1;
-        }
-    }
-    std::multimap<unsigned long, TreeShape::node_type *> steps_from_root_inv;
-    for (auto & si : steps_from_root) {
-        steps_from_root_inv.insert(std::make_pair(si.second, si.first));
-    }
-    nodes_in_level_order.reserve(steps_from_root_inv.size());
-    for (auto & si : steps_from_root_inv) {
-        nodes_in_level_order.push_back(si.second);
-    }
-    return nodes_in_level_order;
-}
-
 // type: 0 = mean coalescent, 1 = random, 2 = uniform 3 = anti-coalescent
 void TreeShape::add_edge_lengths(int regime) {
-    auto nodes_in_level_order = this->get_nodes_in_level_order();
     if (this->number_of_tips_ == 0) {
         for (auto ndi = this->leaf_begin(); ndi != this->leaf_end(); ++ndi, ++this->number_of_tips_) {
         }
@@ -454,9 +431,9 @@ void TreeShape::add_edge_lengths(int regime) {
     unsigned long num_lineages = this->number_of_tips_;
     unsigned long total_lineages = num_lineages;
     double prev_age = 0.0;
-    for (auto ndi = nodes_in_level_order.rbegin(); ndi != nodes_in_level_order.rend(); ++ndi) {
-        if ((*ndi)->is_leaf()) {
-            node_ages[*ndi] = 0.0;
+    for (auto ndi = this->level_order_rbegin(); ndi != this->level_order_rend(); ++ndi) {
+        if (ndi.is_leaf()) {
+            node_ages[ndi.node()] = 0.0;
         } else {
             double wt;
             if (regime == 0) {
@@ -469,8 +446,8 @@ void TreeShape::add_edge_lengths(int regime) {
             } else {
                 throw std::runtime_error("Unsupported regime: " + std::to_string(regime));
             }
-            node_ages[*ndi] = prev_age + wt;
-            prev_age = node_ages[*ndi];
+            node_ages[ndi.node()] = prev_age + wt;
+            prev_age = node_ages[ndi.node()];
             --num_lineages;
         }
     }

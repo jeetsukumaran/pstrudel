@@ -429,9 +429,6 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         }
 
     private:
-        std::vector<TreeShape::node_type *> get_nodes_in_level_order();
-
-    private:
         unsigned long                            number_of_tips_;
         double                                   total_tree_length_;
         PairwiseTipDistanceProfileCalculator     pairwise_tip_distance_profile_calculator_;
