@@ -135,7 +135,8 @@ class CanonicalTreePatterns {
             // unbalanced tree, mean coalescent
             platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced"],
                     leaves.begin(), leaves.end());
-            this->tree_patterns_["unbalanced"].create_coalescent_intervals(0); // mean
+            // this->tree_patterns_["unbalanced"].create_coalescent_intervals(0); // mean
+            this->tree_patterns_["unbalanced"].add_edge_lengths(1.0, true);
 
             // // unbalanced tree, converse coalescent
             // platypus::build_maximally_unbalanced_tree(this->tree_patterns_["unbalanced.converse.coal"],
