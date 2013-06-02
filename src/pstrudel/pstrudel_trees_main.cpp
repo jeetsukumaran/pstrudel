@@ -150,7 +150,7 @@ class CanonicalTreePatterns {
             // balanced tree
             platypus::build_maximally_balanced_tree(this->tree_patterns_["balanced"],
                     leaves.begin(), leaves.end());
-            this->tree_patterns_["unbalanced"].add_edge_lengths(1.0, true);
+            this->tree_patterns_["balanced"].add_edge_lengths(1.0, true);
 
             // calculate inter-reference tree distances
             this->tree_pattern_cross_distances_.add_key_column<std::string>("pattern");
