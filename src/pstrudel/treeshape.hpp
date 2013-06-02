@@ -316,6 +316,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
 
         template <class T, class R>
         void tabulate_distances(
+                const std::string & prefix,
                 T & other_tree,
                 R & row,
                 bool scale_by_tree_length,
@@ -323,32 +324,32 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 bool calculate_unary_statistics_differences) {
             double d = 0.0;
             if (calculate_unary_statistics_differences) {
-                row.set("diff.ntips"             , std::abs(this->number_of_tips_ - other_tree.number_of_tips_));
-                row.set("diff.length"            , std::abs(this->total_tree_length_ - other_tree.total_tree_length_));
-                row.set("diff.B1"                , std::abs(this->get_B1() - other_tree.get_B1()));
-                row.set("diff.colless.imbalance" , std::abs(this->get_colless_tree_imbalance() - other_tree.get_colless_tree_imbalance()));
-                row.set("diff.gamma"             , std::abs(this->get_pybus_harvey_gamma() - other_tree.get_pybus_harvey_gamma()));
-                row.set("diff.N.bar"             , std::abs(this->get_N_bar() - other_tree.get_N_bar()));
-                row.set("diff.treeness"          , std::abs(this->get_treeness() - other_tree.get_treeness()));
+                row.set("diff." + prefix + "ntips"             , std::abs(this->number_of_tips_ - other_tree.number_of_tips_));
+                row.set("diff." + prefix + "length"            , std::abs(this->total_tree_length_ - other_tree.total_tree_length_));
+                row.set("diff." + prefix + "B1"                , std::abs(this->get_B1() - other_tree.get_B1()));
+                row.set("diff." + prefix + "colless.imbalance" , std::abs(this->get_colless_tree_imbalance() - other_tree.get_colless_tree_imbalance()));
+                row.set("diff." + prefix + "gamma"             , std::abs(this->get_pybus_harvey_gamma() - other_tree.get_pybus_harvey_gamma()));
+                row.set("diff." + prefix + "N.bar"             , std::abs(this->get_N_bar() - other_tree.get_N_bar()));
+                row.set("diff." + prefix + "treeness"          , std::abs(this->get_treeness() - other_tree.get_treeness()));
             }
             d = this->get_unweighted_pairwise_tip_profile_distance(other_tree);
-            row.set("pwtd.uw", d);
+            row.set(prefix + "pwtd.uw", d);
             d = this->get_lineage_accumulation_profile_distance(other_tree);
-            row.set("ltt", d);
+            row.set(prefix + "ltt", d);
             if (scale_by_tree_length) {
                 d = this->get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("pwtd", d);
+                row.set(prefix + "pwtd", d);
                 d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree);
-                row.set("lst", d);
+                row.set(prefix + "lst", d);
             } else {
                 d = this->get_weighted_pairwise_tip_profile_distance(other_tree);
-                row.set("pwtd", d);
+                row.set(prefix + "pwtd", d);
                 d = this->get_lineage_splitting_time_profile_distance(other_tree);
-                row.set("lst", d);
+                row.set(prefix + "lst", d);
             }
             if (calculate_symmetric_diff) {
                 d = this->get_unlabeled_symmetric_difference(other_tree);
-                row.set("rfdu", d);
+                row.set(prefix + "rfdu", d);
             }
         }
 
@@ -369,21 +370,22 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         }
 
         static void add_results_data_columns(
+                const std::string & prefix,
                 platypus::DataTable & table,
                 platypus::stream::OutputStreamFormatters & col_formatters,
                 bool calculate_symmetric_diff,
                 bool calculate_unary_statistics_differences) {
             if (calculate_unary_statistics_differences) {
-                TreeShape::add_unary_statistic_columns("diff.",
+                TreeShape::add_unary_statistic_columns("diff." + prefix,
                         table,
                         col_formatters,
                         false);
             }
             for (auto & y_distance_name : TreeShape::tree_pattern_y_distance_names_) {
-                table.add_data_column<double>(y_distance_name, col_formatters);
+                table.add_data_column<double>(prefix + y_distance_name, col_formatters);
             }
             if (calculate_symmetric_diff) {
-                table.add_data_column<double>("rfdu", col_formatters);
+                table.add_data_column<double>(prefix + "rfdu", col_formatters);
             }
         }
 
