@@ -6,6 +6,7 @@
 #include <platypus/model/datatable.hpp>
 #include <platypus/serialize/newick.hpp>
 #include <platypus/parse/nclreader.hpp>
+#include <platypus/parse/newick.hpp>
 #include <platypus/model/treepattern.hpp>
 #include <platypus/model/standardinterface.hpp>
 #include "dataio.hpp"
@@ -62,25 +63,31 @@ int get_trees(std::vector<TreeT>& trees,
         const std::string & source_name,
         const std::string& format,
         unsigned long file_index) {
-    auto reader = platypus::NclTreeReader<TreeT>();
-    platypus::bind_standard_interface(reader);
-    reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
     std::function<TreeT& ()> get_new_tree_reference = [&trees, &source_name, &file_index] () -> TreeT& { trees.emplace_back(source_name, file_index); return trees.back(); };
-    return reader.read(src, get_new_tree_reference, format);
+    if (format == "newick") {
+        auto reader = platypus::NewickReader<TreeT>();
+        platypus::bind_standard_interface(reader);
+        reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
+        return reader.read(src, get_new_tree_reference);
+    } else {
+        auto reader = platypus::NclTreeReader<TreeT>();
+        platypus::bind_standard_interface(reader);
+        reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
+        return reader.read(src, get_new_tree_reference, format);
+    }
 }
 
-template <class TreeT>
-int get_trees(
+template <class TreeT, class Reader>
+int read_trees(
+        Reader & reader,
         std::vector<TreeT>& trees,
         const std::vector<std::string> filepaths,
-        const std::string& format,
         int type_of_file_info_to_store,
         colugo::Logger & logger) {
-    auto reader = platypus::NclTreeReader<TreeT>();
-    platypus::bind_standard_interface(reader);
-    reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
     unsigned long file_idx = 0;
     unsigned long num_trees_read = 0;
+    platypus::bind_standard_interface(reader);
+    reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
     for (auto & filepath : filepaths) {
         auto fullpath = colugo::filesys::absolute_path(filepath);
         std::string stored_filepath;
@@ -99,12 +106,28 @@ int get_trees(
         if (!src.good()) {
             logger.abort("Failed to open file for input: '", fullpath, "'");
         }
-        num_trees_read += reader.read(src, get_new_tree_reference, format);
+        num_trees_read += reader.read(src, get_new_tree_reference);
         // logger.info(num_trees_read, " trees read from '", fullpath,
         //         "' (total number of trees in comparison set is now: ", comparison_trees.size(), ")");
         ++file_idx;
     }
     return num_trees_read;
+}
+
+template <class TreeT>
+int get_trees(
+        std::vector<TreeT>& trees,
+        const std::vector<std::string> filepaths,
+        const std::string& format,
+        int type_of_file_info_to_store,
+        colugo::Logger & logger) {
+    if (format == "newick") {
+        auto reader = platypus::NewickReader<TreeT>();
+        return read_trees(reader, trees, filepaths, type_of_file_info_to_store, logger);
+    } else {
+        auto reader = platypus::NclTreeReader<TreeT>();
+        return read_trees(reader, trees, filepaths, type_of_file_info_to_store, logger);
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////////
