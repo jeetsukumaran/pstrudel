@@ -109,9 +109,9 @@ class PairwiseTipDistanceProfileCalculator {
         PairwiseTipDistanceProfileCalculator(TreeShape & tree)
             : tree_(tree) { }
         PairwiseTipDistanceProfileCalculator & operator=(const PairwiseTipDistanceProfileCalculator & other);
-        double get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other);
-        double get_weighted_distance(PairwiseTipDistanceProfileCalculator & other);
-        double get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other);
+        double get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size=false);
+        double get_weighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size=false);
+        double get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size=false);
 
     private:
         void build_pairwise_tip_distance_profiles();
@@ -166,9 +166,9 @@ class LineageThroughTimeProfileCalculator {
             , max_leaf_distance_(0.0)
             , min_edge_length_(-1.0) { }
         LineageThroughTimeProfileCalculator & operator=(const LineageThroughTimeProfileCalculator & other);
-        double get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other);
-        double get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
-        double get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other);
+        double get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size=false);
+        double get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size=false);
+        double get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size=false);
         Profile & get_lineage_accumulation_through_time_profile() {
             return this->lineage_accumulation_through_time_profile_;
         }
@@ -271,28 +271,28 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         // Calculators
 
         // pairwise tup profile
-        double get_unweighted_pairwise_tip_profile_distance(TreeShape & other) {
-            return this->pairwise_tip_distance_profile_calculator_.get_unweighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        double get_unweighted_pairwise_tip_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->pairwise_tip_distance_profile_calculator_.get_unweighted_distance(other.pairwise_tip_distance_profile_calculator_, weight_values_by_profile_size);
         }
-        double get_weighted_pairwise_tip_profile_distance(TreeShape & other) {
-            return this->pairwise_tip_distance_profile_calculator_.get_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        double get_weighted_pairwise_tip_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->pairwise_tip_distance_profile_calculator_.get_weighted_distance(other.pairwise_tip_distance_profile_calculator_, weight_values_by_profile_size);
         }
-        double get_scaled_weighted_pairwise_tip_profile_distance(TreeShape & other) {
-            return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_);
+        double get_scaled_weighted_pairwise_tip_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->pairwise_tip_distance_profile_calculator_.get_scaled_weighted_distance(other.pairwise_tip_distance_profile_calculator_, weight_values_by_profile_size);
         }
 
         // lineage through time
         LineageThroughTimeProfileCalculator & get_lineage_through_time_calculator() {
             return this->lineage_through_time_calculator_;
         }
-        double get_lineage_accumulation_profile_distance(TreeShape & other) {
-            return this->lineage_through_time_calculator_.get_lineage_accumulation_profile_distance(other.lineage_through_time_calculator_);
+        double get_lineage_accumulation_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->lineage_through_time_calculator_.get_lineage_accumulation_profile_distance(other.lineage_through_time_calculator_, weight_values_by_profile_size);
         }
-        double get_lineage_splitting_time_profile_distance(TreeShape & other) {
-            return this->lineage_through_time_calculator_.get_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
+        double get_lineage_splitting_time_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->lineage_through_time_calculator_.get_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_, weight_values_by_profile_size);
         }
-        double get_scaled_lineage_splitting_time_profile_distance(TreeShape & other) {
-            return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_);
+        double get_scaled_lineage_splitting_time_profile_distance(TreeShape & other, bool weight_values_by_profile_size=false) {
+            return this->lineage_through_time_calculator_.get_scaled_lineage_splitting_time_profile_distance(other.lineage_through_time_calculator_, weight_values_by_profile_size);
         }
 
         // symmetric difference
@@ -321,7 +321,8 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 R & row,
                 bool scale_by_tree_length,
                 bool calculate_symmetric_diff,
-                bool calculate_unary_statistics_differences) {
+                bool calculate_unary_statistics_differences,
+                bool weight_values_by_profile_size) {
             double d = 0.0;
             if (calculate_unary_statistics_differences) {
                 row.set("diff." + prefix + "ntips"             , std::abs(this->number_of_tips_ - other_tree.number_of_tips_));
@@ -332,19 +333,19 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 row.set("diff." + prefix + "N.bar"             , std::abs(this->get_N_bar() - other_tree.get_N_bar()));
                 row.set("diff." + prefix + "treeness"          , std::abs(this->get_treeness() - other_tree.get_treeness()));
             }
-            d = this->get_unweighted_pairwise_tip_profile_distance(other_tree);
+            d = this->get_unweighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
             row.set(prefix + "pwtd.uw", d);
-            d = this->get_lineage_accumulation_profile_distance(other_tree);
+            d = this->get_lineage_accumulation_profile_distance(other_tree, weight_values_by_profile_size);
             row.set(prefix + "ltt", d);
             if (scale_by_tree_length) {
-                d = this->get_scaled_weighted_pairwise_tip_profile_distance(other_tree);
+                d = this->get_scaled_weighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "pwtd", d);
-                d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree);
+                d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
             } else {
-                d = this->get_weighted_pairwise_tip_profile_distance(other_tree);
+                d = this->get_weighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "pwtd", d);
-                d = this->get_lineage_splitting_time_profile_distance(other_tree);
+                d = this->get_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
             }
             if (calculate_symmetric_diff) {

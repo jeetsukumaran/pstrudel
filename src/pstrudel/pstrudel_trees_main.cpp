@@ -232,7 +232,8 @@ class CanonicalTreePatterns {
                         row,
                         scale_by_tree_length,
                         calculate_symmetric_diff,
-                        calculate_unary_statistics_differences);
+                        calculate_unary_statistics_differences,
+                        true);
             } else {
                 if (calculate_unary_statistics) {
                     tree_pattern.tabulate_unary_statistics(tree_pattern_name + ".tree.", row);
@@ -243,7 +244,8 @@ class CanonicalTreePatterns {
                         row,
                         scale_by_tree_length,
                         calculate_symmetric_diff,
-                        calculate_unary_statistics_differences);
+                        calculate_unary_statistics_differences,
+                        true);
             }
         }
         template <class W>
@@ -711,7 +713,8 @@ int main(int argc, const char * argv[]) {
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff,
-                        calculate_unary_statistics_differences);
+                        calculate_unary_statistics_differences,
+                        false);
                 if (calculate_unary_statistics) {
                     reference_tree.tabulate_unary_statistics("reference.", results_table_row);
                 }
@@ -1004,7 +1007,8 @@ int main(int argc, const char * argv[]) {
                         results_table_row,
                         scale_by_tree_length,
                         calculate_symmetric_diff,
-                        calculate_unary_statistics_differences);
+                        calculate_unary_statistics_differences,
+                        false);
 
                 ++comparison_count;
             } // for each tree_idx2 pairwise tree comparison

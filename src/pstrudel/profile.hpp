@@ -73,7 +73,7 @@ class Profile {
             return this->raw_data_[idx];
         }
         const ProfileMetricVectorType & get_profile(unsigned long profile_size=0);
-        ProfileMetricValueType get_distance(Profile & other, bool normalize_by_profile_size=false);
+        ProfileMetricValueType get_distance(Profile & other, bool weight_values_by_profile_size=false);
         void fix_size(unsigned long size) {
             if (size > 0 && size < this->raw_data_.size()) {
                 throw std::runtime_error("Cannot fix size to less than data size");
@@ -85,12 +85,12 @@ class Profile {
         }
 
     private:
-        ProfileMetricValueType calc_distance(Profile & other, unsigned long profile_size);
+        ProfileMetricValueType calc_distance(Profile & other, unsigned long profile_size, bool weight_values_by_profile_size=false);
         unsigned long get_profile_comparison_size(Profile & other);
         void build_interpolated_profile(unsigned long profile_size);
         static void interpolate_flat(ProfileMetricVectorType & subprofile, ProfileMetricValueType value, unsigned long num_points);
         static void interpolate_linear(ProfileMetricVectorType & subprofile, ProfileMetricValueType x1, ProfileMetricValueType y1, ProfileMetricValueType y2, unsigned long num_points, unsigned long max_points=0);
-        static ProfileMetricValueType calc_euclidean_distance(const ProfileMetricVectorType & v1, const ProfileMetricVectorType & v2);
+        static ProfileMetricValueType calc_euclidean_distance(const ProfileMetricVectorType & v1, const ProfileMetricVectorType & v2, bool weight_values_by_profile_size=false);
 
     private:
         unsigned long                                       fixed_size_;

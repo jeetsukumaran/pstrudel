@@ -45,25 +45,20 @@ const ProfileMetricVectorType & Profile::get_profile(unsigned long profile_size)
     return this->interpolated_profiles_[profile_size];
 }
 
-ProfileMetricValueType Profile::get_distance(Profile & other, bool normalize_by_profile_size) {
+ProfileMetricValueType Profile::get_distance(Profile & other, bool weight_values_by_profile_size) {
     unsigned long profile_size = this->get_profile_comparison_size(other);
-    ProfileMetricValueType dist = this->calc_distance(other, profile_size);
-    if (normalize_by_profile_size) {
-        return dist/profile_size;
-    } else {
-        return dist;
-    }
+    ProfileMetricValueType dist = this->calc_distance(other, profile_size, weight_values_by_profile_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
 // Profile (protected/private)
 
-ProfileMetricValueType Profile::calc_distance(Profile & other, unsigned long profile_size) {
+ProfileMetricValueType Profile::calc_distance(Profile & other, unsigned long profile_size, bool weight_values_by_profile_size) {
     auto & v1 = this->get_profile(profile_size);
     auto & v2 = other.get_profile(profile_size);
     this->last_profile_comparison_size_ = profile_size;
     other.last_profile_comparison_size_ = profile_size;
-    return Profile::calc_euclidean_distance(v1, v2);
+    return Profile::calc_euclidean_distance(v1, v2, weight_values_by_profile_size);
 }
 
 
@@ -179,20 +174,28 @@ void Profile::interpolate_linear(ProfileMetricVectorType & interpolated_profile,
     }
 }
 
-ProfileMetricValueType Profile::calc_euclidean_distance(const ProfileMetricVectorType & v1, const ProfileMetricVectorType & v2) {
+ProfileMetricValueType Profile::calc_euclidean_distance(const ProfileMetricVectorType & v1, const ProfileMetricVectorType & v2, bool weight_values_by_profile_size) {
     unsigned long v1_size = v1.size();
     unsigned long v2_size = v2.size();
     unsigned long v1_idx = 0;
     unsigned long v2_idx = 0;
+    double weight = 1.0;
     if (v1_size > v2_size) {
         v1_idx = v1_size - v2_size;
-    }
-    if (v2_size > v1_size) {
+        weight = v2_size;
+    } else if (v2_size > v1_size) {
         v2_idx = v2_size - v1_size;
+        weight = v1_size;
+    } else {
+        weight = v1_size;
+    }
+    if (!weight_values_by_profile_size) {
+        // override
+        weight = 1.0;
     }
     ProfileMetricValueType ss = 0.0;
     while (v1_idx < v1_size && v2_idx < v2_size) {
-        ss += std::pow(v1[v1_idx] - v2[v2_idx], 2);
+        ss += std::pow(v1[v1_idx]/weight - v2[v2_idx]/weight, 2);
         ++v1_idx;
         ++v2_idx;
     }

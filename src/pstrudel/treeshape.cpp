@@ -47,34 +47,34 @@ void PairwiseTipDistanceProfileCalculator::build_pairwise_tip_distance_profiles(
             scaled_weighted_distances.end());
 }
 
-double PairwiseTipDistanceProfileCalculator::get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+double PairwiseTipDistanceProfileCalculator::get_unweighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->unweighted_pairwise_tip_distance_profile_.empty()) {
         this->build_pairwise_tip_distance_profiles();
     }
     if (other.unweighted_pairwise_tip_distance_profile_.empty()) {
         other.build_pairwise_tip_distance_profiles();
     }
-    return this->unweighted_pairwise_tip_distance_profile_.get_distance(other.unweighted_pairwise_tip_distance_profile_);
+    return this->unweighted_pairwise_tip_distance_profile_.get_distance(other.unweighted_pairwise_tip_distance_profile_, weight_values_by_profile_size);
 }
 
-double PairwiseTipDistanceProfileCalculator::get_weighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+double PairwiseTipDistanceProfileCalculator::get_weighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->weighted_pairwise_tip_distance_profile_.empty()) {
         this->build_pairwise_tip_distance_profiles();
     }
     if (other.weighted_pairwise_tip_distance_profile_.empty()) {
         other.build_pairwise_tip_distance_profiles();
     }
-    return this->weighted_pairwise_tip_distance_profile_.get_distance(other.weighted_pairwise_tip_distance_profile_);
+    return this->weighted_pairwise_tip_distance_profile_.get_distance(other.weighted_pairwise_tip_distance_profile_, weight_values_by_profile_size);
 }
 
-double PairwiseTipDistanceProfileCalculator::get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other) {
+double PairwiseTipDistanceProfileCalculator::get_scaled_weighted_distance(PairwiseTipDistanceProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->scaled_weighted_pairwise_tip_distance_profile_.empty()) {
         this->build_pairwise_tip_distance_profiles();
     }
     if (other.scaled_weighted_pairwise_tip_distance_profile_.empty()) {
         other.build_pairwise_tip_distance_profiles();
     }
-    return this->scaled_weighted_pairwise_tip_distance_profile_.get_distance(other.scaled_weighted_pairwise_tip_distance_profile_);
+    return this->scaled_weighted_pairwise_tip_distance_profile_.get_distance(other.scaled_weighted_pairwise_tip_distance_profile_, weight_values_by_profile_size);
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -169,34 +169,34 @@ LineageThroughTimeProfileCalculator & LineageThroughTimeProfileCalculator::opera
     return *this;
 }
 
-double LineageThroughTimeProfileCalculator::get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other) {
+double LineageThroughTimeProfileCalculator::get_lineage_accumulation_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->lineage_accumulation_through_time_profile_.empty()) {
         this->build_lineage_accumulation_through_time_profile();
     }
     if (other.lineage_accumulation_through_time_profile_.empty()) {
         other.build_lineage_accumulation_through_time_profile();
     }
-    return this->lineage_accumulation_through_time_profile_.get_distance(other.lineage_accumulation_through_time_profile_);
+    return this->lineage_accumulation_through_time_profile_.get_distance(other.lineage_accumulation_through_time_profile_, weight_values_by_profile_size);
 }
 
-double LineageThroughTimeProfileCalculator::get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other) {
+double LineageThroughTimeProfileCalculator::get_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->lineage_splitting_time_profile_.empty()) {
         this->build_lineage_splitting_time_profile();
     }
     if (other.lineage_splitting_time_profile_.empty()) {
         other.build_lineage_splitting_time_profile();
     }
-    return this->lineage_splitting_time_profile_.get_distance(other.lineage_splitting_time_profile_);
+    return this->lineage_splitting_time_profile_.get_distance(other.lineage_splitting_time_profile_, weight_values_by_profile_size);
 }
 
-double LineageThroughTimeProfileCalculator::get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other) {
+double LineageThroughTimeProfileCalculator::get_scaled_lineage_splitting_time_profile_distance(LineageThroughTimeProfileCalculator & other, bool weight_values_by_profile_size) {
     if (this->scaled_lineage_splitting_time_profile_.empty()) {
         this->build_lineage_splitting_time_profile();
     }
     if (other.scaled_lineage_splitting_time_profile_.empty()) {
         other.build_lineage_splitting_time_profile();
     }
-    return this->scaled_lineage_splitting_time_profile_.get_distance(other.scaled_lineage_splitting_time_profile_);
+    return this->scaled_lineage_splitting_time_profile_.get_distance(other.scaled_lineage_splitting_time_profile_, weight_values_by_profile_size);
 }
 
 void LineageThroughTimeProfileCalculator::clear() {
