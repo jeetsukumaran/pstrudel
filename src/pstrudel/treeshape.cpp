@@ -525,7 +525,7 @@ double TreeShape::get_pybus_harvey_gamma() {
         }
         intervals.push_back(older);
         // assert(intervals.size() == this->number_of_tips_ - 1);
-        if (intervals.size() == this->number_of_tips_ - 1) {
+        if (intervals.size() != this->number_of_tips_ - 1) {
             this->pybus_harvey_gamma_ = NAN;
         } else {
             double T = 0.0;
