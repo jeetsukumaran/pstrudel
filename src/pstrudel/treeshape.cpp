@@ -524,21 +524,25 @@ double TreeShape::get_pybus_harvey_gamma() {
             older = node_ages[age_idx];
         }
         intervals.push_back(older);
-        assert(intervals.size() == this->number_of_tips_ - 1);
-        double T = 0.0;
-        double accum = 0.0;
-        unsigned long list_idx;
-        for (unsigned long i = 2; i < this->number_of_tips_; ++i) {
-            list_idx = i - 2;
-            T += static_cast<double>(i) * intervals[list_idx];
-            accum += T;
+        // assert(intervals.size() == this->number_of_tips_ - 1);
+        if (intervals.size() == this->number_of_tips_ - 1) {
+            this->pybus_harvey_gamma_ = NAN;
+        } else {
+            double T = 0.0;
+            double accum = 0.0;
+            unsigned long list_idx;
+            for (unsigned long i = 2; i < this->number_of_tips_; ++i) {
+                list_idx = i - 2;
+                T += static_cast<double>(i) * intervals[list_idx];
+                accum += T;
+            }
+            list_idx = this->number_of_tips_ - 2;
+            T += this->number_of_tips_ * intervals[list_idx];
+            double nmt = this->number_of_tips_ - 2.0;
+            double numerator = accum/nmt - T/2.0;
+            double C = T * std::pow(1/(12*nmt), 0.5);
+            this->pybus_harvey_gamma_ = numerator/C;
         }
-        list_idx = this->number_of_tips_ - 2;
-        T += this->number_of_tips_ * intervals[list_idx];
-        double nmt = this->number_of_tips_ - 2.0;
-        double numerator = accum/nmt - T/2.0;
-        double C = T * std::pow(1/(12*nmt), 0.5);
-        this->pybus_harvey_gamma_ = numerator/C;
     }
     return this->pybus_harvey_gamma_;
 }
