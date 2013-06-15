@@ -684,9 +684,9 @@ int main(int argc, const char * argv[]) {
         unsigned long comparison_count = 0;
         unsigned long comparison_tree_idx = 0;
         unsigned long reference_tree_idx = 0;
-        for (auto & ctree : comparison_trees) {
-            reference_tree_idx = 0;
-            for (auto & reference_tree : reference_trees) {
+        for (auto & reference_tree : reference_trees) {
+            comparison_tree_idx = 0;
+            for (auto & ctree : comparison_trees) {
                 auto & results_table_row = results_table.add_row();
                 if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
                     logger.info("Calculating distances to reference tree(s): ",
@@ -718,11 +718,11 @@ int main(int argc, const char * argv[]) {
                 if (calculate_unary_statistics) {
                     reference_tree.tabulate_unary_statistics("reference.", results_table_row);
                 }
-                ++reference_tree_idx;
+                ++comparison_tree_idx;
                 ++comparison_count;
-            } // for each reference tree
-            ++comparison_tree_idx;
-        } // for each tree in comparison set
+            } // for each tree in comparison set
+            ++reference_tree_idx;
+        } // for each tree in refrence set
         logger.info("Calculating distances to reference tree(s): done");
 
         // output_filepaths["reference-distances"] = output_prefix + "reference.distances.txt";
