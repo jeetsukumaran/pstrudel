@@ -303,7 +303,25 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
+        // TODO: refactor!
         // coalescent intervals
+        double get_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
+            if (this->coalescent_interval_profile_.empty()) {
+                this->build_coalescent_interval_profile();
+            }
+            if (other.coalescent_interval_profile_.empty()) {
+                other.build_coalescent_interval_profile();
+            }
+            return this->coalescent_interval_profile_.get_distance(other.coalescent_interval_profile_, weight_values_by_profile_size);
+        }
+
+        void build_coalescent_interval_profile() {
+            if (this->coalescent_intervals_.empty()) {
+                this->calc_coalescent_intervals();
+            }
+            this->coalescent_interval_profile_.set_data(this->coalescent_intervals_.begin(), this->coalescent_intervals_.end(), true);
+        }
+
         void calc_coalescent_intervals() {
             this->coalescent_intervals_.clear();
             if (this->number_of_tips_ == 0) {
@@ -460,6 +478,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         SymmetricDifferenceCalculator            symmetric_difference_calculator_;
         LineageThroughTimeProfileCalculator      lineage_through_time_calculator_;
         std::vector<double>                      coalescent_intervals_;
+        Profile                                  coalescent_interval_profile_;
         static const std::vector<std::string>    tree_pattern_y_distance_names_;
         double                                   B1_;
         double                                   colless_tree_imbalance_;
