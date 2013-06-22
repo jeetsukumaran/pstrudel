@@ -397,7 +397,7 @@ TreeShape::TreeShape(const TreeShape & other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
-          , coalescent_intervals_(coalescent_intervals_)
+          , coalescent_intervals_(other.coalescent_intervals_)
           , B1_(other.B1_)
           , colless_tree_imbalance_(other.colless_tree_imbalance_)
           , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
@@ -415,6 +415,7 @@ TreeShape & TreeShape::operator=(const TreeShape & other) {
     this->pairwise_tip_distance_profile_calculator_ = other.pairwise_tip_distance_profile_calculator_;
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
+    this->coalescent_intervals_ = other.coalescent_intervals_;
     this->pybus_harvey_gamma_ = other.pybus_harvey_gamma_;
     this->N_bar_ = other.N_bar_;
     this->colless_tree_imbalance_ = other.colless_tree_imbalance_;
