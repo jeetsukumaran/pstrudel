@@ -356,7 +356,7 @@ const std::vector<std::string> TreeShape::tree_pattern_y_distance_names_{
         "pwtd.uw",
         "ltt",
         "lst",
-        "ci",
+        "coal.intv",
 }; // static cons ttree_pattern_names_
 
 TreeShape::TreeShape(bool is_rooted)

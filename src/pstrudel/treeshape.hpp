@@ -399,14 +399,14 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
                 d = this->get_scaled_coalescent_interval_profile_distance(other_tree, weight_values_by_profile_size);
-                row.set(prefix + "ci", d);
+                row.set(prefix + "coal.intv", d);
             } else {
                 d = this->get_weighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "pwtd", d);
                 d = this->get_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
                 d = this->get_unscaled_coalescent_interval_profile_distance(other_tree, weight_values_by_profile_size);
-                row.set(prefix + "ci", d);
+                row.set(prefix + "coal.intv", d);
             }
             if (calculate_symmetric_diff) {
                 d = this->get_unlabeled_symmetric_difference(other_tree);
