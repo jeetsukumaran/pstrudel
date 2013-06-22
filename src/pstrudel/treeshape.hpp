@@ -303,6 +303,27 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
             return this->symmetric_difference_calculator_.get_unlabeled_symmetric_difference(other.symmetric_difference_calculator_);
         }
 
+        // coalescent intervals
+        void calc_coalescent_intervals() {
+            this->coalescent_intervals_.clear();
+            if (this->number_of_tips_ == 0) {
+                this->calc_num_tips();
+            }
+            TreeShape::node_type * node_ptr = nullptr;
+            auto node_ages = this->calc_node_ages(false);
+            if (node_ages.empty()) {
+                throw std::runtime_error("Cannot calculate statistic on empty tree");
+            }
+            this->coalescent_intervals_.reserve(node_ages.size());
+            auto cur_age_iter = node_ages.begin();
+            double older = node_ages[0];
+            for (unsigned long age_idx = 1; age_idx < node_ages.size(); ++age_idx) {
+                this->coalescent_intervals_.push_back(older - node_ages[age_idx]);
+                older = node_ages[age_idx];
+            }
+            this->coalescent_intervals_.push_back(older);
+        }
+
         template <class R>
         void tabulate_unary_statistics(const std::string & prefix, R & row) {
             row.set(prefix + "ntips"             , this->number_of_tips_);
@@ -438,6 +459,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         PairwiseTipDistanceProfileCalculator     pairwise_tip_distance_profile_calculator_;
         SymmetricDifferenceCalculator            symmetric_difference_calculator_;
         LineageThroughTimeProfileCalculator      lineage_through_time_calculator_;
+        std::vector<double>                      coalescent_intervals_;
         static const std::vector<std::string>    tree_pattern_y_distance_names_;
         double                                   B1_;
         double                                   colless_tree_imbalance_;

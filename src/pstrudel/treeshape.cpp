@@ -379,6 +379,7 @@ TreeShape::TreeShape(TreeShape && other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
+          , coalescent_intervals_(std::move(coalescent_intervals_))
           , B1_(other.B1_)
           , colless_tree_imbalance_(other.colless_tree_imbalance_)
           , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
@@ -396,6 +397,7 @@ TreeShape::TreeShape(const TreeShape & other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
+          , coalescent_intervals_(coalescent_intervals_)
           , B1_(other.B1_)
           , colless_tree_imbalance_(other.colless_tree_imbalance_)
           , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
@@ -507,25 +509,11 @@ std::vector<double> TreeShape::calc_node_ages(bool include_leaves) {
 
 double TreeShape::get_pybus_harvey_gamma() {
     if (this->pybus_harvey_gamma_ <= 0.0) {
-        if (this->number_of_tips_ == 0) {
-            this->calc_num_tips();
-        }
-        TreeShape::node_type * node_ptr = nullptr;
-        auto node_ages = this->calc_node_ages(false);
-        std::vector<double> intervals;
-        if (node_ages.empty()) {
-            throw std::runtime_error("Cannot calculate statistic on empty tree");
-        }
-        intervals.reserve(node_ages.size());
-        auto cur_age_iter = node_ages.begin();
-        double older = node_ages[0];
-        for (unsigned long age_idx = 1; age_idx < node_ages.size(); ++age_idx) {
-            intervals.push_back(older - node_ages[age_idx]);
-            older = node_ages[age_idx];
-        }
-        intervals.push_back(older);
         // assert(intervals.size() == this->number_of_tips_ - 1);
-        if (intervals.size() != this->number_of_tips_ - 1) {
+        if (this->coalescent_intervals_.size() == 0) {
+            this->calc_coalescent_intervals();
+        }
+        if (this->coalescent_intervals_.size() != this->number_of_tips_ - 1) {
             this->pybus_harvey_gamma_ = NAN;
         } else {
             double T = 0.0;
@@ -533,11 +521,11 @@ double TreeShape::get_pybus_harvey_gamma() {
             unsigned long list_idx;
             for (unsigned long i = 2; i < this->number_of_tips_; ++i) {
                 list_idx = i - 2;
-                T += static_cast<double>(i) * intervals[list_idx];
+                T += static_cast<double>(i) * this->coalescent_intervals_[list_idx];
                 accum += T;
             }
             list_idx = this->number_of_tips_ - 2;
-            T += this->number_of_tips_ * intervals[list_idx];
+            T += this->number_of_tips_ * this->coalescent_intervals_[list_idx];
             double nmt = this->number_of_tips_ - 2.0;
             double numerator = accum/nmt - T/2.0;
             double C = T * std::pow(1/(12*nmt), 0.5);
