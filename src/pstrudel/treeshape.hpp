@@ -305,7 +305,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
 
         // TODO: refactor!
         // coalescent intervals
-        double get_unscaled_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
+        double get_unscaled_coalescent_interval_profile_distance(TreeShape & other, bool weight_values_by_profile_size) {
             if (this->unscaled_coalescent_interval_profile_.empty()) {
                 this->build_coalescent_interval_profile();
             }
@@ -315,7 +315,7 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
             return this->unscaled_coalescent_interval_profile_.get_distance(other.unscaled_coalescent_interval_profile_, weight_values_by_profile_size);
         }
 
-        double get_scaled_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
+        double get_scaled_coalescent_interval_profile_distance(TreeShape & other, bool weight_values_by_profile_size) {
             if (this->scaled_coalescent_interval_profile_.empty()) {
                 this->build_coalescent_interval_profile();
             }
@@ -398,11 +398,15 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 row.set(prefix + "pwtd", d);
                 d = this->get_scaled_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
+                d = this->get_scaled_coalescent_interval_profile_distance(other_tree, weight_values_by_profile_size);
+                row.set(prefix + "ci", d);
             } else {
                 d = this->get_weighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "pwtd", d);
                 d = this->get_lineage_splitting_time_profile_distance(other_tree, weight_values_by_profile_size);
                 row.set(prefix + "lst", d);
+                d = this->get_unscaled_coalescent_interval_profile_distance(other_tree, weight_values_by_profile_size);
+                row.set(prefix + "ci", d);
             }
             if (calculate_symmetric_diff) {
                 d = this->get_unlabeled_symmetric_difference(other_tree);
