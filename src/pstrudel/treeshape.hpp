@@ -305,21 +305,38 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
 
         // TODO: refactor!
         // coalescent intervals
-        double get_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
-            if (this->coalescent_interval_profile_.empty()) {
+        double get_unscaled_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
+            if (this->unscaled_coalescent_interval_profile_.empty()) {
                 this->build_coalescent_interval_profile();
             }
-            if (other.coalescent_interval_profile_.empty()) {
+            if (other.unscaled_coalescent_interval_profile_.empty()) {
                 other.build_coalescent_interval_profile();
             }
-            return this->coalescent_interval_profile_.get_distance(other.coalescent_interval_profile_, weight_values_by_profile_size);
+            return this->unscaled_coalescent_interval_profile_.get_distance(other.unscaled_coalescent_interval_profile_, weight_values_by_profile_size);
+        }
+
+        double get_scaled_coalescent_interval_distance(TreeShape & other, bool weight_values_by_profile_size) {
+            if (this->scaled_coalescent_interval_profile_.empty()) {
+                this->build_coalescent_interval_profile();
+            }
+            if (other.scaled_coalescent_interval_profile_.empty()) {
+                other.build_coalescent_interval_profile();
+            }
+            return this->scaled_coalescent_interval_profile_.get_distance(other.scaled_coalescent_interval_profile_, weight_values_by_profile_size);
         }
 
         void build_coalescent_interval_profile() {
             if (this->coalescent_intervals_.empty()) {
                 this->calc_coalescent_intervals();
             }
-            this->coalescent_interval_profile_.set_data(this->coalescent_intervals_.begin(), this->coalescent_intervals_.end(), true);
+            this->unscaled_coalescent_interval_profile_.set_data(this->coalescent_intervals_.begin(), this->coalescent_intervals_.end(), true);
+            double tree_length = this->get_total_tree_length();
+            std::vector<double> scaled_ci;
+            scaled_ci.reserve(this->coalescent_intervals_.size());
+            for (auto & ci : this->coalescent_intervals_) {
+                scaled_ci.push_back(ci / tree_length);
+            }
+            this->scaled_coalescent_interval_profile_.set_data(scaled_ci.begin(), scaled_ci.end(), true);
         }
 
         void calc_coalescent_intervals() {
@@ -478,7 +495,8 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
         SymmetricDifferenceCalculator            symmetric_difference_calculator_;
         LineageThroughTimeProfileCalculator      lineage_through_time_calculator_;
         std::vector<double>                      coalescent_intervals_;
-        Profile                                  coalescent_interval_profile_;
+        Profile                                  unscaled_coalescent_interval_profile_;
+        Profile                                  scaled_coalescent_interval_profile_;
         static const std::vector<std::string>    tree_pattern_y_distance_names_;
         double                                   B1_;
         double                                   colless_tree_imbalance_;

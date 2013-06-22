@@ -380,7 +380,8 @@ TreeShape::TreeShape(TreeShape && other)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
           , coalescent_intervals_(std::move(coalescent_intervals_))
-          , coalescent_interval_profile_(std::move(other.coalescent_interval_profile_))
+          , unscaled_coalescent_interval_profile_(std::move(other.unscaled_coalescent_interval_profile_))
+          , scaled_coalescent_interval_profile_(std::move(other.scaled_coalescent_interval_profile_))
           , B1_(other.B1_)
           , colless_tree_imbalance_(other.colless_tree_imbalance_)
           , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
@@ -398,8 +399,9 @@ TreeShape::TreeShape(const TreeShape & other)
           , pairwise_tip_distance_profile_calculator_(*this)
           , symmetric_difference_calculator_(*this)
           , lineage_through_time_calculator_(*this)
-          , coalescent_intervals_(other.coalescent_intervals_)
-          , coalescent_interval_profile_(other.coalescent_interval_profile_)
+          , coalescent_intervals_(coalescent_intervals_)
+          , unscaled_coalescent_interval_profile_(other.unscaled_coalescent_interval_profile_)
+          , scaled_coalescent_interval_profile_(other.scaled_coalescent_interval_profile_)
           , B1_(other.B1_)
           , colless_tree_imbalance_(other.colless_tree_imbalance_)
           , pybus_harvey_gamma_(other.pybus_harvey_gamma_)
@@ -418,7 +420,8 @@ TreeShape & TreeShape::operator=(const TreeShape & other) {
     this->symmetric_difference_calculator_ = other.symmetric_difference_calculator_;
     this->lineage_through_time_calculator_ = other.lineage_through_time_calculator_;
     this->coalescent_intervals_ = other.coalescent_intervals_;
-    this->coalescent_interval_profile_ = other.coalescent_interval_profile_;
+    this->unscaled_coalescent_interval_profile_ = other.unscaled_coalescent_interval_profile_;
+    this->scaled_coalescent_interval_profile_ = other.scaled_coalescent_interval_profile_;
     this->pybus_harvey_gamma_ = other.pybus_harvey_gamma_;
     this->N_bar_ = other.N_bar_;
     this->colless_tree_imbalance_ = other.colless_tree_imbalance_;
