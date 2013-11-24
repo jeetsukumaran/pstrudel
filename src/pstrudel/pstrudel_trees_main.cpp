@@ -51,6 +51,13 @@ class WorkingTree : public pstrudel::TreeShape {
 // Utility functions
 
 template <class TreeT>
+void postprocess_working_tree(TreeT & tree, unsigned long idx, unsigned long ntips, unsigned long nints, double tree_length) {
+    tree.set_file_tree_index(idx + 1);
+    tree.set_num_tips(ntips);
+    tree.set_total_tree_length(tree_length);
+}
+
+template <class TreeT>
 int get_trees(std::vector<TreeT>& trees,
         std::istream & src,
         const std::string & source_name,
@@ -63,10 +70,12 @@ int get_trees(std::vector<TreeT>& trees,
     if (format == "newick") {
         auto reader = platypus::NewickReader<TreeT>();
         platypus::bind_standard_interface(reader);
+        reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
         return reader.read(src, get_new_tree_reference);
     } else {
         auto reader = platypus::NclTreeReader<TreeT>();
         platypus::bind_standard_interface(reader);
+        reader.set_tree_postprocess_fn(postprocess_working_tree<TreeT>);
         return reader.read(src, get_new_tree_reference, format);
     }
 }
