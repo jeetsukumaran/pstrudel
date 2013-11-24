@@ -63,7 +63,6 @@ int get_trees(std::vector<TreeT>& trees,
         const std::string & source_name,
         const std::string& format,
         unsigned long file_index) {
-    trees.reserve(1000);
     std::function<TreeT& ()> get_new_tree_reference =
         [&trees, &source_name, &file_index] () -> TreeT& {
             trees.emplace_back(source_name, file_index); return trees.back();
