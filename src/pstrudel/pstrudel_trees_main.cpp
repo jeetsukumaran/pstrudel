@@ -209,7 +209,7 @@ int main(int argc, const char * argv[]) {
                 reference_trees_full_filepath,
                 format,
                 0);
-        logger.info(reference_trees.size(), " trees read from '", reference_trees_full_filepath, "'");
+        logger.info("'", reference_trees_full_filepath, "': ", reference_trees.size());
         }
 
         {
@@ -232,15 +232,16 @@ int main(int argc, const char * argv[]) {
                     src,
                     comparison_trees_full_filepath,
                     format,
-                    file_idx++);
-            logger.info(trees_read,
-                    " trees read from file trees from comparison source file ",
-                    file_idx+1,
-                    " of ",
-                    args.size(),
-                    " (",
+                    file_idx+1);
+            logger.info(
+                    "'",
+                    comparison_trees_full_filepath,
+                    "': ",
+                    trees_read,
+                    " trees read (total of ",
                     comparison_trees.size(),
-                    " trees now in comparison set");
+                    " trees now in comparison set)");
+            ++file_idx;
         }
         }
 
