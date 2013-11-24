@@ -197,56 +197,120 @@ int main(int argc, const char * argv[]) {
         logger.abort("Source of reference tree(s) not specified");
     } else {
 
-        {
-        logger.info("Reading reference trees");
         std::vector<WorkingTree> reference_trees;
-        auto reference_trees_full_filepath = colugo::filesys::absolute_path(reference_trees_filepath);
-        logger.info("Reading reference trees from '", reference_trees_full_filepath, "'");
-        std::ifstream src(reference_trees_full_filepath);
-        get_trees(
-                reference_trees,
-                src,
-                reference_trees_full_filepath,
-                format,
-                0);
-        logger.info("'", reference_trees_full_filepath, "': ", reference_trees.size());
+        {
+            logger.info("Reading reference trees");
+            auto reference_trees_full_filepath = colugo::filesys::absolute_path(reference_trees_filepath);
+            logger.info("Reading reference trees from '", reference_trees_full_filepath, "'");
+            std::ifstream src(reference_trees_full_filepath);
+            get_trees(
+                    reference_trees,
+                    src,
+                    reference_trees_full_filepath,
+                    format,
+                    0);
+            logger.info("'", reference_trees_full_filepath, "': ", reference_trees.size());
+        }
+
+        std::vector<WorkingTree> comparison_trees;
+        {
+            logger.info("Reading comparison trees");
+            unsigned long file_idx = 0;
+            unsigned long trees_read = 0;
+            for (auto & arg : args) {
+                auto comparison_trees_full_filepath = colugo::filesys::absolute_path(arg);
+                logger.info("Reading comparison trees from comparison source file ",
+                        file_idx+1,
+                        " of ",
+                        args.size(),
+                        ": '",
+                        comparison_trees_full_filepath,
+                        "'");
+                std::ifstream src(comparison_trees_full_filepath);
+                trees_read = get_trees(
+                        comparison_trees,
+                        src,
+                        comparison_trees_full_filepath,
+                        format,
+                        file_idx+1);
+                logger.info(
+                        "'",
+                        comparison_trees_full_filepath,
+                        "': ",
+                        trees_read,
+                        " trees read (total of ",
+                        comparison_trees.size(),
+                        " trees now in comparison set)");
+                ++file_idx;
+            }
         }
 
         {
-        logger.info("Reading comparison trees");
-        std::vector<WorkingTree> comparison_trees;
-        unsigned long file_idx = 0;
-        unsigned long trees_read = 0;
-        for (auto & arg : args) {
-            auto comparison_trees_full_filepath = colugo::filesys::absolute_path(arg);
-            logger.info("Reading comparison trees from comparison source file ",
-                    file_idx+1,
-                    " of ",
-                    args.size(),
-                    ": '",
-                    comparison_trees_full_filepath,
-                    "'");
-            std::ifstream src(comparison_trees_full_filepath);
-            trees_read = get_trees(
-                    comparison_trees,
-                    src,
-                    comparison_trees_full_filepath,
-                    format,
-                    file_idx+1);
-            logger.info(
-                    "'",
-                    comparison_trees_full_filepath,
-                    "': ",
-                    trees_read,
-                    " trees read (total of ",
-                    comparison_trees.size(),
-                    " trees now in comparison set)");
-            ++file_idx;
-        }
-        }
+            logger.info("Starting comparisons");
+            std::ofstream distf(output_filepaths["dists"]);
+            if (!distf.good()) {
+                logger.abort("Unable to open file for output: '", output_filepaths["dists"], "'");
+            }
 
+            // headers
+            distf << "reference.idx";
+            distf << "\t" << "source.file.idx";
+            distf << "\t" << "source.tree.idx";
+            distf << "\t" << "pwtd.uwt";
+            distf << "\t" << "ltt";
+            distf << "\t" << "pwtd.wt";
+            distf << "\t" << "lst";
+            distf << "\t" << "coal.intv";
+            distf << "\n";
+
+            logger.info("Beginning calculating distances between comparison trees and reference tree(s)");
+            if (scale_by_tree_length) {
+                logger.info("Edge lengths will be scaled to tree length");
+            } else {
+                logger.info("Edge lengths will NOT be scaled to tree length");
+            }
+
+            unsigned long num_reference_trees = reference_trees.size();
+            unsigned long num_comparison_trees = comparison_trees.size();
+            unsigned long total_comparisons = num_comparison_trees * num_reference_trees;
+            unsigned long log_frequency = total_comparisons / 10;
+            unsigned long comparison_count = 0;
+            unsigned long comparison_tree_idx = 0;
+            unsigned long reference_tree_idx = 0;
+            bool weight_values_by_profile_size = true;
+            for (auto & reference_tree : reference_trees) {
+                comparison_tree_idx = 0;
+                for (auto & ctree : comparison_trees) {
+                    if (log_frequency > 0 && (comparison_count % log_frequency == 0)) {
+                        logger.info("Calculating distances to reference tree(s): ",
+                                    (comparison_count * 100)/total_comparisons, "%");
+                    }
+
+                    distf << reference_tree_idx + 1;
+                    distf << "\t" << ctree.get_file_index();
+                    distf << "\t" << ctree.get_file_tree_index();
+
+                    distf << "\t" << reference_tree.get_unweighted_pairwise_tip_profile_distance(ctree, weight_values_by_profile_size);
+                    distf << "\t" << reference_tree.get_lineage_accumulation_profile_distance(ctree, weight_values_by_profile_size);
+                    if (scale_by_tree_length) {
+                        distf << "\t" << reference_tree.get_scaled_weighted_pairwise_tip_profile_distance(ctree, weight_values_by_profile_size);
+                        distf << "\t" << reference_tree.get_scaled_lineage_splitting_time_profile_distance(ctree, weight_values_by_profile_size);
+                        distf << "\t" << reference_tree.get_scaled_coalescent_interval_profile_distance(ctree, weight_values_by_profile_size);
+                    } else {
+                        distf << "\t" << reference_tree.get_weighted_pairwise_tip_profile_distance(ctree, weight_values_by_profile_size);
+                        distf << "\t" << reference_tree.get_lineage_splitting_time_profile_distance(ctree, weight_values_by_profile_size);
+                        distf << "\t" << reference_tree.get_unscaled_coalescent_interval_profile_distance(ctree, weight_values_by_profile_size);
+                    }
+                    distf << "\n";
+
+                    ++comparison_tree_idx;
+                    ++comparison_count;
+                } // for each tree in comparison set
+                ++reference_tree_idx;
+            } // for each tree in refrence set
+            logger.info("Calculating distances to reference tree(s): done");
+        }
     }
-
 }
 
 
