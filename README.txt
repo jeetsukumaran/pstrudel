@@ -68,6 +68,12 @@ The following options can be passed to the invocation of `cmake`:
         run any PSTRUDEL products: this is only if you want the NCL library
         available for your own use).
 
+For example:
+
+    mkdir -p build/release
+    cd build/release
+    cmake -DCMAKE_INSTALL_PREFIX=${PWD}/install ../..
+
 Copyright and License
 =====================
 
