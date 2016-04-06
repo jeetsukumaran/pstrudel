@@ -381,13 +381,13 @@ class TreeShape : public platypus::StandardTree<DistanceNodeValue> {
                 bool weight_values_by_profile_size) {
             double d = 0.0;
             if (calculate_unary_statistics_differences) {
-                row.set("diff." + prefix + "ntips"             , std::abs(this->number_of_tips_ - other_tree.number_of_tips_));
-                row.set("diff." + prefix + "length"            , std::abs(this->total_tree_length_ - other_tree.total_tree_length_));
-                row.set("diff." + prefix + "B1"                , std::abs(this->get_B1() - other_tree.get_B1()));
-                row.set("diff." + prefix + "colless.imbalance" , std::abs(this->get_colless_tree_imbalance() - other_tree.get_colless_tree_imbalance()));
-                row.set("diff." + prefix + "gamma"             , std::abs(this->get_pybus_harvey_gamma() - other_tree.get_pybus_harvey_gamma()));
-                row.set("diff." + prefix + "N.bar"             , std::abs(this->get_N_bar() - other_tree.get_N_bar()));
-                row.set("diff." + prefix + "treeness"          , std::abs(this->get_treeness() - other_tree.get_treeness()));
+                row.set("diff." + prefix + "ntips"             , std::fabs(this->number_of_tips_ - other_tree.number_of_tips_));
+                row.set("diff." + prefix + "length"            , std::fabs(this->total_tree_length_ - other_tree.total_tree_length_));
+                row.set("diff." + prefix + "B1"                , std::fabs(this->get_B1() - other_tree.get_B1()));
+                row.set("diff." + prefix + "colless.imbalance" , std::fabs(this->get_colless_tree_imbalance() - other_tree.get_colless_tree_imbalance()));
+                row.set("diff." + prefix + "gamma"             , std::fabs(this->get_pybus_harvey_gamma() - other_tree.get_pybus_harvey_gamma()));
+                row.set("diff." + prefix + "N.bar"             , std::fabs(this->get_N_bar() - other_tree.get_N_bar()));
+                row.set("diff." + prefix + "treeness"          , std::fabs(this->get_treeness() - other_tree.get_treeness()));
             }
             d = this->get_unweighted_pairwise_tip_profile_distance(other_tree, weight_values_by_profile_size);
             row.set(prefix + "pwtd.uw", d);
