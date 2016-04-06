@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <colugo/assert.hpp>
 #include <colugo/console.hpp>
 #include "profile.hpp"
@@ -48,6 +49,7 @@ const ProfileMetricVectorType & Profile::get_profile(unsigned long profile_size)
 ProfileMetricValueType Profile::get_distance(Profile & other, bool weight_values_by_profile_size) {
     unsigned long profile_size = this->get_profile_comparison_size(other);
     ProfileMetricValueType dist = this->calc_distance(other, profile_size, weight_values_by_profile_size);
+    return dist;
 }
 
 //////////////////////////////////////////////////////////////////////////////
